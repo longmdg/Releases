@@ -6,37 +6,37 @@ namespace SparkTech
 {
     class SimpleBoot
     {
-        public static bool MenuLoaded;
-
-        public static void TempName1()
-        {
-            CustomEvents.Game.OnGameLoad += Tracker;
-        }
-
-        private static void Tracker(EventArgs args)
-        {
-            MenuLoaded = false;
-
-            if (Settings.MustDebug)
-            {
-                Game.PrintChat("Set MenuLoaded to false");
-            }
-        }
+        internal static bool Summoned;
 
         public static void LoadLibrary()
         {
-            if (MenuLoaded)
-            {
-                if (Settings.MustDebug)
-                {
-                   Notifications.AddNotification("Multiload!", 2000);
-                }
-            }
-            else
-            {
-                MenuLoaded = true;
-                Settings.LoadStuff();
-            }
+            CustomEvents.Game.OnGameLoad += Loader;
+        }
+
+        private static void Loader(EventArgs args)
+        {
+            Lib.Load();
+        }
+    }
+}
+
+class Lib
+{
+    static Lib()
+    {
+        SparkTech.SimpleBoot.Summoned = false;
+    }
+
+    public static void Load()
+    {
+        if (!SparkTech.SimpleBoot.Summoned)
+        {
+            SparkTech.Settings.LoadStuff();
+        }
+
+        else
+        {
+            SparkTech.Comms.Print("Error: Already Loaded!");
         }
     }
 }
