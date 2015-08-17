@@ -2,10 +2,11 @@
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
 
 namespace SparkTech
 {
-    class Settings
+    internal class Settings
     {
         internal static bool Debug = true;
 
@@ -14,8 +15,12 @@ namespace SparkTech
         internal static void LoadStuff()
         {
 
-            LibraryMenu = new Menu("[ST] Core", "SparkTech");
-            //code
+            Notifications.AddNotification("Loaded!", 1000);
+
+            LibraryMenu = new Menu("[ST] Core", "SparkTech", true);
+
+
+
             LibraryMenu.AddToMainMenu();
         }
     }
