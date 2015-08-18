@@ -1,43 +1,43 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using LeagueSharp.Common;
 
 namespace SparkTech
 {
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class Load
     {
-        internal static bool Summoned;
+        private static bool _summoned;
+        internal static bool MLGloaded;
 
-        public static void Library()
+        static Load()
         {
+            _summoned = false;
+        } 
+
+        public static void Library(bool MLGload = false)
+        {
+            if (MLGload)
+            {
+                MLGloaded = true;
+            }
+
             CustomEvents.Game.OnGameLoad += Loader;
         }
 
         private static void Loader(EventArgs args)
         {
-            Lib.Load();
-        }
-    }
-}
+            if (!_summoned)
+            {
+                _summoned = true;
+                Settings.LoadStuff();
+            }
 
-internal class Lib
-{
-    static Lib()
-    {
-        SparkTech.Load.Summoned = false;
-    }
-
-    internal static void Load()
-    {
-        if (!SparkTech.Load.Summoned)
-        {
-            SparkTech.Settings.LoadStuff();
-            SparkTech.Load.Summoned = true;
-        }
-
-        else
-        {
-            Notifications.AddNotification("Error: Already Loaded!");
-            //SparkTech.Comms.Print("Error: Already Loaded!");
+            else
+            {
+                Notifications.AddNotification("Error: Already Loaded!", 1000);
+                //SparkTech.Comms.Print("Error: Already Loaded!");
+            }
         }
     }
 }
