@@ -29,7 +29,7 @@ namespace SparkTech
                         //dumb code warning
                         var version =
                             System.Version.Parse(
-                                new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value
+                                new Regex("AssemblyVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value
                                     .Replace("\"", ""));
                         //end dumb code warning
 
