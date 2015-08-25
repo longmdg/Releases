@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using LeagueSharp;
 
+//copy pasterino
+//https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+
 namespace SparkTech
 {
     public class UpdateChecker
