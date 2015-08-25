@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using LeagueSharp.Common;
 
 namespace SparkTech
 {
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class Load
     {
         private static bool _summoned;
@@ -25,7 +23,7 @@ namespace SparkTech
             {
                 _summoned = true;
                 Settings.LoadStuff();
-                UpdateChecker.LibraryUpdatecheck();
+                Utility.DelayAction.Add(250, UpdateChecker.LibraryUpdatecheck);
             }
 
             else

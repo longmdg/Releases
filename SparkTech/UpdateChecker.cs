@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using LeagueSharp;
-using LeagueSharp.Common;
 using Version = System.Version;
 
 //copy pasterino a bit
@@ -17,18 +16,13 @@ namespace SparkTech
         {
             using (var client = new WebClient())
             {
-                Utility.DelayAction.Add(2500, () =>
-
                     new Thread(async () =>
                     {
                         try
                         {
-                            // will this return Testing's name or SparkTech's?
                             var assemblyName = Assembly.GetExecutingAssembly().GetName();
-                            Game.PrintChat(assemblyName.ToString());
-
                             var data =
-                                await
+                               await
                                     // ReSharper disable once AccessToDisposedClosure
                                     client.DownloadStringTaskAsync(
                                         string.Format(
@@ -49,12 +43,9 @@ namespace SparkTech
                                     version);
                             }
                         }
-                        catch
-                        {
-                            // ignored
-                        }
+                        catch { /* ignored */ }
                     }
-                        ).Start());
+                        ).Start();
             }
         }
     }
