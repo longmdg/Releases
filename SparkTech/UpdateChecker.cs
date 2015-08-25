@@ -49,9 +49,13 @@ namespace SparkTech
                         {
                             Comms.Print("You are running the latest version of the library");
                         }
+                        else if (version < assemblyName.Version)
+                        {
+                            Comms.Print("Error 1!");
+                        }
                         else
                         {
-                            Comms.Print("Unknown error!");
+                            Comms.Print("Error 2!");
                         }
                     }
                     catch
