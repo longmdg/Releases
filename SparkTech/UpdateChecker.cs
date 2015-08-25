@@ -4,14 +4,13 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using LeagueSharp;
 
-//copy pasterino from
-//https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+//copy pasterino from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
 
 namespace SparkTech
 {
     public class UpdateChecker
     {
-        internal static void LibraryUpdatecheck()
+        internal static void LibraryUpdateCheck()
         {
             using (var client = new WebClient())
             {
@@ -28,22 +27,22 @@ namespace SparkTech
                                     string.Format(
                                         "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs"));
 
-                        //dumb code
+                        //dumb code warning
                         var version = System.Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value.Replace("\"", ""));
-                        //dumb code
+                        //end dumb code warning
 
                         Game.PrintChat(version.ToString());
 
                         if (version > assemblyName.Version)
                         {
-                            Game.PrintChat("Library update available: {1} => {2}!",
+                            Game.PrintChat("Updated version of the library is available: {1} => {2}",
                                 assemblyName.Name,
                                 assemblyName.Version,
                                 version);
                         }
                         else
                         {
-                            Game.PrintChat("Heil Asuna!");
+                            Game.PrintChat("Nice meme!");
                         }
                     }
                     catch
