@@ -5,7 +5,7 @@ using System.Threading;
 using LeagueSharp;
 using Version = System.Version;
 
-//copy pasterino a bit
+//copy pasterino from
 //https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
 
 namespace SparkTech
@@ -16,36 +16,43 @@ namespace SparkTech
         {
             using (var client = new WebClient())
             {
-                    new Thread(async () =>
+                new Thread(async () =>
+                {
+                    try
                     {
-                        try
+                        var assemblyName = Assembly.GetExecutingAssembly().GetName();
+                        var data =
+                            await
+                                // ReSharper disable once AccessToDisposedClosure
+                                client.DownloadStringTaskAsync(
+                                    string.Format(
+                                        "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs"));
+
+                        var version =
+                            Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1]
+                                .Value.Replace(
+                                    "\"", ""));
+
+                        Game.PrintChat(version.ToString());
+
+                        if (version > assemblyName.Version)
                         {
-                            var assemblyName = Assembly.GetExecutingAssembly().GetName();
-                            var data =
-                               await
-                                    // ReSharper disable once AccessToDisposedClosure
-                                    client.DownloadStringTaskAsync(
-                                        string.Format(
-                                            "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs"));
-
-                            var version =
-                                Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1]
-                                    .Value.Replace(
-                                        "\"", ""));
-
-                            Game.PrintChat(version.ToString());
-
-                            if (version > assemblyName.Version)
-                            {
-                                Game.PrintChat("Library update available: {1} => {2}!",
-                                    assemblyName.Name,
-                                    assemblyName.Version,
-                                    version);
-                            }
+                            Game.PrintChat("Library update available: {1} => {2}!",
+                                assemblyName.Name,
+                                assemblyName.Version,
+                                version);
                         }
-                        catch { /* ignored */ }
+                        else
+                        {
+                            Game.PrintChat("Heil Asuna!");
+                        }
                     }
-                        ).Start();
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+                    ).Start();
             }
         }
     }
