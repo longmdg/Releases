@@ -18,7 +18,12 @@ namespace SparkTech
                 {
                     try
                     {
-                        var assemblyName = Assembly.GetExecutingAssembly().GetName();
+                       var assemblyName = Assembly.GetExecutingAssembly().GetName();
+
+                        if (Settings.Debug)
+                        {
+                            Game.PrintChat("Assembly Name: " + assemblyName);
+                        }
 
                         var data =
                             await
@@ -26,16 +31,19 @@ namespace SparkTech
                                 client.DownloadStringTaskAsync(
                                     "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs");
 
-                        //dumb code warning
+                        if (Settings.Debug)
+                        {
+                            Game.PrintChat("Data: " + data);
+                        }
+
                         var version =
                             System.Version.Parse(
-                                new Regex("AssemblyVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value
+                                new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value
                                     .Replace("\"", ""));
-                        //end dumb code warning
 
                         if (Settings.Debug)
                         {
-                            Game.PrintChat(version.ToString());
+                            Game.PrintChat("Version: " + version);
                         }
 
                         if (version > assemblyName.Version)
@@ -49,18 +57,14 @@ namespace SparkTech
                         {
                             Comms.Print("You are running the latest version of the library");
                         }
-                        else if (version < assemblyName.Version)
-                        {
-                            Comms.Print("Error 1!");
-                        }
                         else
                         {
-                            Comms.Print("Error 2!");
+                            Comms.Print("Checking for an update FAILED! (1)");
                         }
                     }
                     catch
                     {
-                        Comms.Print("Checking for an update FAILED!");
+                        Comms.Print("Checking for an update FAILED! (2)");
                     }
                 }
                     ).Start();
