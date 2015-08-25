@@ -7,9 +7,9 @@ namespace SparkTech
 {
     public class Comms
     {
-        public static void Print(string message)
+        public static void Print(string message) //to be expanded
         {
-            
+            Game.PrintChat(message);
         }
     }
 }

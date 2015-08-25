@@ -11,17 +11,27 @@ namespace SparkTech
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class Settings
     {
-        internal static bool Debug = false;
+        internal static bool Debug = true;
 
         public static Menu LibraryMenu;
 
         internal static void LoadStuff()
         {
             LibraryMenu = new Menu("[ST] Core", "SparkTech", true);
-            var F5settings = new Menu("F5 Settings", "F5");
-            {
-                F5settings.AddSubMenu(new Menu("", ""));
-            }
+
+            /*
+            F5Settings -> Default Settings?
+            F5Settings -> Subsciption Manager
+            F5Settings -> Target Selector
+            F5Settings -> Orbwalker
+            F5Settings -> Prediction
+            
+            Messaging -> Message output (PrintChat, Notifs, Console)
+            Messaging -> Delay / Time
+
+            more 2 come
+
+            */
 
             LibraryMenu.AddToMainMenu();
         }

@@ -33,7 +33,10 @@ namespace SparkTech
                                     .Replace("\"", ""));
                         //end dumb code warning
 
-                        Game.PrintChat(version.ToString());
+                        if (Settings.Debug)
+                        {
+                            Game.PrintChat(version.ToString());
+                        }
 
                         if (version > assemblyName.Version)
                         {
@@ -42,14 +45,18 @@ namespace SparkTech
                                 assemblyName.Version,
                                 version);
                         }
+                        else if (version == assemblyName.Version)
+                        {
+                            Comms.Print("You are running the latest version of the library");
+                        }
                         else
                         {
-                            Game.PrintChat("Debug");
+                            Comms.Print("Unknown error!");
                         }
                     }
                     catch
                     {
-                        // ignored
+                        Comms.Print("Checking for an update FAILED!");
                     }
                 }
                     ).Start();

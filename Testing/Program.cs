@@ -1,5 +1,4 @@
-﻿using System;
-using SparkTech;
+﻿using SparkTech;
 
 namespace Testing
 {

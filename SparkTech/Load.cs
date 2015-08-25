@@ -22,13 +22,13 @@ namespace SparkTech
             if (!_summoned)
             {
                 _summoned = true;
-                Settings.LoadStuff();
                 Utility.DelayAction.Add(250, UpdateChecker.LibraryUpdateCheck);
+                Settings.LoadStuff();
             }
 
             else
             {
-                Notifications.AddNotification("Error: Already Loaded!", 1000);
+                Comms.Print("Error: Already Loaded!");
             }
         }
     }
