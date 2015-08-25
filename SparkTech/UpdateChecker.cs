@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using LeagueSharp;
-using Version = System.Version;
 
 //copy pasterino from
 //https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
@@ -21,6 +20,7 @@ namespace SparkTech
                     try
                     {
                         var assemblyName = Assembly.GetExecutingAssembly().GetName();
+
                         var data =
                             await
                                 // ReSharper disable once AccessToDisposedClosure
@@ -28,10 +28,9 @@ namespace SparkTech
                                     string.Format(
                                         "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs"));
 
-                        var version =
-                            Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1]
-                                .Value.Replace(
-                                    "\"", ""));
+                        //dumb code
+                        var version = System.Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value.Replace("\"", ""));
+                        //dumb code
 
                         Game.PrintChat(version.ToString());
 
