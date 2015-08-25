@@ -23,7 +23,7 @@ namespace SparkTech
             {
                 _summoned = true;
                 Settings.LoadStuff();
-                Utility.DelayAction.Add(250, UpdateChecker.LibraryUpdatecheck);
+                Utility.DelayAction.Add(250, UpdateChecker.LibraryUpdateCheck);
             }
 
             else

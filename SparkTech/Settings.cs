@@ -17,8 +17,6 @@ namespace SparkTech
 
         internal static void LoadStuff()
         {
-            Notifications.AddNotification("Loaded!", 1000);
-
             LibraryMenu = new Menu("[ST] Core", "SparkTech", true);
             var F5settings = new Menu("F5 Settings", "F5");
             {

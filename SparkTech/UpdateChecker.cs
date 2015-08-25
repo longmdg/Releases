@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using LeagueSharp;
 
-//copy pasterino from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+//partial copy pasterino from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
 
 namespace SparkTech
 {
@@ -24,11 +24,13 @@ namespace SparkTech
                             await
                                 // ReSharper disable once AccessToDisposedClosure
                                 client.DownloadStringTaskAsync(
-                                    string.Format(
-                                        "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs"));
+                                    "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs");
 
                         //dumb code warning
-                        var version = System.Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value.Replace("\"", ""));
+                        var version =
+                            System.Version.Parse(
+                                new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value
+                                    .Replace("\"", ""));
                         //end dumb code warning
 
                         Game.PrintChat(version.ToString());
@@ -42,7 +44,7 @@ namespace SparkTech
                         }
                         else
                         {
-                            Game.PrintChat("Nice meme!");
+                            Game.PrintChat("Debug");
                         }
                     }
                     catch
