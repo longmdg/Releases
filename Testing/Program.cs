@@ -1,10 +1,13 @@
-﻿namespace Testing
+﻿using System;
+using SparkTech;
+
+namespace Testing
 {
     class Program
     {
         static void Main()
         {
-            SparkTech.Load.Library();
+            Load.Library();
         }
     }
 }

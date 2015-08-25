@@ -1,52 +1,60 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using LeagueSharp;
+using LeagueSharp.Common;
+using Version = System.Version;
 
-//copy pasterino
+//copy pasterino a bit
 //https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
 
 namespace SparkTech
 {
     public class UpdateChecker
     {
-        public static void Initialize(string path)
+        internal static void LibraryUpdatecheck()
         {
             using (var client = new WebClient())
             {
-                new Thread(async () =>
-                {
-                    try
+                Utility.DelayAction.Add(2500, () =>
+
+                    new Thread(async () =>
                     {
-                        var data =
-                            await
-                                // ReSharper disable once AccessToDisposedClosure
-                                client.DownloadStringTaskAsync(
-                                    string.Format("https://raw.github.com/{0}/Properties/AssemblyInfo.cs", path));
-
-                        var version =
-                            Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1]
-                                .Value.Replace(
-                                    "\"", ""));
-
-                        var assemblyName = Assembly.GetExecutingAssembly().GetName();
-
-                        if (version > assemblyName.Version)
+                        try
                         {
-                            Game.PrintChat("[{0}] Update available: {1} => {2}!",
-                                assemblyName.Name,
-                                assemblyName.Version,
-                                version);
+                            // will this return Testing's name or SparkTech's?
+                            var assemblyName = Assembly.GetExecutingAssembly().GetName();
+                            Game.PrintChat(assemblyName.ToString());
+
+                            var data =
+                                await
+                                    // ReSharper disable once AccessToDisposedClosure
+                                    client.DownloadStringTaskAsync(
+                                        string.Format(
+                                            "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs"));
+
+                            var version =
+                                Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1]
+                                    .Value.Replace(
+                                        "\"", ""));
+
+                            Game.PrintChat(version.ToString());
+
+                            if (version > assemblyName.Version)
+                            {
+                                Game.PrintChat("Library update available: {1} => {2}!",
+                                    assemblyName.Name,
+                                    assemblyName.Version,
+                                    version);
+                            }
+                        }
+                        catch
+                        {
+                            // ignored
                         }
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("An error occured while trying to check for an update:\n{0}", e.Message);
-                    }
-                }
-                ).Start();
+                        ).Start());
             }
         }
     }

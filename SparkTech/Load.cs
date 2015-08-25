@@ -25,6 +25,7 @@ namespace SparkTech
             {
                 _summoned = true;
                 Settings.LoadStuff();
+                UpdateChecker.LibraryUpdatecheck();
             }
 
             else
