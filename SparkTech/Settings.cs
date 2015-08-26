@@ -23,7 +23,7 @@ namespace SparkTech
         public static bool UpdateCheck = true;
         public static int UpdateCheckDelay = 250;
 
-        // private static float _spaghettiLimiter;
+        private static float _spaghettiLimiter;
         // private static bool _zoomhackEnabled;
         // private static bool _dciEnabled;
         // private static bool ZoomHackTurnedOn { get { return LibraryMenu.Item("zoomhack").GetValue<bool>(); } }
@@ -101,13 +101,12 @@ namespace SparkTech
             Utility.DelayAction.Add(1500, () =>
             {
                 LibraryMenu.AddToMainMenu();
-                // Game.OnUpdate += OnSettingsChange;
-
+                Game.OnUpdate += OnSettingsChange;
             });
 
         }
 
-        /*
+        
 
         private static void OnSettingsChange(EventArgs args)
         {
@@ -118,7 +117,7 @@ namespace SparkTech
 
             _spaghettiLimiter = Environment.TickCount;
 
-            // TODO: Simplify this.
+            /*
 
             if (!_zoomhackEnabled && ZoomHackTurnedOn && LibraryMenu.Item("confirm").GetValue<bool>())
             {
@@ -141,9 +140,17 @@ namespace SparkTech
                 Hacks.DisableCastIndicator = false;
             }
 
-            Comms.Print("");
+            */
+
+            Console.WriteLine("");
+
+         // Comms.Print("");
 
         } 
+        
+        /*
+        
+        Code
         
         */
     }
