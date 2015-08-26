@@ -10,5 +10,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("52e46eb2-e5d9-43d0-9d9a-40b17fe5e81c")]
-[assembly: AssemblyVersion(ZoomHack.Program.Version)]
+[assembly: AssemblyVersion("1.3.3.7")]
 [assembly: AssemblyFileVersion("1.0.0.0")]

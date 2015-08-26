@@ -2,7 +2,6 @@
 {
     static class Program
     {
-        public const string Version = "1.3.3.*";
         static LeagueSharp.Common.Menu _menu;
         static void Main()
         {
