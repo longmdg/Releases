@@ -33,7 +33,7 @@ namespace Testing
 
         private static void AssemblyUtil_onGetVersionCompleted(OnGetVersionCompletedArgs args)
         {
-            if (args.LastAssemblyVersion == Assembly.GetExecutingAssembly().GetName().Version.ToString() && !Settings.SkipNoUpdate)
+            if (args.LastAssemblyVersion == Assembly.GetExecutingAssembly().GetName().Version.ToString())
             {
                 if (!Settings.SkipNoUpdate)
                 {
