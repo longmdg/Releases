@@ -31,20 +31,10 @@ namespace SparkTech
                                 client.DownloadStringTaskAsync(
                                     "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs");
 
-                        if (Settings.Debug)
-                        {
-                            Game.PrintChat("Data: " + data);
-                        }
-
                         var version =
                             System.Version.Parse(
                                 new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value
                                     .Replace("\"", ""));
-
-                        if (Settings.Debug)
-                        {
-                            Game.PrintChat("Version: " + version);
-                        }
 
                         if (version > assemblyName.Version)
                         {
