@@ -12,7 +12,7 @@ namespace SparkTech
             Game.PrintChat(message);
         }
 
-        internal static void Print(string message, string color = Color.DodgerBlue)
+        public static void Print(string message, string color = Color.DodgerBlue)
         {
             Game.PrintChat("<font color='{0}'>{1}</font>", color, message);
         }
