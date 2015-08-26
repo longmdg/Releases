@@ -9,15 +9,17 @@ using SharpDX;
 namespace SparkTech
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    internal class Settings
+    internal static class Settings
     {
-        internal static bool Debug = true;
+        internal static bool Debug = false;
 
         public static Menu LibraryMenu;
 
         internal static void LoadStuff()
         {
             LibraryMenu = new Menu("[ST] Core", "SparkTech", true);
+
+            Comms.Print("Loaded.");
 
             /*
             F5Settings -> Default Settings?

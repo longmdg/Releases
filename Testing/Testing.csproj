@@ -36,6 +36,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LeagueSharp">
+      <HintPath>C:\LeagueSharp\System\LeagueSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="LeagueSharp.Common">
+      <HintPath>C:\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+    </Reference>
     <Reference Include="SparkTech">
       <HintPath>C:\LeagueSharp\System\SparkTech.dll</HintPath>
     </Reference>
