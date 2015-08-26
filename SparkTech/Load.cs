@@ -28,7 +28,12 @@ namespace SparkTech
             if (!_summoned)
             {
                 _summoned = true;
-                Utility.DelayAction.Add(250, LibraryUpdateCheck);
+
+                if (Settings.UpdateCheck)
+                {
+                    Utility.DelayAction.Add(Settings.UpdateCheckDelay, LibraryUpdateCheck);
+                }
+
                 Settings.LoadStuff();
             }
 
@@ -39,6 +44,8 @@ namespace SparkTech
         }
 
         //partial copy pasterino from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+
+        #region UpdateCheck
 
         private static void LibraryUpdateCheck()
         {
@@ -79,16 +86,25 @@ namespace SparkTech
                         }
                         else
                         {
-                            Comms.Print("Checking for an update FAILED! (else)");
+                            if (Settings.Debug)
+                            {
+                                Comms.Print("Checking for an update FAILED! (else)");
+                            }
                         }
                     }
                     catch (Exception ex)
                     {
-                        Comms.Print("Checking for an update FAILED! (ex) " + ex);
+                        if (Settings.Debug)
+                        {
+                            Comms.Print(ex.ToString());
+                        }
                     }
                 }
                     ).Start();
             }
         }
+       
+        #endregion
+
     }
 }
