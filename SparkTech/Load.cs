@@ -25,10 +25,12 @@ namespace SparkTech
                 if (!_summoned)
                 {
                     _summoned = true;
+
                     if (Settings.UpdateCheck)
                     {
                         Utility.DelayAction.Add(Settings.UpdateCheckDelay, LibraryUpdateCheck);
                     }
+
                     Settings.LoadStuff();
                 }
                 else

@@ -9,11 +9,11 @@ using SharpDX;
 namespace SparkTech
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    
-    //reenable when L# supports .NET 4.6
-    [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")]
 
-    public static class Settings
+    //reenable when L# supports .NET 4.6
+    // [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")]
+
+    public class Settings
     {
         #region MenuBools
 
@@ -23,11 +23,12 @@ namespace SparkTech
         public static bool UpdateCheck = true;
         public static int UpdateCheckDelay = 250;
 
-        private static float _spaghettiLimiter;
-        private static bool _zoomhackEnabled;
-        private static bool _dciEnabled;
-        private static bool ZoomHackTurnedOn { get { return LibraryMenu.Item("zoomhack").GetValue<bool>(); } }
-        private static bool DCITurnedOn { get { return LibraryMenu.Item("dcindicator").GetValue<bool>(); } }
+        // private static float _spaghettiLimiter;
+        // private static bool _zoomhackEnabled;
+        // private static bool _dciEnabled;
+        // private static bool ZoomHackTurnedOn { get { return LibraryMenu.Item("zoomhack").GetValue<bool>(); } }
+        // private static bool DCITurnedOn { get { return LibraryMenu.Item("dcindicator").GetValue<bool>(); } }
+
         #endregion
 
         public static Menu LibraryMenu;
@@ -40,26 +41,44 @@ namespace SparkTech
             {
 
                 F5Settings.AddItem(new MenuItem("defaultsettings", "Use Recommended Settings")).SetValue(true);
-                F5Settings.AddItem((new MenuItem("For [ST] assemblies only.", "")));
+                F5Settings.AddItem((new MenuItem("", "For [ST] assemblies only.")));
 
             }
             LibraryMenu.AddSubMenu(F5Settings);
 
-            var BanMenu = new Menu("Ban me please", "BanMenu");
+            var BanMenu = new Menu("I want to get banned", "BanMenu");
             {
-                BanMenu.AddItem((new MenuItem("zoomhack", "Use ZoomHack (bannable!)")).SetValue(false));
-                BanMenu.AddItem((new MenuItem("confirm", "Care: This can get you banned!")).SetValue(false));
+                var DCIndicator =
+                    BanMenu.AddItem((new MenuItem("dcindicator", "Disable Cast Indicator")).SetValue(false));
+                DCIndicator.SetValue(Hacks.DisableCastIndicator);
+                DCIndicator.ValueChanged +=
+                    delegate(object sender, OnValueChangeEventArgs args)
+                    {
+                        Hacks.DisableCastIndicator = args.GetNewValue<bool>();
+                    };
+
                 BanMenu.AddItem((new MenuItem("", "")));
-                BanMenu.AddItem((new MenuItem("dcindicator", "Disable Cast Indicator")).SetValue(false));
+
+                var ZoomHack = BanMenu.AddItem((new MenuItem("zoomhack", "Use ZoomHack (bannable!)")).SetValue(false));
+                ZoomHack.SetValue(Hacks.ZoomHack);
+                ZoomHack.ValueChanged +=
+                    delegate (object sender, OnValueChangeEventArgs args)
+                    {
+                        Hacks.ZoomHack = args.GetNewValue<bool>();
+                    };
+
+                BanMenu.AddItem((new MenuItem("confirm", "Care: ZoomHack can get you banned!")));
             }
+
             LibraryMenu.AddSubMenu(BanMenu);
 
-            LibraryMenu.AddItem(new MenuItem("onupdatedelay", "Delay in checking for menu changes")).SetValue(new Slider(300, 0, 1000));
+            // LibraryMenu.AddItem(new MenuItem("onupdatedelay", "Delay in checking for menu changes")).SetValue(new Slider(300, 0, 1000));
 
 
-            // Comms.Print("Loaded.");
+            // Comms.Print("Loaded!");
 
             /*
+
             F5Settings -> Default Settings?
             F5Settings -> Subsciption Manager
             F5Settings -> Target Selector
@@ -77,16 +96,18 @@ namespace SparkTech
 
             */
 
-            _zoomhackEnabled = false;
+            // _zoomhackEnabled = false;
 
             Utility.DelayAction.Add(1500, () =>
             {
                 LibraryMenu.AddToMainMenu();
-                Game.OnUpdate += OnSettingsChange;
+                // Game.OnUpdate += OnSettingsChange;
 
             });
 
         }
+
+        /*
 
         private static void OnSettingsChange(EventArgs args)
         {
@@ -96,6 +117,8 @@ namespace SparkTech
             }
 
             _spaghettiLimiter = Environment.TickCount;
+
+            // TODO: Simplify this.
 
             if (!_zoomhackEnabled && ZoomHackTurnedOn && LibraryMenu.Item("confirm").GetValue<bool>())
             {
@@ -118,6 +141,10 @@ namespace SparkTech
                 Hacks.DisableCastIndicator = false;
             }
 
-        }
+            Comms.Print("");
+
+        } 
+        
+        */
     }
 }

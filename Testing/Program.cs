@@ -28,7 +28,6 @@ namespace Testing
                     catch { }
                 });
             }
-
             Load.Library();
         }
 
