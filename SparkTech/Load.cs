@@ -20,32 +20,30 @@ namespace SparkTech
 
         public static void Library()
         {
-            CustomEvents.Game.OnGameLoad += Loader;
-        }
-
-        private static void Loader(EventArgs args)
-        {
-            if (!_summoned)
+            CustomEvents.Game.OnGameLoad += eventArgs =>
             {
-                _summoned = true;
-
-                if (Settings.UpdateCheck)
+                if (!_summoned)
                 {
-                    Utility.DelayAction.Add(Settings.UpdateCheckDelay, LibraryUpdateCheck);
+                    _summoned = true;
+                    if (Settings.UpdateCheck)
+                    {
+                        Utility.DelayAction.Add(Settings.UpdateCheckDelay, LibraryUpdateCheck);
+                    }
+                    Settings.LoadStuff();
                 }
-
-                Settings.LoadStuff();
-            }
-
-            else
-            {
-                Comms.Print("Error: Library already loaded!");
-            }
+                else
+                {
+                    if (!Settings.SkipNoUpdate)
+                    {
+                        Comms.Print("Error: Library already loaded!");
+                    }
+                }
+            };
         }
 
-        //partial copy pasterino from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+        #region LibraryUpdateCheck
 
-        #region UpdateCheck
+        // Credits to https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
 
         private static void LibraryUpdateCheck()
         {
@@ -75,11 +73,14 @@ namespace SparkTech
 
                         if (version == assemblyName.Version)
                         {
-                            Comms.Print("You are running the latest version of the library");
+                            if (!Settings.SkipNoUpdate)
+                            {
+                                Comms.Print("You are using the latest version of [ST] library.");
+                            }
                         }
                         else if (version > assemblyName.Version)
                         {
-                            Game.PrintChat("Updated version of the library is available: {1} => {2}",
+                            Game.PrintChat("Updated version of the [ST] lib is available: {1} => {2}",
                                 assemblyName.Name,
                                 assemblyName.Version,
                                 version);
@@ -96,7 +97,7 @@ namespace SparkTech
                     {
                         if (Settings.Debug)
                         {
-                            Comms.Print(ex.ToString());
+                            Comms.Print("Checking for an update FAILED! (ex)" + ex);
                         }
                     }
                 }
@@ -105,6 +106,12 @@ namespace SparkTech
         }
        
         #endregion
+
+        /*
+
+        Here moar code
+
+        */
 
     }
 }

@@ -25,14 +25,9 @@ namespace SparkTech
 
         private static float _spaghettiLimiter;
         private static bool _zoomhackEnabled;
-        private static bool ZoomHackTurnedOn
-        {
-            get
-            {
-                return LibraryMenu.Item("zoomhack").GetValue<bool>();
-            }
-        }
-
+        private static bool _dciEnabled;
+        private static bool ZoomHackTurnedOn { get { return LibraryMenu.Item("zoomhack").GetValue<bool>(); } }
+        private static bool DCITurnedOn { get { return LibraryMenu.Item("dcindicator").GetValue<bool>(); } }
         #endregion
 
         public static Menu LibraryMenu;
@@ -43,7 +38,9 @@ namespace SparkTech
 
             var F5Settings = new Menu("F5Settings", "F5Settings");
             {
-                F5Settings.AddItem(new MenuItem("defaultsettings", "Use Default Settings")).SetValue(true);
+
+                F5Settings.AddItem(new MenuItem("defaultsettings", "Use Recommended Settings")).SetValue(true);
+                F5Settings.AddItem((new MenuItem("For [ST] assemblies only.", "")));
 
             }
             LibraryMenu.AddSubMenu(F5Settings);
@@ -51,10 +48,13 @@ namespace SparkTech
             var BanMenu = new Menu("Ban me please", "BanMenu");
             {
                 BanMenu.AddItem((new MenuItem("zoomhack", "Use ZoomHack (bannable!)")).SetValue(false));
+                BanMenu.AddItem((new MenuItem("confirm", "Care: This can get you banned!")).SetValue(false));
+                BanMenu.AddItem((new MenuItem("", "")));
+                BanMenu.AddItem((new MenuItem("dcindicator", "Disable Cast Indicator")).SetValue(false));
             }
             LibraryMenu.AddSubMenu(BanMenu);
 
-            LibraryMenu.AddItem(new MenuItem("onupdatedelay", "Delay in checking for menu changes")).SetValue(new Slider(8, 0, 1000));
+            LibraryMenu.AddItem(new MenuItem("onupdatedelay", "Delay in checking for menu changes")).SetValue(new Slider(300, 0, 1000));
 
 
             // Comms.Print("Loaded.");
@@ -77,32 +77,47 @@ namespace SparkTech
 
             */
 
-            LibraryMenu.AddToMainMenu();
-
             _zoomhackEnabled = false;
-            Game.OnUpdate += SettingsUpdate;
+
+            Utility.DelayAction.Add(1500, () =>
+            {
+                LibraryMenu.AddToMainMenu();
+                Game.OnUpdate += OnSettingsChange;
+
+            });
 
         }
 
-        private static void SettingsUpdate(EventArgs args)
+        private static void OnSettingsChange(EventArgs args)
         {
-            if (Environment.TickCount - _spaghettiLimiter < 80)
+            if (Environment.TickCount - _spaghettiLimiter < LibraryMenu.Item("onupdatedelay").GetValue<Slider>().Value)
             {
                 return;
             }
 
             _spaghettiLimiter = Environment.TickCount;
 
-            if (ZoomHackTurnedOn && !_zoomhackEnabled)
+            if (!_zoomhackEnabled && ZoomHackTurnedOn && LibraryMenu.Item("confirm").GetValue<bool>())
             {
                 _zoomhackEnabled = true;
                 Hacks.ZoomHack = true;
             }
-            else if (!ZoomHackTurnedOn && _zoomhackEnabled)
+            if (_zoomhackEnabled && (!ZoomHackTurnedOn || !LibraryMenu.Item("confirm").GetValue<bool>()))
             {
                 _zoomhackEnabled = false;
                 Hacks.ZoomHack = false;
             }
+            if (DCITurnedOn && !_dciEnabled)
+            {
+                _dciEnabled = true;
+                Hacks.DisableCastIndicator = true;
+            }
+            if (!DCITurnedOn && _dciEnabled)
+            {
+                _dciEnabled = false;
+                Hacks.DisableCastIndicator = false;
+            }
+
         }
     }
 }

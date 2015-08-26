@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-
 using LeagueSharp;
 using LeagueSharp.Common;
 using SparkTech;
@@ -10,7 +9,7 @@ namespace Testing
 {
     internal class Program
     {
-        private static AssemblyUtil _assemblyUtil;
+        private static UpdateChecker _updateChecker;
         private const string AssemblyName = "Testing";
 
         private static void Main()
@@ -21,9 +20,9 @@ namespace Testing
                 {
                     try
                     {
-                        _assemblyUtil = new AssemblyUtil(Assembly.GetExecutingAssembly().GetName().Name);
-                        _assemblyUtil.onGetVersionCompleted += AssemblyUtil_onGetVersionCompleted;
-                        _assemblyUtil.GetLastVersionAsync();
+                        _updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
+                        _updateChecker.onGetVersionCompleted += AssemblyUtil_onGetVersionCompleted;
+                        _updateChecker.GetLastVersionAsync();
                     }
                         // ReSharper disable once EmptyGeneralCatchClause
                     catch { }
@@ -35,13 +34,17 @@ namespace Testing
 
         private static void AssemblyUtil_onGetVersionCompleted(OnGetVersionCompletedArgs args)
         {
-            // Comms.Print(args.LastAssemblyVersion == Assembly.GetExecutingAssembly().GetName().Version.ToString()
-            //    ? string.Format("You have the latest version of \"" + AssemblyName + "\"")
-            //    : string.Format("A new version of \"" + AssemblyName + "\" is available!"));
-            if (args.LastAssemblyVersion == Assembly.GetExecutingAssembly().GetName().Version.ToString())
-                Game.PrintChat(string.Format("<font color='#fb762d'>DevAnnie :: You have the latest version.</font>"));
+            if (args.LastAssemblyVersion == Assembly.GetExecutingAssembly().GetName().Version.ToString() && !Settings.SkipNoUpdate)
+            {
+                if (!Settings.SkipNoUpdate)
+                {
+                    Comms.Print("You have the latest version of \"" + AssemblyName + "\"");
+                }
+            }
             else
-                Game.PrintChat(string.Format("<font color='#fb762d'>DevAnnie :: NEW VERSION available! Tap F8 for Update! {0}</font>", args.LastAssemblyVersion));
+            {
+                Comms.Print("A new version of \"" + AssemblyName + "\" is available!");
+            }
         }
     }
 }
