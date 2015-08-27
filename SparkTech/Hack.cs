@@ -6,7 +6,7 @@ using LeagueSharp.Common;
 namespace SparkTech
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    class Hack
+    public class Hack
     {
         private static Menu _menu;
         static Hack()
