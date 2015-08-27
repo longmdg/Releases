@@ -12,7 +12,7 @@ namespace ZoomHack
             CustomEvents.Game.OnGameLoad += eventArgs =>
             {
                 _menu = new Menu("[ST] ZoomHack", "SparkTech", true);
-                var zoomHack = _menu.AddItem((new MenuItem("zoomhack", "Active!")).SetValue(true));
+                var zoomHack = _menu.AddItem((new MenuItem("zoomhack", "Use ZoomHack (Read Disclaimer)")).SetValue(true));
                 // blank space
                 // DISCLAIMER
                 // THis will probably get you banned.
