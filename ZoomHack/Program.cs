@@ -1,4 +1,5 @@
-﻿using LeagueSharp.Common;
+﻿using SparkTech;
+// ReSharper disable ObjectCreationAsStatement
 
 namespace ZoomHack
 {
@@ -9,7 +10,8 @@ namespace ZoomHack
         private static void Main()
         {
             Updater.Init();
-            SparkTech.Hack.LoadZoomHackStandalone();
+            new Hacks.DisableCastIndicator();
+            new Hacks.ZoomHack();
         }
     }
 }

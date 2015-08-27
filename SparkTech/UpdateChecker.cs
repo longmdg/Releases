@@ -50,7 +50,6 @@ namespace SparkTech
             var currentVersion = body.Remove(0, body.LastIndexOf("AssemblyVersion", StringComparison.Ordinal));
             currentVersion = currentVersion.Substring(currentVersion.IndexOf("\"", StringComparison.Ordinal) + 1);
             currentVersion = currentVersion.Substring(0, currentVersion.IndexOf("\"", StringComparison.Ordinal));
-
             return currentVersion;
         }
 

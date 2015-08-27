@@ -43,7 +43,7 @@ namespace SparkTech
             {
                 F5Settings.AddItem(new MenuItem("defaultsettings", "Use Recommended Settings")).SetValue(true);
                 F5Settings.AddItem((new MenuItem("1", "For [ST] assemblies only.")));
-                F5Settings.AddItem((new MenuItem("hack", "For [ST] assemblies only."))).SetValue(false);
+                F5Settings.AddItem((new MenuItem("hack", "Load ZoomHack"))).SetValue(false);
             }
             LibraryMenu.AddSubMenu(F5Settings);
 
@@ -51,7 +51,7 @@ namespace SparkTech
 
             if (LoadHack)
             {
-                new Hack();
+                new Hacks();
             }
 
             LibraryMenu.AddItem(new MenuItem("onupdatedelay", "Delay in checking for menu changes")).SetValue(new Slider(300, 0, 1000));

@@ -4,7 +4,7 @@ using SparkTech;
 
 namespace Testing
 {
-    class Updater
+    internal class Updater
     {
         private static UpdateChecker _updateChecker;
 
@@ -14,19 +14,14 @@ namespace Testing
             {
                 Utility.DelayAction.Add(Settings.UpdateCheckDelay, () =>
                 {
-                    try
-                    {
-                        _updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
-                        _updateChecker.onGetVersionCompleted += AssemblyUtil_onGetVersionCompleted;
-                        _updateChecker.GetLastVersionAsync();
-                    }
-                    // ReSharper disable once EmptyGeneralCatchClause
-                    catch { }
+                    _updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
+                    _updateChecker.onGetVersionCompleted += AssemblyUtil_onGetVersionCompleted;
+                    _updateChecker.GetLastVersionAsync();
                 });
             }
         }
 
-        internal static void AssemblyUtil_onGetVersionCompleted(OnGetVersionCompletedArgs args)
+        private static void AssemblyUtil_onGetVersionCompleted(OnGetVersionCompletedArgs args)
         {
             if (args.LastAssemblyVersion == Assembly.GetExecutingAssembly().GetName().Version.ToString())
             {

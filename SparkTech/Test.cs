@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Orbwalker = SparkTech.Orbwalker;
-using LeagueSharp;
-using LeagueSharp.Common;
+﻿using LeagueSharp.Common;
 
 namespace SparkTech
 {
