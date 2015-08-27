@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using SharpDX;
 using LeagueSharp;
@@ -7,6 +8,7 @@ using LeagueSharp.Common;
 
 namespace SparkTech
 {
+    [SuppressMessage("ReSharper", "UseNullPropagation")] //remove when L# supports .NET 4.6
     internal class Orbwalker
     {
         private static readonly string[] AttackResets =
@@ -727,12 +729,18 @@ namespace SparkTech
 
         private static void FireAfterAttack(Obj_AI_Base unit, Obj_AI_Base target)
         {
-            AfterAttack?.Invoke(unit, target);
+            if (AfterAttack != null)
+            {
+                AfterAttack(unit, target);
+            }
         }
 
         private static void FireOnAttack(Obj_AI_Base unit, Obj_AI_Base target)
         {
-            OnAttack?.Invoke(unit, target);
+            if (OnAttack != null)
+            {
+                OnAttack(unit, target);
+            }
         }
     }
 }
