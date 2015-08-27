@@ -14,9 +14,14 @@ namespace ZoomHack
             {
                 Utility.DelayAction.Add(Settings.UpdateCheckDelay, () =>
                 {
-                    _updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
-                    _updateChecker.onGetVersionCompleted += AssemblyUtil_onGetVersionCompleted;
-                    _updateChecker.GetLastVersionAsync();
+                    try
+                    {
+                        _updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
+                        _updateChecker.onGetVersionCompleted += AssemblyUtil_onGetVersionCompleted;
+                        _updateChecker.GetLastVersionAsync();
+                    }
+                    // ReSharper disable once EmptyGeneralCatchClause
+                    catch { }
                 });
             }
         }
