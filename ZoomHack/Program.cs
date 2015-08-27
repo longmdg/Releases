@@ -1,21 +1,32 @@
-﻿namespace ZoomHack
+﻿using LeagueSharp;
+using LeagueSharp.Common;
+
+namespace ZoomHack
 {
     static class Program
     {
         public const string Version = "1.3.3.*";
-        static LeagueSharp.Common.Menu _menu;
-        static void Main()
+        private static Menu _menu;
+        private static void Main()
         {
-            LeagueSharp.Common.CustomEvents.Game.OnGameLoad += eventArgs =>
+            CustomEvents.Game.OnGameLoad += eventArgs =>
             {
-                _menu = new LeagueSharp.Common.Menu("[ST] ZoomHack", "SparkTech", true);
-                var zoomHack = _menu.AddItem((new LeagueSharp.Common.MenuItem("zoomhack", "Active!")).SetValue(true));
-                zoomHack.SetValue(LeagueSharp.Hacks.ZoomHack);
-                zoomHack.ValueChanged += delegate (object sender, LeagueSharp.Common.OnValueChangeEventArgs args)
+                _menu = new Menu("[ST] ZoomHack", "SparkTech", true);
+                var zoomHack = _menu.AddItem((new MenuItem("zoomhack", "Active!")).SetValue(true));
+                // blank space
+                // DISCLAIMER
+                // THis will probably get you banned.
+                _menu.AddItem((new MenuItem("", "")));
+                _menu.AddItem((new MenuItem("", "DISCLAIMER:")));
+                _menu.AddItem((new MenuItem("", "This assembly will get you banned")));
+                zoomHack.SetValue(Hacks.ZoomHack);
+                zoomHack.ValueChanged += delegate (object sender, OnValueChangeEventArgs args)
                     {
-                        LeagueSharp.Hacks.ZoomHack = args.GetNewValue<bool>();
+                        Hacks.ZoomHack = args.GetNewValue<bool>();
                     };
                 _menu.AddToMainMenu();
+
+                Game.PrintChat("Unsafe ZoomHack loaded! Turn on in menu to activate!");
             };
         }
     }

@@ -80,7 +80,7 @@ namespace SparkTech
                                 Comms.Print("You are using the latest version of [ST] library.");
                             }
                         }
-                        else if (version > assemblyName.Version)
+                        else if (version != assemblyName.Version)
                         {
                             Game.PrintChat("Updated version of the [ST] lib is available: {1} => {2}",
                                 assemblyName.Name,
