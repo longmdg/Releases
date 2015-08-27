@@ -16,9 +16,9 @@ namespace ZoomHack
                 // blank space
                 // DISCLAIMER
                 // THis will probably get you banned.
-                _menu.AddItem((new MenuItem("", "")));
-                _menu.AddItem((new MenuItem("", "DISCLAIMER:")));
-                _menu.AddItem((new MenuItem("", "This assembly will get you banned")));
+                _menu.AddItem((new MenuItem("1", "")));
+                _menu.AddItem((new MenuItem("2", "DISCLAIMER:")));
+                _menu.AddItem((new MenuItem("3", "This assembly will get you banned")));
                 zoomHack.SetValue(Hacks.ZoomHack);
                 zoomHack.ValueChanged += delegate (object sender, OnValueChangeEventArgs args)
                     {
