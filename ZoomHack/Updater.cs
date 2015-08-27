@@ -4,7 +4,7 @@ using SparkTech;
 
 namespace ZoomHack
 {
-    class Updater
+    internal class Updater
     {
         private static UpdateChecker _updateChecker;
 
@@ -14,14 +14,9 @@ namespace ZoomHack
             {
                 Utility.DelayAction.Add(Settings.UpdateCheckDelay, () =>
                 {
-                    try
-                    {
-                        _updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
-                        _updateChecker.onGetVersionCompleted += AssemblyUtil_onGetVersionCompleted;
-                        _updateChecker.GetLastVersionAsync();
-                    }
-                    // ReSharper disable once EmptyGeneralCatchClause
-                    catch { }
+                    _updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
+                    _updateChecker.onGetVersionCompleted += AssemblyUtil_onGetVersionCompleted;
+                    _updateChecker.GetLastVersionAsync();
                 });
             }
         }

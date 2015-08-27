@@ -9,16 +9,14 @@ using LeagueSharp.Common;
 namespace SparkTech
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-
-    //reenable when L# supports .NET 4.6
-    // [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")]
-
+    [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")] // reenable when L# supports .NET 4.6
+    [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
     public class Settings
     {
         #region MenuBools
 
         public static bool MenuLoaded;
-        internal static bool Debug = false;
+        internal static bool Debug = true;
 
         public static bool SkipNoUpdate = true;
         public static bool UpdateCheck = true;
@@ -49,9 +47,10 @@ namespace SparkTech
             }
             LibraryMenu.AddSubMenu(F5Settings);
 
+            new Test();
+
             if (LoadHack)
             {
-                // ReSharper disable once ObjectCreationAsStatement
                 new Hack();
             }
 
