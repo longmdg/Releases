@@ -35,21 +35,14 @@ namespace SparkTech
 
         private void FinishWebRequest(IAsyncResult result)
         {
-            try
-            {
-                var webResponse = _webRequest.EndGetResponse(result);
-                // ReSharper disable once AssignNullToNotNullAttribute
-                var body = new StreamReader(webResponse.GetResponseStream()).ReadToEnd();
+            var webResponse = _webRequest.EndGetResponse(result);
+            // ReSharper disable once AssignNullToNotNullAttribute
+            var body = new StreamReader(webResponse.GetResponseStream()).ReadToEnd();
 
-                if (onGetVersionCompleted == null)
-                    return;
-                _versionCompletedArgs.LastAssemblyVersion = GetVersionFromAssemblyInfo(body);
-                onGetVersionCompleted(_versionCompletedArgs);
-            }
-            catch
-            {
-                // ignored
-            }
+            if (onGetVersionCompleted == null)
+                return;
+            _versionCompletedArgs.LastAssemblyVersion = GetVersionFromAssemblyInfo(body);
+            onGetVersionCompleted(_versionCompletedArgs);
         }
 
         private static string GetVersionFromAssemblyInfo(string body)
