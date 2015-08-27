@@ -6,6 +6,7 @@ namespace ZoomHack
     static class Program
     {
         public const string Version = "1.3.3.*";
+        public const string DodgerBlue = "#1E90FF";
         private static Menu _menu;
         private static void Main()
         {
@@ -13,9 +14,6 @@ namespace ZoomHack
             {
                 _menu = new Menu("[ST] ZoomHack", "SparkTech", true);
                 var zoomHack = _menu.AddItem((new MenuItem("zoomhack", "Use ZoomHack (Read Disclaimer)")).SetValue(true));
-                // blank space
-                // DISCLAIMER
-                // THis will probably get you banned.
                 _menu.AddItem((new MenuItem("1", "")));
                 _menu.AddItem((new MenuItem("2", "DISCLAIMER:")));
                 _menu.AddItem((new MenuItem("3", "This assembly will get you banned")));
@@ -25,9 +23,9 @@ namespace ZoomHack
                         Hacks.ZoomHack = args.GetNewValue<bool>();
                     };
                 _menu.AddToMainMenu();
-
-                Game.PrintChat("Unsafe ZoomHack loaded! Turn on in menu to activate!");
+                Game.PrintChat("<font color=\"#1eff00\">ZoomHack loaded!</font> - <font color=\"#00BFFF\">care, it can get you banned.</font>");
             };
+
         }
     }
 }
