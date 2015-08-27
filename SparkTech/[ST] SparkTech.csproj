@@ -53,6 +53,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hack.cs" />
     <Compile Include="Leveler.cs" />
     <Compile Include="Colors.cs" />
     <Compile Include="Comms.cs" />
