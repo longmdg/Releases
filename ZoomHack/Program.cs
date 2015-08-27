@@ -2,14 +2,11 @@
 
 namespace ZoomHack
 {
-    static class Program
+    internal static class Program
     {
         private static void Main()
         {
-            CustomEvents.Game.OnGameLoad += eventArgs =>
-            {
-                SparkTech.Hack.LoadZoomHackStandalone();
-            };
+            SparkTech.Hack.LoadZoomHackStandalone();
         }
     }
 }

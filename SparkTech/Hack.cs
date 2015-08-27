@@ -46,19 +46,22 @@ namespace SparkTech
 
         public static void LoadZoomHackStandalone()
         {
-            _menu = new Menu("[ST] ZoomHack", "6", true);
-            var zoomHack = _menu.AddItem((new MenuItem("5", "Enabled (See Disclaimer)")).SetValue(true));
-            _menu.AddItem((new MenuItem("1", "")));
-            _menu.AddItem((new MenuItem("2", "DISCLAIMER:")));
-            _menu.AddItem((new MenuItem("3", "This assembly will get you banned!")));
-            _menu.AddItem((new MenuItem("4", "You accept that fact by using it.")));
-            zoomHack.SetValue(Hacks.ZoomHack);
-            zoomHack.ValueChanged += delegate(object sender, OnValueChangeEventArgs args)
+            CustomEvents.Game.OnGameLoad += eventArgs =>
             {
-                Hacks.ZoomHack = args.GetNewValue<bool>();
+                _menu = new Menu("[ST] ZoomHack", "1", true);
+                var zoomHack = _menu.AddItem((new MenuItem("2", "Enabled")).SetValue(true));
+                _menu.AddItem((new MenuItem("3", "")));
+                _menu.AddItem((new MenuItem("4", ">>>>>   DISCLAIMER:   <<<<<")));
+                _menu.AddItem((new MenuItem("5", ">> This assembly will get you banned! <<")));
+                _menu.AddItem((new MenuItem("6", "You accept the following fact by using it.")));
+                zoomHack.SetValue(Hacks.ZoomHack);
+                zoomHack.ValueChanged += delegate(object sender, OnValueChangeEventArgs args)
+                {
+                    Hacks.ZoomHack = args.GetNewValue<bool>();
+                };
+                _menu.AddToMainMenu();
+                Game.PrintChat("<font color=\"#1eff00\">ZoomHack loaded!</font>");
             };
-            _menu.AddToMainMenu();
-            Game.PrintChat("<font color=\"#1eff00\">ZoomHack loaded!</font>");
         }
     }
 }
