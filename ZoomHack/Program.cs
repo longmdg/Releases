@@ -23,7 +23,7 @@ namespace ZoomHack
                         Hacks.ZoomHack = args.GetNewValue<bool>();
                     };
                 _menu.AddToMainMenu();
-                Game.PrintChat("<font color=\"#1eff00\">ZoomHack loaded!</font> - <font color=\"#00BFFF\">care, it can get you banned.</font>");
+                Game.PrintChat("<font color=\"#1eff00\">ZoomHack loaded!</font> - care, it can get you banned.");
             };
 
         }

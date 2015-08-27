@@ -1,6 +1,6 @@
 ﻿namespace SparkTech
 {
-    public static class Color
+    public static class Colors
     {
         public const string AliceBlue = "#F0F8FF";
         public const string AntiqueWhite = "#FAEBD7";

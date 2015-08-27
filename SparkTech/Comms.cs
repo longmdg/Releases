@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿//using System;
+//using System.Linq;
 using LeagueSharp;
-using LeagueSharp.Common;
+//using LeagueSharp.Common;
 
 namespace SparkTech
 {
@@ -12,7 +12,7 @@ namespace SparkTech
             Game.PrintChat(message);
         }
 
-        public static void Print(string message, string color = Color.DodgerBlue)
+        public static void Print(string message, string color = Colors.DodgerBlue)
         {
             Game.PrintChat("<font color='{0}'>{1}</font>", color, message);
         }

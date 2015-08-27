@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+//using System.Linq;
 
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
+//using SharpDX;
 
 namespace SparkTech
 {
