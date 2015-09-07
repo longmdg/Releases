@@ -1,9 +1,8 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-//using System.Linq;
+﻿//using System.Linq;
 
-using LeagueSharp;
 using LeagueSharp.Common;
+using System.Diagnostics.CodeAnalysis;
+
 //using SharpDX;
 
 namespace SparkTech
@@ -18,18 +17,18 @@ namespace SparkTech
         public static bool MenuLoaded;
         internal static bool Debug = true;
 
-        public static bool SkipNoUpdate = true;
+        public static bool SkipNoUpdate = false;
         public static bool UpdateCheck = true;
         public static int UpdateCheckDelay = 250;
 
-        private static float _spaghettiLimiter;
+        private static float spaghettiLimiter;
 
         private static bool LoadHack
         {
             get { return LibraryMenu.Item("hack").GetValue<bool>(); }
         }
 
-        #endregion
+        #endregion MenuBools
 
         public static Menu LibraryMenu;
 
@@ -39,7 +38,7 @@ namespace SparkTech
 
             LibraryMenu = new Menu("[ST] Core", "SparkTech", true);
 
-            var F5Settings = new Menu("F5Settings", "F5Settings");
+            Menu F5Settings = new Menu("F5Settings", "F5Settings");
             {
                 F5Settings.AddItem(new MenuItem("defaultsettings", "Use Recommended Settings")).SetValue(true);
                 F5Settings.AddItem((new MenuItem("1", "For [ST] assemblies only.")));
@@ -51,30 +50,36 @@ namespace SparkTech
 
             if (LoadHack)
             {
-                new Hacks();
+                new Hacks.ZoomHack();
             }
 
             LibraryMenu.AddItem(new MenuItem("onupdatedelay", "Delay in checking for menu changes")).SetValue(new Slider(300, 0, 1000));
 
             Utility.DelayAction.Add(1500, () =>
             {
+                if (Hacks.HackInited)
+                {
+                    LibraryMenu.AddSubMenu(Hacks.HacksMenu);
+                }
+
                 LibraryMenu.AddToMainMenu();
-                Game.OnUpdate += OnSettingsChange;
+                //Game.OnUpdate += OnSettingsChange;
             });
         }
 
-        private static void OnSettingsChange(EventArgs args)
-        {
-            if (Environment.TickCount - _spaghettiLimiter < LibraryMenu.Item("onupdatedelay").GetValue<Slider>().Value)
-            {
-                return;
-            }
+        /*
+                private static void OnSettingsChange(EventArgs args)
+                {
+                    if (Environment.TickCount - _spaghettiLimiter < LibraryMenu.Item("onupdatedelay").GetValue<Slider>().Value)
+                    {
+                        return;
+                    }
 
-            _spaghettiLimiter = Environment.TickCount;
+                    _spaghettiLimiter = Environment.TickCount;
 
-            Console.WriteLine("");
-
-        }
+                    Console.WriteLine("");
+                }
+        */
 
         /*
 
@@ -96,9 +101,9 @@ more 2 come
 */
 
         /*
-        
+
         Code
-        
+
         */
     }
 }

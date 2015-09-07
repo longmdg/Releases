@@ -2,13 +2,13 @@
 
 namespace SparkTech
 {
-    class Test
+    internal class Test
     {
         internal Test()
         {
-            var orbwalkerMenu = new Menu("Orbwalker", "orbwalker");
-            Orbwalker.AddToMenu(orbwalkerMenu);
-            Settings.LibraryMenu.AddSubMenu(orbwalkerMenu);
+            Menu orbmenu = new Menu("Orb", "orb1");
+            LXOrbwalker.AddToMenu(orbmenu);
+            Settings.LibraryMenu.AddSubMenu(orbmenu);
         }
     }
 }

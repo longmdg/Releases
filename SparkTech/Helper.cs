@@ -1,4 +1,5 @@
 ﻿using System;
+
 //using System.Collections.Generic;
 //using System.Linq;
 //using System.Text;
@@ -6,11 +7,11 @@
 
 namespace SparkTech
 {
-   public class Helper
+    public class Helper
     {
         public static int RandomNumber(int min, int max)
         {
-            var random = new Random();
+            Random random = new Random();
             return random.Next(min, max);
         }
     }

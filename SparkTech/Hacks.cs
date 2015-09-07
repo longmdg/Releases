@@ -1,19 +1,23 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using LeagueSharp.Common;
+﻿using LeagueSharp.Common;
+
 // ReSharper disable ObjectCreationAsStatement
 
 namespace SparkTech
 {
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class Hacks
     {
-        internal static Menu _hacksmenu;
+        public static bool HackInited;
 
-        static Hacks()
+        internal static Menu HacksMenu;
+
+        internal static void AddMenu()
         {
-            _hacksmenu = new Menu("[ST] Hacks", "1", true);
-            Utility.DelayAction.Add(1500, _hacksmenu.AddToMainMenu);
+            if (HackInited)
+            {
+                return;
+            }
+            HackInited = true;
+            HacksMenu = new Menu("Hacks", "hacks1");
         }
 
         public class ZoomHack
@@ -22,15 +26,14 @@ namespace SparkTech
             {
                 CustomEvents.Game.OnGameLoad += eventArgs =>
                 {
-                    new Hacks();
-                    var zoomHack = _hacksmenu.AddItem((new MenuItem("2", "Enable ZoomHack")).SetValue(true));
-                    _hacksmenu.AddItem((new MenuItem("3", "Warning: ZoomHack is extremely unsafe!")));
+                    AddMenu();
+                    MenuItem zoomHack = HacksMenu.AddItem((new MenuItem("hacks2", "Enable ZoomHack")).SetValue(false));
+                    HacksMenu.AddItem((new MenuItem("hacks3", "Warning: ZoomHack is extremely unsafe!")));
                     zoomHack.SetValue(LeagueSharp.Hacks.ZoomHack);
-                    zoomHack.ValueChanged += delegate(object sender, OnValueChangeEventArgs args)
+                    zoomHack.ValueChanged += delegate (object sender, OnValueChangeEventArgs args)
                     {
                         LeagueSharp.Hacks.ZoomHack = args.GetNewValue<bool>();
                     };
-                    Comms.Print("<font color=\"#1eff00\">ZoomHack loaded!</font>");
                 };
             }
         }
@@ -39,13 +42,13 @@ namespace SparkTech
         {
             static DisableCastIndicator()
             {
-                var DCIndicator = _hacksmenu.AddItem((new MenuItem("dcindicator", "Disable Cast Indicator")).SetValue(false));
-                DCIndicator.SetValue(LeagueSharp.Hacks.DisableCastIndicator);
-                DCIndicator.ValueChanged += delegate(object sender, OnValueChangeEventArgs args)
+                AddMenu();
+                MenuItem dcIndicator = HacksMenu.AddItem((new MenuItem("dcindicator", "Disable Cast Indicator")).SetValue(false));
+                dcIndicator.SetValue(LeagueSharp.Hacks.DisableCastIndicator);
+                dcIndicator.ValueChanged += delegate (object sender, OnValueChangeEventArgs args)
                     {
                         LeagueSharp.Hacks.DisableCastIndicator = args.GetNewValue<bool>();
                     };
-                Comms.Print("<font color=\"#1eff00\">Cast Indicator Disabler loaded!</font>");
             }
         }
     }

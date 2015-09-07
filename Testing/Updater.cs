@@ -1,12 +1,12 @@
-﻿using System.Reflection;
-using LeagueSharp.Common;
+﻿using LeagueSharp.Common;
 using SparkTech;
+using System.Reflection;
 
 namespace Testing
 {
     internal class Updater
     {
-        private static UpdateChecker _updateChecker;
+        private static UpdateChecker updateChecker;
 
         internal static void Init()
         {
@@ -14,14 +14,14 @@ namespace Testing
             {
                 Utility.DelayAction.Add(Settings.UpdateCheckDelay, () =>
                 {
-                    _updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
-                    _updateChecker.onGetVersionCompleted += AssemblyUtil_onGetVersionCompleted;
-                    _updateChecker.GetLastVersionAsync();
+                    updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
+                    updateChecker.OnGetVersionCompleted += AssemblyUtilOnGetVersionCompleted;
+                    updateChecker.GetLastVersionAsync();
                 });
             }
         }
 
-        private static void AssemblyUtil_onGetVersionCompleted(OnGetVersionCompletedArgs args)
+        private static void AssemblyUtilOnGetVersionCompleted(OnGetVersionCompletedArgs args)
         {
             if (args.LastAssemblyVersion == Assembly.GetExecutingAssembly().GetName().Version.ToString())
             {

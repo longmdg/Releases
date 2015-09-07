@@ -1,30 +1,31 @@
-﻿using System;
+﻿using LeagueSharp;
+using LeagueSharp.Common;
+using System;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-using LeagueSharp;
-using LeagueSharp.Common;
-
 namespace SparkTech
 {
+    using Version = System.Version;
+
     public class Load
     {
-        private static bool _summoned;
+        private static bool summoned;
 
         static Load()
         {
-            _summoned = false;
+            summoned = false;
         }
 
         public static void Library()
         {
             CustomEvents.Game.OnGameLoad += eventArgs =>
             {
-                if (!_summoned)
+                if (!summoned)
                 {
-                    _summoned = true;
+                    summoned = true;
 
                     if (Settings.UpdateCheck)
                     {
@@ -49,27 +50,27 @@ namespace SparkTech
 
         private static void LibraryUpdateCheck()
         {
-            using (var client = new WebClient())
+            using (WebClient client = new WebClient())
             {
                 new Thread(async () =>
                 {
                     try
                     {
-                        var assemblyName = Assembly.GetExecutingAssembly().GetName();
+                        AssemblyName assemblyName = Assembly.GetExecutingAssembly().GetName();
 
                         if (Settings.Debug)
                         {
                             Game.PrintChat("Assembly Name: " + assemblyName);
                         }
 
-                        var data =
+                        string data =
                             await
                                 // ReSharper disable once AccessToDisposedClosure
                                 client.DownloadStringTaskAsync(
                                     "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs");
 
-                        var version =
-                            System.Version.Parse(
+                        Version version =
+                            Version.Parse(
                                 new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value
                                     .Replace("\"", ""));
 
@@ -106,14 +107,13 @@ namespace SparkTech
                     ).Start();
             }
         }
-       
-        #endregion
+
+        #endregion LibraryUpdateCheck
 
         /*
 
         Here moar code
 
         */
-
     }
 }

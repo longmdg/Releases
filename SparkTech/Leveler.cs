@@ -11,7 +11,6 @@ namespace SparkTech
     {
         internal static void AutoLeveler()
         {
-            
         }
     }
 }
