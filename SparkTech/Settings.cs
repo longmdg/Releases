@@ -21,7 +21,9 @@ namespace SparkTech
         public static bool UpdateCheck = true;
         public static int UpdateCheckDelay = 250;
 
+/*
         private static float spaghettiLimiter;
+*/
 
         private static bool LoadHack
         {
@@ -46,7 +48,11 @@ namespace SparkTech
             }
             LibraryMenu.AddSubMenu(F5Settings);
 
-            new Test();
+            Menu orbmenu = new Menu("Orb", "orb1");
+            LXOrbwalker.AddToMenu(orbmenu);
+            LibraryMenu.AddSubMenu(orbmenu);
+
+            new TaylorSwift();
 
             if (LoadHack)
             {

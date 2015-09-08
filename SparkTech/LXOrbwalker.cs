@@ -1,17 +1,17 @@
-﻿using LeagueSharp;
-using LeagueSharp.Common;
-using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using Color = System.Drawing.Color;
-
-namespace SparkTech
+﻿namespace SparkTech
 {
-    [SuppressMessage("ReSharper", "UseNullPropagation")] // .NET 4.6
-    // ReSharper disable once InconsistentNaming
-    public class LXOrbwalker
+    using LeagueSharp;
+    using LeagueSharp.Common;
+    using SharpDX;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using Color = System.Drawing.Color;
+
+    [SuppressMessage("ReSharper", "UseNullPropagation")]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    internal class LXOrbwalker
     {
         private static readonly string[] AttackResets =
         {
@@ -27,7 +27,8 @@ namespace SparkTech
         {
             "jarvanivcataclysmattack", "monkeykingdoubleattack",
             "shyvanadoubleattack", "shyvanadoubleattackdragon", "zyragraspingplantattack", "zyragraspingplantattack2",
-            "zyragraspingplantattackfire", "zyragraspingplantattack2fire", "viktorpowertransfer", "sivirwattackbounce"
+            "zyragraspingplantattackfire", "zyragraspingplantattack2fire", "viktorpowertransfer", "sivirwattackbounce",
+            "elisespiderlingbasicattack"
         };
 
         private static readonly string[] Attacks =
@@ -61,11 +62,12 @@ namespace SparkTech
 
         public static event OnAttackEvenH OnAttack;
 
-        public enum OrbwalkingMode
+        public enum Mode
         {
             Combo,
             Harass,
             LaneClear,
+            LaneFreeze,
             Lasthit,
             Flee,
             None
@@ -76,16 +78,10 @@ namespace SparkTech
         private static bool movement = true;
         private static bool disableNextAttack;
         private const float LaneClearWaitTimeMod = 2f;
-
-        // ReSharper disable once InconsistentNaming
-        private static int _lastAATick;
-
+        private static int lastAaTick;
         private static Obj_AI_Base lastTarget;
         private static Spell movementPrediction;
         private static int lastMovement;
-
-        // ReSharper disable once InconsistentNaming
-        public static float cantMoveTill = 0;
 
         public static void AddToMenu(Menu menu)
         {
@@ -94,65 +90,67 @@ namespace SparkTech
 
             Menu = menu;
 
-            Menu menuDrawing = new Menu("Drawing", "lxOrbwalker_Draw");
-            menuDrawing.AddItem(new MenuItem("lxOrbwalker_Draw_AARange", "AA Circle").SetValue(new Circle(true, Color.FloralWhite)));
-            menuDrawing.AddItem(new MenuItem("lxOrbwalker_Draw_AARange_Enemy", "AA Circle Enemy").SetValue(new Circle(true, Color.Pink)));
-            menuDrawing.AddItem(new MenuItem("lxOrbwalker_Draw_Holdzone", "Holdzone").SetValue(new Circle(true, Color.FloralWhite)));
-            menuDrawing.AddItem(new MenuItem("lxOrbwalker_Draw_MinionHPBar", "Minion HPBar").SetValue(new Circle(true, Color.Black)));
-            menuDrawing.AddItem(new MenuItem("lxOrbwalker_Draw_MinionHPBar_thickness", "^ HPBar Thickness").SetValue(new Slider(1, 1, 3)));
-            menuDrawing.AddItem(new MenuItem("lxOrbwalker_Draw_hitbox", "Show HitBoxes").SetValue(new Circle(true, Color.FloralWhite)));
-            menuDrawing.AddItem(new MenuItem("lxOrbwalker_Draw_Lasthit", "Minion Lasthit").SetValue(new Circle(true, Color.Lime)));
-            menuDrawing.AddItem(new MenuItem("lxOrbwalker_Draw_nearKill", "Minion nearKill").SetValue(new Circle(true, Color.Gold)));
+            Menu menuDrawing = new Menu("Drawing", "OrbWalker_Draw");
+            menuDrawing.AddItem(new MenuItem("OrbWalker_Draw_AARange", "AA Circle").SetValue(new Circle(true, Color.FloralWhite)));
+            menuDrawing.AddItem(new MenuItem("OrbWalker_Draw_AARange_Enemy", "AA Circle Enemy").SetValue(new Circle(true, Color.Pink)));
+            menuDrawing.AddItem(new MenuItem("OrbWalker_Draw_Holdzone", "Holdzone").SetValue(new Circle(true, Color.FloralWhite)));
+            menuDrawing.AddItem(new MenuItem("OrbWalker_Draw_MinionHPBar", "Minion HPBar").SetValue(new Circle(true, Color.Black)));
+            menuDrawing.AddItem(new MenuItem("OrbWalker_Draw_MinionHPBar_thickness", "^ HPBar Thickness").SetValue(new Slider(1, 1, 3)));
+            menuDrawing.AddItem(new MenuItem("OrbWalker_Draw_hitbox", "Show HitBoxes").SetValue(new Circle(true, Color.FloralWhite)));
+            menuDrawing.AddItem(new MenuItem("OrbWalker_Draw_Lasthit", "Minion Lasthit").SetValue(new Circle(true, Color.Lime)));
+            menuDrawing.AddItem(new MenuItem("OrbWalker_Draw_nearKill", "Minion nearKill").SetValue(new Circle(true, Color.Gold)));
             menu.AddSubMenu(menuDrawing);
 
-            Menu menuMisc = new Menu("Misc", "lxOrbwalker_Misc");
-            menuMisc.AddItem(new MenuItem("lxOrbwalker_Misc_Holdzone", "Hold Position").SetValue(new Slider(50, 100, 0)));
-            menuMisc.AddItem(new MenuItem("lxOrbwalker_Misc_Farmdelay", "Farm Delay").SetValue(new Slider(0, 200, 0)));
-            menuMisc.AddItem(new MenuItem("lxOrbwalker_Misc_ExtraWindUp", "Extra Winduptime").SetValue(new Slider(80, 200, 0)));
-            menuMisc.AddItem(new MenuItem("lxOrbwalker_Misc_AutoWindUp", "Autoset Windup").SetValue(false));
-            menuMisc.AddItem(new MenuItem("lxOrbwalker_Misc_Priority_Unit", "Priority Unit").SetValue(new StringList(new[] { "Minion", "Hero" })));
-            menuMisc.AddItem(new MenuItem("lxOrbwalker_Misc_Humanizer", "Humanizer Delay").SetValue(new Slider(50, 100, 0)));
-            menuMisc.AddItem(new MenuItem("lxOrbwalker_Misc_AllMovementDisabled", "Disable All Movement").SetValue(false));
-            menuMisc.AddItem(new MenuItem("lxOrbwalker_Misc_AllAttackDisabled", "Disable All Attacks").SetValue(false));
+            Menu menuMisc = new Menu("Misc", "OrbWalker_Misc");
+            menuMisc.AddItem(new MenuItem("OrbWalker_Misc_Holdzone", "Hold Position").SetValue(new Slider(50, 100, 0)));
+            menuMisc.AddItem(new MenuItem("OrbWalker_Misc_Farmdelay", "Farm Delay").SetValue(new Slider(0, 200, 0)));
+            menuMisc.AddItem(new MenuItem("OrbWalker_Misc_ExtraWindUp", "Extra Winduptime").SetValue(new Slider(80, 200, 0)));
+            menuMisc.AddItem(new MenuItem("OrbWalker_Misc_AutoWindUp", "Autoset Windup").SetValue(true));
+            menuMisc.AddItem(new MenuItem("OrbWalker_Misc_Priority_Unit", "Priority Unit").SetValue(new StringList(new[] { "Minion", "Hero" })));
+            menuMisc.AddItem(new MenuItem("OrbWalker_Misc_Humanizer", "Humanizer Delay").SetValue(new Slider(50, 100, 0)));
+            menuMisc.AddItem(new MenuItem("OrbWalker_Misc_AllMovementDisabled", "Disable All Movement").SetValue(false));
+            menuMisc.AddItem(new MenuItem("OrbWalker_Misc_AllAttackDisabled", "Disable All Attacks").SetValue(false));
 
             menu.AddSubMenu(menuMisc);
 
-            Menu menuMelee = new Menu("Melee", "lxOrbwalker_Melee");
-            menuMelee.AddItem(new MenuItem("lxOrbwalker_Melee_Prediction", "Movement Prediction").SetValue(false));
+            Menu menuMelee = new Menu("Melee", "OrbWalker_Melee");
+            menuMelee.AddItem(new MenuItem("OrbWalker_Melee_Prediction", "Movement Prediction").SetValue(false));
             menu.AddSubMenu(menuMelee);
 
-            Menu menuModes = new Menu("Orbwalk Mode", "lxOrbwalker_Modes");
+            Menu menuModes = new Menu("Orbwalk Mode", "OrbWalker_Modes");
             {
-                Menu modeCombo = new Menu("Combo", "lxOrbwalker_Modes_Combo");
+                Menu modeCombo = new Menu("Combo", "OrbWalker_Modes_Combo");
                 modeCombo.AddItem(new MenuItem("Combo_Key", "Key").SetValue(new KeyBind(32, KeyBindType.Press)));
                 modeCombo.AddItem(new MenuItem("Combo_move", "Movement").SetValue(true));
                 modeCombo.AddItem(new MenuItem("Combo_attack", "Attack").SetValue(true));
-                modeCombo.AddItem(new MenuItem("Move_target", "Move to target").SetValue(true));
                 menuModes.AddSubMenu(modeCombo);
 
-                Menu modeHarass = new Menu("Harass", "lxOrbwalker_Modes_Harass");
-                modeHarass.AddItem(
-                    new MenuItem("Harass_Key", "Key").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                Menu modeHarass = new Menu("Harass", "OrbWalker_Modes_Harass");
+                modeHarass.AddItem(new MenuItem("Harass_Key", "Key").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
                 modeHarass.AddItem(new MenuItem("Harass_move", "Movement").SetValue(true));
                 modeHarass.AddItem(new MenuItem("Harass_attack", "Attack").SetValue(true));
                 modeHarass.AddItem(new MenuItem("Harass_Lasthit", "Lasthit Minions").SetValue(true));
                 menuModes.AddSubMenu(modeHarass);
 
-                Menu modeLaneClear = new Menu("LaneClear", "lxOrbwalker_Modes_LaneClear");
-                modeLaneClear.AddItem(
-                    new MenuItem("LaneClear_Key", "Key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
+                Menu modeLaneClear = new Menu("LaneClear", "OrbWalker_Modes_LaneClear");
+                modeLaneClear.AddItem(new MenuItem("LaneClear_Key", "Key").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
                 modeLaneClear.AddItem(new MenuItem("LaneClear_move", "Movement").SetValue(true));
                 modeLaneClear.AddItem(new MenuItem("LaneClear_attack", "Attack").SetValue(true));
                 menuModes.AddSubMenu(modeLaneClear);
 
-                Menu modeLasthit = new Menu("LastHit", "lxOrbwalker_Modes_LastHit");
-                modeLasthit.AddItem(
-                    new MenuItem("LastHit_Key", "Key").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
+                Menu modeLaneFreeze = new Menu("LaneFreeze", "OrbWalker_Modes_LaneFreeze");
+                modeLaneFreeze.AddItem(new MenuItem("LaneFreeze_Key", "Key").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
+                modeLaneFreeze.AddItem(new MenuItem("LaneFreeze_move", "Movement").SetValue(true));
+                modeLaneFreeze.AddItem(new MenuItem("LaneFreeze_attack", "Attack").SetValue(true));
+                menuModes.AddSubMenu(modeLaneFreeze);
+
+                Menu modeLasthit = new Menu("LastHit", "OrbWalker_Modes_LastHit");
+                modeLasthit.AddItem(new MenuItem("LastHit_Key", "Key").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press)));
                 modeLasthit.AddItem(new MenuItem("LastHit_move", "Movement").SetValue(true));
                 modeLasthit.AddItem(new MenuItem("LastHit_attack", "Attack").SetValue(true));
                 menuModes.AddSubMenu(modeLasthit);
 
-                Menu modeFlee = new Menu("Flee", "lxOrbwalker_Modes_Flee");
+                Menu modeFlee = new Menu("Flee", "OrbWalker_Modes_Flee");
                 modeFlee.AddItem(new MenuItem("Flee_Key", "Key").SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Press)));
                 menuModes.AddSubMenu(modeFlee);
             }
@@ -161,10 +159,10 @@ namespace SparkTech
             Drawing.OnDraw += OnDraw;
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
-            GameObject.OnCreate += MissileClient_OnCreate;
+            GameObject.OnCreate += Obj_SpellMissile_OnCreate;
         }
 
-        private static void MissileClient_OnCreate(GameObject sender, EventArgs args)
+        private static void Obj_SpellMissile_OnCreate(GameObject sender, EventArgs args)
         {
             if (sender.IsMe)
             {
@@ -187,22 +185,98 @@ namespace SparkTech
 
         private static void OnUpdate(EventArgs args)
         {
-            if (Menu.Item("lxOrbwalker_Misc_AutoWindUp").GetValue<bool>())
-            {
-                CheckAutoWindUp();
-            }
-            if (CurrentMode == OrbwalkingMode.None || MenuGUI.IsChatOpen)
+            if (CurrentMode == Mode.None || MyHero.IsChannelingImportantSpell() || MenuGUI.IsChatOpen || CustomOrbwalkMode)
             {
                 return;
             }
             Obj_AI_Base target = GetPossibleTarget();
-            if (Menu.Item("Move_target").GetValue<bool>() && target != null)
+            Orbwalk(Game.CursorPos, target);
+            CheckAutoWindUp();
+        }
+
+        private static void OnDraw(EventArgs args)
+        {
+            if (!drawing)
             {
-                Orbwalk(target.Path.Length == 0 ? target.Position.To2D().Extend(target.Direction.To2D(), 140).To3D() : target.Position.To2D().Extend(target.Path[0].To2D(), 140).To3D(), target);
+                return;
             }
-            else
+
+            if (Menu.Item("OrbWalker_Draw_AARange").GetValue<Circle>().Active)
             {
-                Orbwalk(Game.CursorPos, target);
+                Render.Circle.DrawCircle(MyHero.Position, GetAutoAttackRange(), Menu.Item("OrbWalker_Draw_AARange").GetValue<Circle>().Color);
+            }
+
+            if (Menu.Item("OrbWalker_Draw_AARange_Enemy").GetValue<Circle>().Active || Menu.Item("OrbWalker_Draw_hitbox").GetValue<Circle>().Active)
+            {
+                foreach (Obj_AI_Hero enemy in AllEnemys.Where(enemy => enemy.IsValidTarget(1500)))
+                {
+                    if (Menu.Item("OrbWalker_Draw_AARange_Enemy").GetValue<Circle>().Active)
+                    {
+                        Render.Circle.DrawCircle(enemy.Position, GetAutoAttackRange(enemy, MyHero), Menu.Item("OrbWalker_Draw_AARange_Enemy").GetValue<Circle>().Color);
+                    }
+                    if (Menu.Item("OrbWalker_Draw_hitbox").GetValue<Circle>().Active)
+                    {
+                        Render.Circle.DrawCircle(enemy.Position, enemy.BoundingRadius, Menu.Item("OrbWalker_Draw_hitbox").GetValue<Circle>().Color);
+                    }
+                }
+            }
+
+            if (Menu.Item("OrbWalker_Draw_AARange_Enemy").GetValue<Circle>().Active)
+            {
+                foreach (Obj_AI_Hero enemy in AllEnemys.Where(enemy => enemy.IsValidTarget(1500)))
+                {
+                    Render.Circle.DrawCircle(enemy.Position, GetAutoAttackRange(enemy, MyHero), Menu.Item("OrbWalker_Draw_AARange_Enemy").GetValue<Circle>().Color);
+                }
+            }
+
+            if (Menu.Item("OrbWalker_Draw_Holdzone").GetValue<Circle>().Active)
+            {
+                Render.Circle.DrawCircle(MyHero.Position, Menu.Item("OrbWalker_Misc_Holdzone").GetValue<Slider>().Value, Menu.Item("OrbWalker_Draw_Holdzone").GetValue<Circle>().Color);
+            }
+
+            if (!Menu.Item("OrbWalker_Draw_MinionHPBar").GetValue<Circle>().Active
+                && !Menu.Item("OrbWalker_Draw_Lasthit").GetValue<Circle>().Active
+                && !Menu.Item("OrbWalker_Draw_nearKill").GetValue<Circle>().Active)
+            {
+                return;
+            }
+            List<Obj_AI_Base> minionList = MinionManager.GetMinions(MyHero.Position, GetAutoAttackRange() + 500, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+            foreach (Obj_AI_Base minion in minionList.Where(minion => minion.IsValidTarget(GetAutoAttackRange() + 500)))
+            {
+                double attackToKill = Math.Ceiling(minion.MaxHealth / MyHero.GetAutoAttackDamage(minion, true));
+                Vector2 hpBarPosition = minion.HPBarPosition;
+                int barWidth = minion.IsMelee ? 75 : 80;
+                if (minion.HasBuff("turretshield"))
+                {
+                    barWidth = 70;
+                }
+                if (Menu.Item("OrbWalker_Draw_Lasthit").GetValue<Circle>().Active
+                    && minion.Health <= MyHero.GetAutoAttackDamage(minion, true))
+                {
+                    Render.Circle.DrawCircle(minion.Position, minion.BoundingRadius, Menu.Item("OrbWalker_Draw_Lasthit").GetValue<Circle>().Color);
+                }
+                else if (Menu.Item("OrbWalker_Draw_nearKill").GetValue<Circle>().Active
+                         && minion.Health <= MyHero.GetAutoAttackDamage(minion, true) * 2)
+                {
+                    Render.Circle.DrawCircle(minion.Position, minion.BoundingRadius, Menu.Item("OrbWalker_Draw_nearKill").GetValue<Circle>().Color);
+                }
+                float barDistance = (float)(barWidth / attackToKill);
+
+                if (!Menu.Item("OrbWalker_Draw_MinionHPBar").GetValue<Circle>().Active)
+                {
+                    continue;
+                }
+                for (int i = 1; i < attackToKill; i++)
+                {
+                    float startposition = hpBarPosition.X + 45 + barDistance * i;
+                    {
+                        Drawing.DrawLine(
+                            new Vector2(startposition, hpBarPosition.Y + 18),
+                            new Vector2(startposition, hpBarPosition.Y + 23),
+                            Menu.Item("OrbWalker_Draw_MinionHPBar_thickness").GetValue<Slider>().Value,
+                            Menu.Item("OrbWalker_Draw_MinionHPBar").GetValue<Circle>().Color);
+                    }
+                }
             }
         }
 
@@ -216,7 +290,7 @@ namespace SparkTech
                 {
                     if (MyHero.IssueOrder(GameObjectOrder.AttackUnit, target))
                     {
-                        _lastAATick = Environment.TickCount + Game.Ping / 2;
+                        lastAaTick = Environment.TickCount + Game.Ping / 2;
                     }
                 }
             }
@@ -225,7 +299,7 @@ namespace SparkTech
                 return;
             }
             if (MyHero.IsMelee && target != null && target.Distance(MyHero) < GetAutoAttackRange(MyHero, target) &&
-                Menu.Item("lxOrbwalker_Melee_Prediction").GetValue<bool>() && target is Obj_AI_Hero &&
+                Menu.Item("OrbWalker_Melee_Prediction").GetValue<bool>() && target is Obj_AI_Hero &&
                 Game.CursorPos.Distance(target.Position) < 300)
             {
                 movementPrediction.Delay = MyHero.BasicAttack.SpellCastTime;
@@ -240,7 +314,7 @@ namespace SparkTech
 
         private static void MoveTo(Vector3 position, float holdAreaRadius = -1)
         {
-            int delay = Menu.Item("lxOrbwalker_Misc_Humanizer").GetValue<Slider>().Value;
+            int delay = Menu.Item("OrbWalker_Misc_Humanizer").GetValue<Slider>().Value;
             if (Environment.TickCount - lastMovement < delay)
             {
                 return;
@@ -253,11 +327,14 @@ namespace SparkTech
             }
             if (holdAreaRadius < 0)
             {
-                holdAreaRadius = Menu.Item("lxOrbwalker_Misc_Holdzone").GetValue<Slider>().Value;
+                holdAreaRadius = Menu.Item("OrbWalker_Misc_Holdzone").GetValue<Slider>().Value;
             }
-            if (MyHero.ServerPosition.Distance(position) < holdAreaRadius && MyHero.Path.Length > 1)
+            if (MyHero.ServerPosition.Distance(position) < holdAreaRadius)
             {
-                MyHero.IssueOrder(GameObjectOrder.HoldPosition, MyHero.ServerPosition);
+                if (MyHero.Path.Length > 1)
+                {
+                    MyHero.IssueOrder(GameObjectOrder.HoldPosition, MyHero.ServerPosition);
+                }
                 return;
             }
             if (position.Distance(MyHero.Position) < 200)
@@ -266,9 +343,9 @@ namespace SparkTech
             }
             else
             {
-                // ReSharper disable once UnusedVariable
-                Vector3 point = MyHero.ServerPosition + 200 * (position.To2D() - MyHero.ServerPosition.To2D()).Normalized().To3D();
-                MyHero.IssueOrder(GameObjectOrder.MoveTo, position);
+                Vector3 point = MyHero.ServerPosition +
+                200 * (position.To2D() - MyHero.ServerPosition.To2D()).Normalized().To3D();
+                MyHero.IssueOrder(GameObjectOrder.MoveTo, point);
             }
         }
 
@@ -278,23 +355,27 @@ namespace SparkTech
             {
                 return false;
             }
-            if (Menu.Item("lxOrbwalker_Misc_AllMovementDisabled").GetValue<bool>())
+            if (Menu.Item("OrbWalker_Misc_AllMovementDisabled").GetValue<bool>())
             {
                 return false;
             }
-            if (CurrentMode == OrbwalkingMode.Combo && !Menu.Item("Combo_move").GetValue<bool>())
+            if (CurrentMode == Mode.Combo && !Menu.Item("Combo_move").GetValue<bool>())
             {
                 return false;
             }
-            if (CurrentMode == OrbwalkingMode.Harass && !Menu.Item("Harass_move").GetValue<bool>())
+            if (CurrentMode == Mode.Harass && !Menu.Item("Harass_move").GetValue<bool>())
             {
                 return false;
             }
-            if (CurrentMode == OrbwalkingMode.LaneClear && !Menu.Item("LaneClear_move").GetValue<bool>())
+            if (CurrentMode == Mode.LaneClear && !Menu.Item("LaneClear_move").GetValue<bool>())
             {
                 return false;
             }
-            return CurrentMode != OrbwalkingMode.Lasthit || Menu.Item("LastHit_move").GetValue<bool>();
+            if (CurrentMode == Mode.LaneFreeze && !Menu.Item("LaneFreeze_move").GetValue<bool>())
+            {
+                return false;
+            }
+            return CurrentMode != Mode.Lasthit || Menu.Item("LastHit_move").GetValue<bool>();
         }
 
         private static bool IsAllowedToAttack()
@@ -303,105 +384,27 @@ namespace SparkTech
             {
                 return false;
             }
-            if (Menu.Item("lxOrbwalker_Misc_AllAttackDisabled").GetValue<bool>())
+            if (Menu.Item("OrbWalker_Misc_AllAttackDisabled").GetValue<bool>())
             {
                 return false;
             }
-            if (CurrentMode == OrbwalkingMode.Combo && !Menu.Item("Combo_attack").GetValue<bool>())
+            if (CurrentMode == Mode.Combo && !Menu.Item("Combo_attack").GetValue<bool>())
             {
                 return false;
             }
-            if (CurrentMode == OrbwalkingMode.Harass && !Menu.Item("Harass_attack").GetValue<bool>())
+            if (CurrentMode == Mode.Harass && !Menu.Item("Harass_attack").GetValue<bool>())
             {
                 return false;
             }
-            if (CurrentMode == OrbwalkingMode.LaneClear && !Menu.Item("LaneClear_attack").GetValue<bool>())
+            if (CurrentMode == Mode.LaneClear && !Menu.Item("LaneClear_attack").GetValue<bool>())
             {
                 return false;
             }
-            return CurrentMode != OrbwalkingMode.Lasthit || Menu.Item("LastHit_attack").GetValue<bool>();
-        }
-
-        private static void OnDraw(EventArgs args)
-        {
-            if (!drawing)
+            if (CurrentMode == Mode.LaneFreeze && !Menu.Item("LaneFreeze_attack").GetValue<bool>())
             {
-                return;
+                return false;
             }
-
-            if (Menu.Item("lxOrbwalker_Draw_AARange").GetValue<Circle>().Active)
-            {
-                Render.Circle.DrawCircle(MyHero.Position, GetAutoAttackRange(), Menu.Item("lxOrbwalker_Draw_AARange").GetValue<Circle>().Color);
-            }
-
-            if (Menu.Item("lxOrbwalker_Draw_AARange_Enemy").GetValue<Circle>().Active || Menu.Item("lxOrbwalker_Draw_hitbox").GetValue<Circle>().Active)
-            {
-                foreach (Obj_AI_Hero enemy in AllEnemys.Where(enemy => enemy.IsValidTarget(1500)))
-                {
-                    if (Menu.Item("lxOrbwalker_Draw_AARange_Enemy").GetValue<Circle>().Active)
-                    {
-                        Render.Circle.DrawCircle(enemy.Position, GetAutoAttackRange(enemy, MyHero), Menu.Item("lxOrbwalker_Draw_AARange_Enemy").GetValue<Circle>().Color);
-                    }
-                    if (Menu.Item("lxOrbwalker_Draw_hitbox").GetValue<Circle>().Active)
-                    {
-                        Render.Circle.DrawCircle(enemy.Position, enemy.BoundingRadius, Menu.Item("lxOrbwalker_Draw_hitbox").GetValue<Circle>().Color);
-                    }
-                }
-            }
-
-            if (Menu.Item("lxOrbwalker_Draw_AARange_Enemy").GetValue<Circle>().Active)
-            {
-                foreach (Obj_AI_Hero enemy in AllEnemys.Where(enemy => enemy.IsValidTarget(1500)))
-                {
-                    Render.Circle.DrawCircle(enemy.Position, GetAutoAttackRange(enemy, MyHero), Menu.Item("lxOrbwalker_Draw_AARange_Enemy").GetValue<Circle>().Color);
-                }
-            }
-
-            if (Menu.Item("lxOrbwalker_Draw_Holdzone").GetValue<Circle>().Active)
-            {
-                Render.Circle.DrawCircle(MyHero.Position, Menu.Item("lxOrbwalker_Misc_Holdzone").GetValue<Slider>().Value, Menu.Item("lxOrbwalker_Draw_Holdzone").GetValue<Circle>().Color);
-            }
-
-            if (!Menu.Item("lxOrbwalker_Draw_MinionHPBar").GetValue<Circle>().Active &&
-                !Menu.Item("lxOrbwalker_Draw_Lasthit").GetValue<Circle>().Active &&
-                !Menu.Item("lxOrbwalker_Draw_nearKill").GetValue<Circle>().Active)
-            {
-                return;
-            }
-            List<Obj_AI_Base> minionList = MinionManager.GetMinions(MyHero.Position, GetAutoAttackRange() + 500, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-            foreach (Obj_AI_Base minion in minionList.Where(minion => minion.IsValidTarget(GetAutoAttackRange() + 500)))
-            {
-                double attackToKill = Math.Ceiling(minion.MaxHealth / MyHero.GetAutoAttackDamage(minion, true));
-                Vector2 hpBarPosition = minion.HPBarPosition;
-                int barWidth = minion.IsMelee ? 75 : 80;
-                if (minion.HasBuff("turretshield"))
-                {
-                    barWidth = 70;
-                }
-                float barDistance = (float)(barWidth / attackToKill);
-                if (Menu.Item("lxOrbwalker_Draw_MinionHPBar").GetValue<Circle>().Active)
-                {
-                    for (int i = 1; i < attackToKill; i++)
-                    {
-                        float startposition = hpBarPosition.X + 45 + barDistance * i;
-                        Drawing.DrawLine(
-                            new Vector2(startposition, hpBarPosition.Y + 18),
-                            new Vector2(startposition, hpBarPosition.Y + 23),
-                            Menu.Item("lxOrbwalker_Draw_MinionHPBar_thickness").GetValue<Slider>().Value,
-                            Menu.Item("lxOrbwalker_Draw_MinionHPBar").GetValue<Circle>().Color);
-                    }
-                }
-                if (Menu.Item("lxOrbwalker_Draw_Lasthit").GetValue<Circle>().Active &&
-                    minion.Health <= MyHero.GetAutoAttackDamage(minion, true))
-                {
-                    Render.Circle.DrawCircle(minion.Position, minion.BoundingRadius, Menu.Item("lxOrbwalker_Draw_Lasthit").GetValue<Circle>().Color);
-                }
-                else if (Menu.Item("lxOrbwalker_Draw_nearKill").GetValue<Circle>().Active &&
-                         minion.Health <= MyHero.GetAutoAttackDamage(minion, true) * 2)
-                {
-                    Render.Circle.DrawCircle(minion.Position, minion.BoundingRadius, Menu.Item("lxOrbwalker_Draw_nearKill").GetValue<Circle>().Color);
-                }
-            }
+            return CurrentMode != Mode.Lasthit || Menu.Item("LastHit_attack").GetValue<bool>();
         }
 
         private static void OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs spell)
@@ -417,7 +420,7 @@ namespace SparkTech
             }
             if (unit.IsMe)
             {
-                _lastAATick = Environment.TickCount;
+                lastAaTick = Environment.TickCount;
                 // ReSharper disable once CanBeReplacedWithTryCastAndCheckForNull
                 if (spell.Target is Obj_AI_Base)
                 {
@@ -426,14 +429,25 @@ namespace SparkTech
                 }
                 if (unit.IsMelee)
                 {
-                    Utility.DelayAction.Add((int)(unit.AttackCastDelay * 1000 + Game.Ping * 0.5) + 50, () => FireAfterAttack(unit, lastTarget));
+                    Utility.DelayAction.Add(
+                        (int)(unit.AttackCastDelay * 1000 + Game.Ping * 0.5) + 50, () => FireAfterAttack(unit, lastTarget));
                 }
             }
             FireOnAttack(unit, lastTarget);
         }
-
+        
         public static Obj_AI_Base GetPossibleTarget()
         {
+            if (
+                ObjectManager.Get<Obj_Building>()
+                    .Any(
+                        obj =>
+                        obj.Position.Distance(MyHero.Position) <= GetAutoAttackRange() + obj.BoundingRadius / 2
+                        && obj.IsTargetable && obj.Name.StartsWith("HQ_")))
+            {
+                return null;
+            }
+
             if (ForcedTarget != null)
             {
                 if (InAutoAttackRange(ForcedTarget))
@@ -445,7 +459,8 @@ namespace SparkTech
 
             Obj_AI_Base tempTarget = null;
 
-            if (Menu.Item("lxOrbwalker_Misc_Priority_Unit").GetValue<StringList>().SelectedIndex == 1 && (CurrentMode == OrbwalkingMode.Harass || CurrentMode == OrbwalkingMode.LaneClear))
+            if (Menu.Item("OrbWalker_Misc_Priority_Unit").GetValue<StringList>().SelectedIndex == 1 &&
+                (CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear))
             {
                 tempTarget = GetBestHeroTarget();
                 if (tempTarget != null)
@@ -454,32 +469,46 @@ namespace SparkTech
                 }
             }
 
-            if (CurrentMode == OrbwalkingMode.Harass || CurrentMode == OrbwalkingMode.Lasthit || CurrentMode == OrbwalkingMode.LaneClear)
+            if (CurrentMode == Mode.Harass || CurrentMode == Mode.Lasthit || CurrentMode == Mode.LaneClear || CurrentMode == Mode.LaneFreeze)
             {
                 foreach (
                     Obj_AI_Minion minion in
                         from minion in
                             ObjectManager.Get<Obj_AI_Minion>()
-                                .Where(minion => minion.IsValidTarget() && InAutoAttackRange(minion))
-                        let t = (int)(MyHero.AttackCastDelay * 1000) - 100 + Game.Ping / 2 +
-                                1000 * (int)MyHero.Distance(minion) / (int)MyProjectileSpeed()
-                        let predHealth = HealthPrediction.GetHealthPrediction(minion, t, FarmDelay())
-                        where minion.Team != GameObjectTeam.Neutral && predHealth > 0 &&
-                              predHealth <= MyHero.GetAutoAttackDamage(minion, true)
+                            .Where(minion => minion.IsValidTarget() && InAutoAttackRange(minion))
+                        let t =
+                            (int)(MyHero.AttackCastDelay * 1000) - 100 + Game.Ping / 2
+                            + 1000 * (int)MyHero.Distance(minion) / (int)MyProjectileSpeed()
+                        let predHealth = HealthPrediction.GetHealthPrediction(minion, t, Menu.Item("OrbWalker_Misc_Farmdelay").GetValue<Slider>().Value)
+                        where
+                            minion.Team != GameObjectTeam.Neutral && predHealth > 0
+                            && predHealth <= MyHero.GetAutoAttackDamage(minion, true)
                         select minion)
+                {
                     return minion;
+                }
             }
 
-            if (CurrentMode == OrbwalkingMode.Harass || CurrentMode == OrbwalkingMode.LaneClear)
+            if (CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear || CurrentMode == Mode.LaneFreeze)
             {
-                foreach (
-                    Obj_AI_Turret turret in
-                        ObjectManager.Get<Obj_AI_Turret>()
-                            .Where(turret => turret.IsValidTarget(GetAutoAttackRange(MyHero, turret))))
+                foreach (Obj_AI_Turret turret in
+                    ObjectManager.Get<Obj_AI_Turret>()
+                        .Where(turret => turret.IsValidTarget(GetAutoAttackRange(MyHero, turret))))
+                {
                     return turret;
+                }
+                if (
+                    ObjectManager.Get<Obj_Building>()
+                        .Any(
+                            obj =>
+                            obj.Position.Distance(MyHero.Position) <= GetAutoAttackRange() + obj.BoundingRadius / 2
+                            && obj.IsTargetable && (obj.Name.StartsWith("Barracks_") || obj.Name.StartsWith("HQ_"))))
+                {
+                    return null;
+                }
             }
 
-            if (CurrentMode != OrbwalkingMode.Lasthit)
+            if (CurrentMode != Mode.Lasthit)
             {
                 tempTarget = GetBestHeroTarget();
                 if (tempTarget != null)
@@ -489,21 +518,11 @@ namespace SparkTech
             }
 
             float[] maxhealth;
-            if (CurrentMode == OrbwalkingMode.LaneClear || CurrentMode == OrbwalkingMode.Harass)
+            if (CurrentMode == Mode.LaneClear || CurrentMode == Mode.Harass || CurrentMode == Mode.LaneFreeze)
             {
                 maxhealth = new float[] { 0 };
-                float[] maxhealth1 = maxhealth;
-                foreach (
-                    Obj_AI_Minion minion in
-                        ObjectManager.Get<Obj_AI_Minion>()
-                            .Where(
-                                minion =>
-                                    minion.IsValidTarget(GetAutoAttackRange(MyHero, minion)) &&
-                                    minion.Team == GameObjectTeam.Neutral)
-                            .Where(
-                                minion =>
-                                    minion.MaxHealth >= maxhealth1[0] ||
-                                    Math.Abs(maxhealth1[0] - float.MaxValue) < float.Epsilon))
+                float[] maxhealth2 = maxhealth;
+                foreach (Obj_AI_Minion minion in ObjectManager.Get<Obj_AI_Minion>().Where(minion => minion.IsValidTarget(GetAutoAttackRange(MyHero, minion)) && minion.Team == GameObjectTeam.Neutral).Where(minion => minion.MaxHealth >= maxhealth2[0] || Math.Abs(maxhealth2[0] - float.MaxValue) < float.Epsilon))
                 {
                     tempTarget = minion;
                     maxhealth[0] = minion.MaxHealth;
@@ -514,16 +533,15 @@ namespace SparkTech
                 }
             }
 
-            if (CurrentMode != OrbwalkingMode.LaneClear || ShouldWait())
+            if (CurrentMode != Mode.LaneClear || ShouldWait())
             {
                 return null;
             }
+
             maxhealth = new float[] { 0 };
             foreach (Obj_AI_Minion minion in from minion in ObjectManager.Get<Obj_AI_Minion>()
                 .Where(minion => minion.IsValidTarget(GetAutoAttackRange(MyHero, minion)))
-                                             let predHealth =
-                                                 HealthPrediction.LaneClearHealthPrediction(minion,
-                                                     (int)((MyHero.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay())
+                                             let predHealth = HealthPrediction.LaneClearHealthPrediction(minion, (int)((MyHero.AttackDelay * 1000) * LaneClearWaitTimeMod), Menu.Item("OrbWalker_Misc_Farmdelay").GetValue<Slider>().Value)
                                              where predHealth >=
                                                    2 * MyHero.GetAutoAttackDamage(minion, true) ||
                                                    Math.Abs(predHealth - minion.Health) < float.Epsilon
@@ -535,29 +553,27 @@ namespace SparkTech
             }
             return tempTarget;
         }
-
+        
         private static bool ShouldWait()
         {
-            return
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .Any(
-                        minion =>
-                            minion.IsValidTarget() && minion.Team != GameObjectTeam.Neutral &&
-                            InAutoAttackRange(minion) &&
-                            HealthPrediction.LaneClearHealthPrediction(
-                                minion, (int)((MyHero.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay()) <=
-                            MyHero.GetAutoAttackDamage(minion));
+            return ObjectManager.Get<Obj_AI_Minion>()
+            .Any(
+            minion =>
+            minion.IsValidTarget() && minion.Team != GameObjectTeam.Neutral &&
+            InAutoAttackRange(minion) &&
+            HealthPrediction.LaneClearHealthPrediction(
+            minion, (int)((MyHero.AttackDelay * 1000) * LaneClearWaitTimeMod), Menu.Item("OrbWalker_Misc_Farmdelay").GetValue<Slider>().Value) <= MyHero.GetAutoAttackDamage(minion));
         }
 
         public static bool IsAutoAttack(string name)
         {
             return (name.ToLower().Contains("attack") && !NoAttacks.Contains(name.ToLower())) ||
-                   Attacks.Contains(name.ToLower());
+            Attacks.Contains(name.ToLower());
         }
 
         public static void ResetAutoAttackTimer()
         {
-            _lastAATick = 0;
+            lastAaTick = 0;
         }
 
         public static bool IsAutoAttackReset(string name)
@@ -567,19 +583,19 @@ namespace SparkTech
 
         public static bool CanAttack()
         {
-            if (_lastAATick <= Environment.TickCount && cantMoveTill < Environment.TickCount)
+            if (lastAaTick <= Environment.TickCount)
             {
-                return Environment.TickCount + Game.Ping / 2 + 25 >= _lastAATick + MyHero.AttackDelay * 1000 && attack;
+                return Environment.TickCount + Game.Ping / 2 + 25 >= lastAaTick + MyHero.AttackDelay * 1000 && attack;
             }
             return false;
         }
 
         public static bool CanMove()
         {
-            int extraWindup = Menu.Item("lxOrbwalker_Misc_ExtraWindUp").GetValue<Slider>().Value;
-            if (_lastAATick <= Environment.TickCount && cantMoveTill < Environment.TickCount)
+            int extraWindup = Menu.Item("OrbWalker_Misc_ExtraWindUp").GetValue<Slider>().Value;
+            if (lastAaTick <= Environment.TickCount)
             {
-                return Environment.TickCount + Game.Ping / 2 >= _lastAATick + MyHero.AttackCastDelay * 1000 + extraWindup && movement;
+                return Environment.TickCount + Game.Ping / 2 >= lastAaTick + MyHero.AttackCastDelay * 1000 + extraWindup && movement;
             }
             return false;
         }
@@ -589,16 +605,6 @@ namespace SparkTech
             return (MyHero.CombatType == GameObjectCombatType.Melee) ? float.MaxValue : MyHero.BasicAttack.MissileSpeed;
         }
 
-        private static int FarmDelay()
-        {
-            int ret = 0;
-            if (MyHero.ChampionName == "Azir")
-            {
-                ret += 125;
-            }
-            return Menu.Item("lxOrbwalker_Misc_Farmdelay").GetValue<Slider>().Value + ret;
-        }
-
         private static Obj_AI_Base GetBestHeroTarget()
         {
             Obj_AI_Hero killableEnemy = null;
@@ -606,57 +612,47 @@ namespace SparkTech
             foreach (Obj_AI_Hero enemy in AllEnemys.Where(hero => hero.IsValidTarget() && InAutoAttackRange(hero)))
             {
                 double killHits = CountKillhits(enemy);
-                if (killableEnemy != null && !(killHits < hitsToKill))
-                {
+                if (killableEnemy != null && (!(killHits < hitsToKill) || enemy.HasBuffOfType(BuffType.Invulnerability)))
                     continue;
-                }
                 killableEnemy = enemy;
                 hitsToKill = killHits;
             }
-            return hitsToKill < 4
-                ? killableEnemy
-                : TargetSelector.GetTarget(GetAutoAttackRange() + 100, TargetSelector.DamageType.Physical);
+            return hitsToKill <= 4 ? killableEnemy : TargetSelector.GetTarget(GetAutoAttackRange() + 100, TargetSelector.DamageType.Physical);
         }
 
-        private static double CountKillhits(Obj_AI_Hero enemy)
+        public static double CountKillhits(Obj_AI_Base enemy)
         {
             return enemy.Health / MyHero.GetAutoAttackDamage(enemy);
         }
 
         private static void CheckAutoWindUp()
         {
+            if (!Menu.Item("OrbWalker_Misc_AutoWindUp").GetValue<bool>())
+                return;
             int additional = 0;
             if (Game.Ping >= 100)
-            {
                 additional = Game.Ping / 100 * 10;
-            }
             else if (Game.Ping > 40 && Game.Ping < 100)
-            {
                 additional = Game.Ping / 100 * 20;
-            }
             else if (Game.Ping <= 40)
-            {
                 additional = +20;
-            }
             int windUp = Game.Ping + additional;
             if (windUp < 40)
-            {
                 windUp = 40;
-            }
-            Menu.Item("lxOrbwalker_Misc_ExtraWindUp").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
+            Menu.Item("OrbWalker_Misc_ExtraWindUp").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
         }
 
         public static int GetCurrentWindupTime()
         {
-            return Menu.Item("lxOrbwalker_Misc_ExtraWindUp").GetValue<Slider>().Value;
+            return Menu.Item("OrbWalker_Misc_ExtraWindUp").GetValue<Slider>().Value;
         }
 
-        public void EnableDrawing()
+        public static void EnableDrawing()
         {
             drawing = true;
         }
 
-        public void DisableDrawing()
+        public static void DisableDrawing()
         {
             drawing = false;
         }
@@ -664,49 +660,36 @@ namespace SparkTech
         public static float GetAutoAttackRange(Obj_AI_Base source = null, Obj_AI_Base target = null)
         {
             if (source == null)
-            {
                 source = MyHero;
-            }
             float ret = source.AttackRange + MyHero.BoundingRadius;
             if (target != null)
-            {
                 ret += target.BoundingRadius;
-            }
             return ret;
         }
 
         public static bool InAutoAttackRange(Obj_AI_Base target)
         {
             if (target == null)
-            {
                 return false;
-            }
             float myRange = GetAutoAttackRange(MyHero, target);
-            return Vector2.DistanceSquared(target.ServerPosition.To2D(), MyHero.ServerPosition.To2D()) <=
-                   myRange * myRange;
+            return Vector2.DistanceSquared(target.ServerPosition.To2D(), MyHero.ServerPosition.To2D()) <= myRange * myRange;
         }
 
-        public static OrbwalkingMode CurrentMode
+        public static Mode CurrentMode
         {
             get
             {
                 if (Menu.Item("Combo_Key").GetValue<KeyBind>().Active)
-                {
-                    return OrbwalkingMode.Combo;
-                }
+                    return Mode.Combo;
                 if (Menu.Item("Harass_Key").GetValue<KeyBind>().Active)
-                {
-                    return OrbwalkingMode.Harass;
-                }
+                    return Mode.Harass;
                 if (Menu.Item("LaneClear_Key").GetValue<KeyBind>().Active)
-                {
-                    return OrbwalkingMode.LaneClear;
-                }
+                    return Mode.LaneClear;
+                if (Menu.Item("LaneFreeze_Key").GetValue<KeyBind>().Active)
+                    return Mode.LaneFreeze;
                 if (Menu.Item("LastHit_Key").GetValue<KeyBind>().Active)
-                {
-                    return OrbwalkingMode.Lasthit;
-                }
-                return Menu.Item("Flee_Key").GetValue<KeyBind>().Active ? OrbwalkingMode.Flee : OrbwalkingMode.None;
+                    return Mode.Lasthit;
+                return Menu.Item("Flee_Key").GetValue<KeyBind>().Active ? Mode.Flee : Mode.None;
             }
         }
 

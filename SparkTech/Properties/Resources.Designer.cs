@@ -63,9 +63,9 @@ namespace SparkTech.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tswift {
+        internal static System.Drawing.Bitmap TaySwift {
             get {
-                object obj = ResourceManager.GetObject("tswift", resourceCulture);
+                object obj = ResourceManager.GetObject("TaySwift", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

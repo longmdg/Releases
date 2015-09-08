@@ -1,16 +1,14 @@
-﻿using LeagueSharp;
-using LeagueSharp.Common;
-using System;
-using System.Net;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Threading;
-
-namespace SparkTech
+﻿namespace SparkTech
 {
-    using Version = System.Version;
+    using LeagueSharp;
+    using LeagueSharp.Common;
+    using System;
+    using System.Net;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using System.Threading;
 
-    public class Load
+    public static class Load
     {
         private static bool summoned;
 
@@ -47,6 +45,7 @@ namespace SparkTech
         #region LibraryUpdateCheck
 
         // Credits to https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+        // Which was c+p'd too, in fact ¯\_(ツ)_/¯
 
         private static void LibraryUpdateCheck()
         {
@@ -69,8 +68,8 @@ namespace SparkTech
                                 client.DownloadStringTaskAsync(
                                     "https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs");
 
-                        Version version =
-                            Version.Parse(
+                        System.Version version =
+                            System.Version.Parse(
                                 new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value
                                     .Replace("\"", ""));
 

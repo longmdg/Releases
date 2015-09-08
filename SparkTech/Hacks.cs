@@ -4,7 +4,7 @@
 
 namespace SparkTech
 {
-    public class Hacks
+    internal class Hacks
     {
         public static bool HackInited;
 
@@ -20,7 +20,7 @@ namespace SparkTech
             HacksMenu = new Menu("Hacks", "hacks1");
         }
 
-        public class ZoomHack
+        internal class ZoomHack
         {
             static ZoomHack()
             {
@@ -38,7 +38,7 @@ namespace SparkTech
             }
         }
 
-        public class DisableCastIndicator
+        internal class DisableCastIndicator
         {
             static DisableCastIndicator()
             {

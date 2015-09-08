@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SparkTech
 {
-    [SuppressMessage("ReSharper", "UseStringInterpolation")]
+    [SuppressMessage("ReSharper", "UseStringInterpolation")] // .NET 4.6
     public class UpdateChecker
     {
         public event onGetVersionCompleted OnGetVersionCompleted;

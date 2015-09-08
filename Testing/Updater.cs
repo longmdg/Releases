@@ -1,6 +1,6 @@
-﻿using LeagueSharp.Common;
+﻿using System.Reflection;
+using LeagueSharp.Common;
 using SparkTech;
-using System.Reflection;
 
 namespace Testing
 {
