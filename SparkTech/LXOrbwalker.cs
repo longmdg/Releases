@@ -270,11 +270,7 @@
                 {
                     float startposition = hpBarPosition.X + 45 + barDistance * i;
                     {
-                        Drawing.DrawLine(
-                            new Vector2(startposition, hpBarPosition.Y + 18),
-                            new Vector2(startposition, hpBarPosition.Y + 23),
-                            Menu.Item("OrbWalker_Draw_MinionHPBar_thickness").GetValue<Slider>().Value,
-                            Menu.Item("OrbWalker_Draw_MinionHPBar").GetValue<Circle>().Color);
+                        Drawing.DrawLine(new Vector2(startposition, hpBarPosition.Y + 18), new Vector2(startposition, hpBarPosition.Y + 23), Menu.Item("OrbWalker_Draw_MinionHPBar_thickness").GetValue<Slider>().Value, Menu.Item("OrbWalker_Draw_MinionHPBar").GetValue<Circle>().Color);
                     }
                 }
             }

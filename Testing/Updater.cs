@@ -1,9 +1,9 @@
-﻿using System.Reflection;
-using LeagueSharp.Common;
-using SparkTech;
-
-namespace Testing
+﻿namespace Testing
 {
+    using System.Reflection;
+    using LeagueSharp.Common;
+    using SparkTech;
+
     internal class Updater
     {
         private static UpdateChecker updateChecker;

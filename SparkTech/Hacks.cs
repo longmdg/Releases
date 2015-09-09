@@ -29,7 +29,8 @@ namespace SparkTech
                     AddMenu();
                     MenuItem zoomHack = HacksMenu.AddItem((new MenuItem("hacks2", "Enable ZoomHack")).SetValue(false));
                     HacksMenu.AddItem((new MenuItem("hacks3", "Warning: ZoomHack is extremely unsafe!")));
-                    zoomHack.SetValue(LeagueSharp.Hacks.ZoomHack);
+                    if (Settings.
+                    zoomHack.SetValue(false);
                     zoomHack.ValueChanged += delegate (object sender, OnValueChangeEventArgs args)
                     {
                         LeagueSharp.Hacks.ZoomHack = args.GetNewValue<bool>();

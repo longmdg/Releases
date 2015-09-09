@@ -7,6 +7,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SparkTech
 {
+    using LeagueSharp;
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")] // reenable when L# supports .NET 4.6
     [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
@@ -25,7 +27,7 @@ namespace SparkTech
         private static float spaghettiLimiter;
 */
 
-        private static bool LoadHack
+        internal static bool LoadZoomHack
         {
             get { return LibraryMenu.Item("hack").GetValue<bool>(); }
         }
@@ -34,7 +36,7 @@ namespace SparkTech
 
         public static Menu LibraryMenu;
 
-        internal static void LoadStuff()
+        internal static void Launch()
         {
             MenuLoaded = true;
 
@@ -52,9 +54,13 @@ namespace SparkTech
             LXOrbwalker.AddToMenu(orbmenu);
             LibraryMenu.AddSubMenu(orbmenu);
 
-            new TaylorSwift();
+            if (Drawing.Height == 1920 && Drawing.Width == 1080)
+            {
+                new Extensions();
+            }
+            
 
-            if (LoadHack)
+            if (LoadZoomHack)
             {
                 new Hacks.ZoomHack();
             }

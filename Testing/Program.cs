@@ -1,7 +1,7 @@
-﻿using SparkTech;
-
-namespace Testing
+﻿namespace Testing
 {
+    using SparkTech;
+
     internal class Program
     {
         internal const string AssemblyName = "Testing";

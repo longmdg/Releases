@@ -5,11 +5,11 @@
 
     using SharpDX;
 
-    internal class TaylorSwift
+    internal class Extensions
     {
         public Render.Sprite Hud;
 
-        public TaylorSwift()
+        public Extensions()
         {
             Hud = new Render.Sprite(Properties.Resources.TaySwift, new Vector2(1, 1));
             Hud.Add();

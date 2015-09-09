@@ -19,27 +19,43 @@
 
         public static void Library()
         {
-            CustomEvents.Game.OnGameLoad += eventArgs =>
+            if (Game.Mode == GameMode.Running)
             {
-                if (!summoned)
+                OnLoad();
+            }
+            else if (Game.Mode != GameMode.Running)
+            {
+                CustomEvents.Game.OnGameLoad += eventArgs =>
                 {
-                    summoned = true;
+                    OnLoad();
+                };
+            }
+            else
+            {
+                Comms.Print(@"Error loading!", true);
+            }
+        }
 
-                    if (Settings.UpdateCheck)
-                    {
-                        Utility.DelayAction.Add(Settings.UpdateCheckDelay, LibraryUpdateCheck);
-                    }
+        private static void OnLoad()
+        {
+            if (!summoned)
+            {
+                summoned = true;
 
-                    Settings.LoadStuff();
-                }
-                else
+                if (Settings.UpdateCheck)
                 {
-                    if (!Settings.SkipNoUpdate)
-                    {
-                        Comms.Print("Error: Library already loaded!");
-                    }
+                    Utility.DelayAction.Add(Settings.UpdateCheckDelay, LibraryUpdateCheck);
                 }
-            };
+
+                Settings.Launch();
+            }
+            else
+            {
+                if (!Settings.SkipNoUpdate)
+                {
+                    Comms.Print("Error: Library already loaded!", true);
+                }
+            }
         }
 
         #region LibraryUpdateCheck
@@ -109,10 +125,5 @@
 
         #endregion LibraryUpdateCheck
 
-        /*
-
-        Here moar code
-
-        */
     }
 }

@@ -1,10 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using System.Diagnostics.CodeAnalysis;
-
-namespace SparkTech
+﻿namespace SparkTech
 {
+    using System;
+    using System.IO;
+    using System.Net;
+    using System.Diagnostics.CodeAnalysis;
+
     [SuppressMessage("ReSharper", "UseStringInterpolation")] // .NET 4.6
     public class UpdateChecker
     {
