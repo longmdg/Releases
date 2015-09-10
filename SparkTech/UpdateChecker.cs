@@ -3,7 +3,7 @@
     using System;
     using System.IO;
     using System.Net;
-    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.CodeAnalysis; // .NET 4.6
 
     [SuppressMessage("ReSharper", "UseStringInterpolation")] // .NET 4.6
     public class UpdateChecker
@@ -27,7 +27,7 @@
         {
             string urlBase =
                 string.Format(
-                    @"https://raw.githubusercontent.com/Wiciaki/Releases/master/{0}/Properties/AssemblyInfo.cs",
+                    "https://raw.githubusercontent.com/Wiciaki/Releases/master/{0}/Properties/AssemblyInfo.cs",
                     assemblyName);
             webRequest = WebRequest.Create(urlBase);
             webRequest.BeginGetResponse(FinishWebRequest, null);

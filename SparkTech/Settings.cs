@@ -1,18 +1,13 @@
-﻿//using System.Linq;
-
-using LeagueSharp.Common;
-using System.Diagnostics.CodeAnalysis;
-
-//using SharpDX;
-
-namespace SparkTech
+﻿namespace SparkTech
 {
     using LeagueSharp;
+    using LeagueSharp.Common;
+    using System.Diagnostics.CodeAnalysis;
 
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")] // reenable when L# supports .NET 4.6
     [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
-    public class Settings
+    public static class Settings
     {
         #region MenuBools
 
@@ -36,7 +31,7 @@ namespace SparkTech
 
         public static Menu LibraryMenu;
 
-        internal static void Launch()
+        internal static void Fire()
         {
             MenuLoaded = true;
 
