@@ -54,9 +54,9 @@ namespace LastHit_Assistant
         
         private static void OnLoad(EventArgs args)
         {
-            if (UnsupportedChamps.Contains(ObjectManager.Player.CharData.Name.ToLower()))
+            if (UnsupportedChamps.Contains(ObjectManager.Player.ChampionName.ToLower()))
             {
-                Game.PrintChat("[ST] LastHit Assistant : " + ObjectManager.Player.CharData.Name + " is bugged ATM and has been disabled. I'm sorry :c");
+                Game.PrintChat("[ST] LastHit Assistant : " + ObjectManager.Player.ChampionName + " is bugged ATM and has been disabled. I'm sorry :c");
              // SadMemes();
                 return;
             }
