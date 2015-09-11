@@ -276,11 +276,11 @@
             }
             if (position.Distance(MyHero.Position) < 200)
             MyHero.IssueOrder(GameObjectOrder.MoveTo, position);
-            //else
-            //{
-            //    var point = MyHero.ServerPosition + 200 * (position.To2D() - MyHero.ServerPosition.To2D()).Normalized().To3D();
-            //    MyHero.IssueOrder(GameObjectOrder.MoveTo, position);
-            //}
+            else
+            {
+                var point = MyHero.ServerPosition + 200 * (position.To2D() - MyHero.ServerPosition.To2D()).Normalized().To3D();
+                MyHero.IssueOrder(GameObjectOrder.MoveTo, point);
+            }
         }
 
         private static bool IsAllowedToMove()

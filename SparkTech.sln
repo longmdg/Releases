@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueSharp.Spaghetti", "Sp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ST_Testing", "Testing\ST_Testing.csproj", "{6F58865D-A5A8-49A6-9CD0-321CC076C830}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LastHit Assistant", "LastHit Assistant\LastHit Assistant.csproj", "{9BF4AA2C-0398-49ED-856B-B254EA3240C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{6F58865D-A5A8-49A6-9CD0-321CC076C830}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F58865D-A5A8-49A6-9CD0-321CC076C830}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F58865D-A5A8-49A6-9CD0-321CC076C830}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BF4AA2C-0398-49ED-856B-B254EA3240C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BF4AA2C-0398-49ED-856B-B254EA3240C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BF4AA2C-0398-49ED-856B-B254EA3240C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BF4AA2C-0398-49ED-856B-B254EA3240C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
