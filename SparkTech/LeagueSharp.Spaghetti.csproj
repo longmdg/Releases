@@ -35,6 +35,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="LeagueSharp">
       <HintPath>C:\LeagueSharp\System\LeagueSharp.dll</HintPath>
@@ -56,9 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LXOrbwalker.cs" />
-    <Compile Include="Hacks.cs" />
+    <Compile Include="Cheats.cs" />
     <Compile Include="Leveler.cs" />
-    <Compile Include="Colors.cs" />
+    <Compile Include="HTMLColor.cs" />
     <Compile Include="Comms.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Load.cs" />
@@ -75,6 +78,7 @@
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Test.cs" />
     <Compile Include="UpdateChecker.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -89,7 +93,10 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Resources\Unbenannt-111111.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\HUD\TaylorSwift.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

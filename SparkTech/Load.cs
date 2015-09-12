@@ -29,12 +29,11 @@
                 }
                 catch (Exception ex)
                 {
-                    Comms.Print("SparkTech - Load.cs - Error: Couldn't sign an event! (1) " + ex, true);
+                    Comms.Print("SparkTech - Load.cs - Error: Couldn't sign an event!", true);
+                    Comms.Print("Error: "+ ex);
                 }
-                
-                return;
             }
-            if (Game.Mode != GameMode.Running)
+            else if (Game.Mode != GameMode.Running)
             {
                 Comms.Print("SparkTech - Load.cs - Fired the second library init option", true);
                 try
@@ -43,11 +42,14 @@
                 }
                 catch (Exception ex)
                 {
-                    Comms.Print("SparkTech - Load.cs - Error: Couldn't sign an event! (2) " + ex, true);
+                    Comms.Print("SparkTech - Load.cs - Error: Couldn't sign an event!", true);
+                    Comms.Print("Error: " + ex);
                 }
-                return;
             }
-            Comms.Print("SparkTech - Load.cs - Error: No boot options matching!", true);
+            else
+            {
+                Comms.Print("SparkTech - Load.cs - Error: No boot options matching!", true);
+            }
         }
 
         private static void Summoner(EventArgs args)

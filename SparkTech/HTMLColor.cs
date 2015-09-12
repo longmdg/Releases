@@ -1,6 +1,7 @@
 ﻿namespace SparkTech
 {
-    public static class Colors
+    // ReSharper disable once InconsistentNaming
+    public static class HTMLColor
     {
         public const string AliceBlue = "#F0F8FF";
         public const string AntiqueWhite = "#FAEBD7";

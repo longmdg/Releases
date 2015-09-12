@@ -11,7 +11,7 @@
 
         public Extensions()
         {
-            Hud = new Render.Sprite(Properties.Resources.TaySwift, new Vector2(1, 1));
+            Hud = new Render.Sprite(Properties.Resources.TaylorSwift, new Vector2(1, 1));
             Hud.Add();
         }
     }
