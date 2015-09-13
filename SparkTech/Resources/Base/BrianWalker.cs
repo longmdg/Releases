@@ -1,6 +1,7 @@
-﻿namespace SparkTech
+﻿namespace SparkTech.Resources.Base
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using LeagueSharp;
@@ -10,49 +11,32 @@
 
     using Color = System.Drawing.Color;
 
-    internal class Orbwalker
+    [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")]
+    [SuppressMessage("ReSharper", "UseNullPropagation")]
+    internal class BrianWalker
     {
 
         private static readonly Obj_AI_Hero Player = ObjectManager.Player;
-
         public static Obj_AI_Hero ForcedTarget = null;
-
         private static Menu config;
-
         private static bool disableNextAttack, missileLaunched;
-
         private static int lastAttack, lastMove;
-
         private static AttackableUnit lastTarget;
-
         private static Obj_AI_Minion prevMinion;
-
         private static readonly Spell MovePrediction = new Spell(SpellSlot.Unknown, GetAutoAttackRange());
-
         private static readonly Random Random = new Random(DateTime.Now.Millisecond);
-
+        private static float[] maxhealth;
 
         public delegate void AfterAttackEvenH(AttackableUnit target);
-
         public delegate void BeforeAttackEvenH(BeforeAttackEventArgs args);
-
         public delegate void OnAttackEvenH(AttackableUnit target);
-
         public delegate void OnNonKillableMinionH(AttackableUnit minion);
-
         public delegate void OnTargetChangeH(AttackableUnit oldTarget, AttackableUnit newTarget);
-
-
         public static event AfterAttackEvenH AfterAttack;
-
         public static event BeforeAttackEvenH BeforeAttack;
-
         public static event OnAttackEvenH OnAttack;
-
         public static event OnNonKillableMinionH OnNonKillableMinion;
-
         public static event OnTargetChangeH OnTargetChange;
-
 
         public enum Mode
         {
@@ -80,10 +64,10 @@
             {
                 return config.Item("OW_Combo_Key").IsActive()
                            ? Mode.Combo
-                           : (config.Item("OW_Harass_Key").IsActive()
-                                  ? Mode.Harass
-                                  : (config.Item("OW_Clear_Key").IsActive()
-                                         ? Mode.LaneClear
+                           : (config.Item("OW_Clear_Key").IsActive()
+                                  ? Mode.LaneClear
+                                  : (config.Item("OW_Harass_Key").IsActive()
+                                         ? Mode.Harass
                                          : (config.Item("OW_LastHit_Key").IsActive()
                                                 ? Mode.LastHit
                                                 : (config.Item("OW_Flee_Key").IsActive() ? Mode.Flee : Mode.None))));
@@ -195,6 +179,7 @@
                 {
                     return null;
                 }
+                /*
                 if (InAutoAttackRange(prevMinion))
                 {
                     var hpPred = HealthPrediction.LaneClearHealthPrediction(
@@ -221,6 +206,14 @@
                     prevMinion = minion;
                 }
                 return minion;
+                */
+                maxhealth = new float[] { 0 };
+                foreach (Obj_AI_Minion minion in from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget(GetAutoAttackRange(Player, minion)) let predHealth = HealthPrediction.LaneClearHealthPrediction(minion, (int)((Player.AttackDelay * 1000) * 2f), 0) where (predHealth >= 2 * Player.GetAutoAttackDamage(minion, true) || Math.Abs(predHealth - minion.Health) < float.Epsilon) && (minion.Health >= maxhealth[0] || Math.Abs(maxhealth[0] - float.MaxValue) < float.Epsilon) select minion)
+                {
+                    prevMinion = minion;
+                    maxhealth[0] = minion.MaxHealth;
+                }
+                return prevMinion;
             }
         }
 
@@ -291,8 +284,6 @@
                             <= Player.GetAutoAttackDamage(i, true));
             }
         }
-
-        #region Public Methods and Operators
 
         public static float GetAutoAttackRange(AttackableUnit target = null)
         {
@@ -386,7 +377,15 @@
             MovePrediction.SetTargetted(Player.BasicAttack.SpellCastTime, Player.BasicAttack.MissileSpeed);
             Attack = true;
             Move = true;
-            Game.OnUpdate += OnUpdate;
+            Game.OnUpdate += args =>
+                {
+                    if (Player.IsDead || CurrentMode == Mode.None || MenuGUI.IsChatOpen || Player.IsRecalling()
+                        || Player.IsCastingInterruptableSpell(true))
+                    {
+                        return;
+                    }
+                    Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget);
+                };
             Drawing.OnDraw += OnDraw;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
             GameObject.OnCreate += OnCreateMissileClient;
@@ -451,10 +450,6 @@
                 MoveTo(Game.CursorPos);
             }
         }
-
-        #endregion
-
-        #region Methods
 
         private static void FireAfterAttack(AttackableUnit target)
         {
@@ -592,34 +587,17 @@
             ResetAutoAttack();
         }
 
-        private static void OnUpdate(EventArgs args)
-        {
-            if (Player.IsDead || CurrentMode == Mode.None || MenuGUI.IsChatOpen || Player.IsRecalling()
-                || Player.IsCastingInterruptableSpell(true))
-            {
-                return;
-            }
-            Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget);
-        }
-
         private static void ResetAutoAttack()
         {
             lastAttack = 0;
         }
 
-        #endregion
-
         public class BeforeAttackEventArgs
         {
-            #region Fields
 
             public AttackableUnit Target;
 
             private bool process = true;
-
-            #endregion
-
-            #region Public Properties
 
             public bool Process
             {
@@ -633,8 +611,6 @@
                     process = value;
                 }
             }
-
-            #endregion
         }
     }
 }

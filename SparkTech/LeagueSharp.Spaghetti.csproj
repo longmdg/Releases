@@ -58,7 +58,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LXOrbwalker.cs" />
+    <Compile Include="Resources\Base\LXOrbwalker.cs" />
     <Compile Include="Cheats.cs" />
     <Compile Include="Leveler.cs" />
     <Compile Include="HTMLColor.cs" />
@@ -78,8 +78,8 @@
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Test.cs" />
-    <Compile Include="STUpdate.cs" />
+    <Compile Include="Resources\Base\BrianWalker.cs" />
+    <Compile Include="STUpdater.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

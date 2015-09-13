@@ -5,6 +5,8 @@
     using LeagueSharp.Common;
     using System.Diagnostics.CodeAnalysis;
 
+    using SparkTech.Resources.Base;
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")] // reenable when L# supports .NET 4.6
     [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
@@ -44,7 +46,7 @@
             LibraryMenu.AddSubMenu(F5Settings);
 
             Menu orbmenu = new Menu("Orb", "orb1");
-            Orbwalker.Init(orbmenu);
+            BrianWalker.Init(orbmenu);
             LibraryMenu.AddSubMenu(orbmenu);
 
             if (Drawing.Height == 1920 && Drawing.Width == 1080)
@@ -63,7 +65,7 @@
             Utility.DelayAction.Add(150, () =>
             {
                 LibraryMenu.AddToMainMenu();
-                STUpdate.Library();
+                STUpdater.Library();
                 Game.OnUpdate += OnSettingsChange;
             });
         }

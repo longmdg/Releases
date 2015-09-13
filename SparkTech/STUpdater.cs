@@ -10,7 +10,7 @@
 
     [SuppressMessage("ReSharper", "UseStringInterpolation")]
     // ReSharper disable once InconsistentNaming
-    public class STUpdate
+    public class STUpdater
     {
         public event onGetVersionCompleted OnGetVersionCompleted;
 
@@ -21,7 +21,7 @@
         private readonly string assemblyName;
         private readonly OnGetVersionCompletedArgs versionCompletedArgs;
 
-        public STUpdate(string pAssemblyName)
+        public STUpdater(string pAssemblyName)
         {
             assemblyName = pAssemblyName;
             versionCompletedArgs = new OnGetVersionCompletedArgs();

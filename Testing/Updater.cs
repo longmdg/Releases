@@ -6,7 +6,7 @@
 
     internal class Updater
     {
-        private static UpdateChecker updateChecker;
+        private static STUpdater updateChecker;
 
         internal static void Init()
         {
@@ -14,7 +14,7 @@
             {
                 Utility.DelayAction.Add(Settings.UpdateCheckDelay, () =>
                 {
-                    updateChecker = new UpdateChecker(Assembly.GetExecutingAssembly().GetName().Name);
+                    updateChecker = new STUpdater(Assembly.GetExecutingAssembly().GetName().Name);
                     updateChecker.OnGetVersionCompleted += AssemblyUtilOnGetVersionCompleted;
                     updateChecker.GetLastVersionAsync();
                 });

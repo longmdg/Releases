@@ -9,7 +9,7 @@
         private static void Main()
         {
             Updater.Init();
-            Load.Library();
+            object SparkTech = new Load();
         }
     }
 }

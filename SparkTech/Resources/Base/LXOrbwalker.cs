@@ -1,12 +1,15 @@
-﻿namespace SparkTech
+﻿namespace SparkTech.Resources.Base
 {
-    using LeagueSharp;
-    using LeagueSharp.Common;
-    using SharpDX;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+
+    using LeagueSharp;
+    using LeagueSharp.Common;
+
+    using SharpDX;
+
     using Color = System.Drawing.Color;
 
     [SuppressMessage("ReSharper", "UseNullPropagation")]
@@ -470,7 +473,7 @@
             */
 
             maxhealth = new float[] { 0 };
-            foreach (Obj_AI_Minion minion in from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget(GetAutoAttackRange(MyHero, minion)) let predHealth = HealthPrediction.LaneClearHealthPrediction(minion, (int)((MyHero.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay()) where (predHealth >= 2 * MyHero.GetAutoAttackDamage(minion, true) || Math.Abs(predHealth - minion.Health) < float.Epsilon) && (minion.Health >= maxhealth[0] || Math.Abs(maxhealth[0] - float.MaxValue) < float.Epsilon) select minion)
+            foreach (Obj_AI_Minion minion in from minion in ObjectManager.Get<Obj_AI_Minion>() where Utility.IsValidTarget(minion, GetAutoAttackRange(MyHero, minion)) let predHealth = HealthPrediction.LaneClearHealthPrediction(minion, (int)((MyHero.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay()) where (predHealth >= 2 * MyHero.GetAutoAttackDamage(minion, true) || Math.Abs(predHealth - minion.Health) < float.Epsilon) && (minion.Health >= maxhealth[0] || Math.Abs(maxhealth[0] - float.MaxValue) < float.Epsilon) select minion)
             {
                 tempTarget = minion;
                 maxhealth[0] = minion.MaxHealth;
