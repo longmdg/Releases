@@ -63,6 +63,7 @@
             Utility.DelayAction.Add(150, () =>
             {
                 LibraryMenu.AddToMainMenu();
+                STUpdate.Library();
                 Game.OnUpdate += OnSettingsChange;
             });
         }

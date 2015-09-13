@@ -57,7 +57,6 @@
             if (!summoned)
             {
                 summoned = true;
-                Utility.DelayAction.Add(2000, LibraryUpdateCheck);
                 Settings.Fire();
                 return;
             }

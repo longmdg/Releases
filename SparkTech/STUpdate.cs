@@ -6,10 +6,11 @@
     using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Threading;
-    using System.Diagnostics.CodeAnalysis; // Remove when .NET 4.6
+    using System.Diagnostics.CodeAnalysis; // Remove when .NET 4.6 arrives
 
-    [SuppressMessage("ReSharper", "UseStringInterpolation")] // .NET 4.6
-    public class UpdateChecker
+    [SuppressMessage("ReSharper", "UseStringInterpolation")]
+    // ReSharper disable once InconsistentNaming
+    public class STUpdate
     {
         public event onGetVersionCompleted OnGetVersionCompleted;
 
@@ -20,7 +21,7 @@
         private readonly string assemblyName;
         private readonly OnGetVersionCompletedArgs versionCompletedArgs;
 
-        public UpdateChecker(string pAssemblyName)
+        public STUpdate(string pAssemblyName)
         {
             assemblyName = pAssemblyName;
             versionCompletedArgs = new OnGetVersionCompletedArgs();
