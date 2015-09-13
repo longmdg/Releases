@@ -66,50 +66,7 @@
 
         #region LibraryUpdateCheck
 
-        // Taken from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
-        // Which was c+p'd too, in fact ¯\_(ツ)_/¯
-
-        private static void LibraryUpdateCheck()
-        {
-            using (WebClient client = new WebClient())
-            {
-                new Thread(async () =>
-                {
-                    try
-                    {
-                        AssemblyName assemblyName = Assembly.GetExecutingAssembly().GetName();
-                        Comms.Print("Assembly Name: " + assemblyName, true);
-                        // ReSharper disable once AccessToDisposedClosure
-                        string data = await client.DownloadStringTaskAsync("https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs");
-                        System.Version version = System.Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value.Replace("\"", ""));
-                        if (version == assemblyName.Version)
-                        {
-                            if (!Settings.SkipNoUpdate)
-                            {
-                                Comms.Print("You are using the latest version of [ST] library.");
-                            }
-                        }
-                        else if (version != assemblyName.Version)
-                        {
-                            Game.PrintChat(
-                                "A new spaghetti sauce is available: {1} => {2}",
-                                assemblyName.Name,
-                                assemblyName.Version,
-                                version);
-                        }
-                        else
-                        {
-                            Comms.Print("Checking for an update FAILED! (else)", true);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Comms.Print("Checking for an update FAILED! Exception: " + ex, true);
-                    }
-                }
-                    ).Start();
-            }
-        }
+        
 
         #endregion LibraryUpdateCheck
 
