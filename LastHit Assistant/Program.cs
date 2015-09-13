@@ -11,7 +11,7 @@ namespace LastHit_Assistant
     {
         private static readonly string[] UnsupportedChamps =
         {
-            "azir", "kalista"
+            "Azir", "Kalista"
         };
 
         private static readonly string[] NoAttacks =
@@ -54,7 +54,7 @@ namespace LastHit_Assistant
         
         private static void OnLoad(EventArgs args)
         {
-            if (UnsupportedChamps.Contains(ObjectManager.Player.ChampionName.ToLower()))
+            if (UnsupportedChamps.Contains(ObjectManager.Player.ChampionName))
             {
                 Game.PrintChat("[ST] LastHit Assistant : " + ObjectManager.Player.ChampionName + " is bugged ATM and has been disabled. I'm sorry :c");
              // SadMemes();
@@ -91,7 +91,7 @@ namespace LastHit_Assistant
         private static void OnUpdate(EventArgs args)
         {
             CheckAutoWindUp();
-            if (!config.Item("LastHit_Key").GetValue<KeyBind>().Active || ObjectManager.Player.IsCastingInterruptableSpell(true) || ObjectManager.Player.IsChannelingImportantSpell() || MenuGUI.IsChatOpen || ObjectManager.Player.IsDead)
+            if (!config.Item("LastHit_Key").GetValue<KeyBind>().Active || ObjectManager.Player.IsCastingInterruptableSpell(true) || MenuGUI.IsChatOpen || ObjectManager.Player.IsDead)
             {
                 return;
             }
@@ -109,9 +109,9 @@ namespace LastHit_Assistant
             {
                 return;
             }
-            foreach (var minion in MinionManager.GetMinions(ObjectManager.Player.Position, GetAutoAttackRange() + 500, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth))
+            foreach (var minion in MinionManager.GetMinions(ObjectManager.Player.Position, 2500))
             {
-                if (!minion.IsValidTarget(5000))
+                if (!minion.IsValidTarget(2500))
                 {
                     continue;
                 }
