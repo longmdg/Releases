@@ -95,8 +95,23 @@ namespace LastHit_Assistant
             {
                 return;
             }
-            var target = GetPossibleTarget();
+            var target = GetBestMinion();
             Orbwalk(Game.CursorPos, target);
+        }
+
+        private static Obj_AI_Base GetBestMinion()
+        {
+            return GetCannonTarget() ?? GetMinionTarget();
+        }
+
+        private static Obj_AI_Base GetCannonTarget()
+        {
+            return (from minion in ObjectManager.Get<Obj_AI_Minion>() where (minion.IsValidTarget() && InAutoAttackRange(minion) && (minion.CharData.BaseSkinName.ToLower().Contains("siege") || minion.CharData.BaseSkinName.ToLower().Contains("cannon"))) let t = (int)(ObjectManager.Player.AttackCastDelay * 1000) - 100 + Game.Ping / 2 + 1000 * (int)ObjectManager.Player.Distance(minion) / (int)MyProjectileSpeed() let predHealth = HealthPrediction.GetHealthPrediction(minion, t, config.Item("LastHit_Misc_Farmdelay").GetValue<Slider>().Value) where minion.Team != GameObjectTeam.Neutral && predHealth > 0 && predHealth <= ObjectManager.Player.GetAutoAttackDamage(minion, true) select minion).FirstOrDefault();
+        }
+
+        private static Obj_AI_Base GetMinionTarget()
+        {
+            return (from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget() && InAutoAttackRange(minion) let t = (int)(ObjectManager.Player.AttackCastDelay * 1000) - 100 + Game.Ping / 2 + 1000 * (int)ObjectManager.Player.Distance(minion) / (int)MyProjectileSpeed() let predHealth = HealthPrediction.GetHealthPrediction(minion, t, config.Item("LastHit_Misc_Farmdelay").GetValue<Slider>().Value) where minion.Team != GameObjectTeam.Neutral && predHealth > 0 && predHealth <= ObjectManager.Player.GetAutoAttackDamage(minion, true) select minion).FirstOrDefault();
         }
 
         private static void OnDraw(EventArgs args)
@@ -202,11 +217,6 @@ namespace LastHit_Assistant
                 return;
             }
             lastAaTick = Environment.TickCount;
-        }
-
-        private static Obj_AI_Base GetPossibleTarget()
-        {
-            return (from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget() && InAutoAttackRange(minion) let t = (int)(ObjectManager.Player.AttackCastDelay * 1000) - 100 + Game.Ping / 2 + 1000 * (int)ObjectManager.Player.Distance(minion) / (int)MyProjectileSpeed() let predHealth = HealthPrediction.GetHealthPrediction(minion, t, config.Item("LastHit_Misc_Farmdelay").GetValue<Slider>().Value) where minion.Team != GameObjectTeam.Neutral && predHealth > 0 && predHealth <= ObjectManager.Player.GetAutoAttackDamage(minion, true) select minion).FirstOrDefault();
         }
 
         private static bool IsAutoAttack(string name)

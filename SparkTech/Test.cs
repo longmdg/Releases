@@ -12,7 +12,6 @@
 
     internal class Orbwalker
     {
-        #region Static Fields
 
         private static readonly Obj_AI_Hero Player = ObjectManager.Player;
 
@@ -32,9 +31,6 @@
 
         private static readonly Random Random = new Random(DateTime.Now.Millisecond);
 
-        #endregion
-
-        #region Delegates
 
         public delegate void AfterAttackEvenH(AttackableUnit target);
 
@@ -46,9 +42,6 @@
 
         public delegate void OnTargetChangeH(AttackableUnit oldTarget, AttackableUnit newTarget);
 
-        #endregion
-
-        #region Public Events
 
         public static event AfterAttackEvenH AfterAttack;
 
@@ -60,28 +53,16 @@
 
         public static event OnTargetChangeH OnTargetChange;
 
-        #endregion
-
-        #region Enums
 
         public enum Mode
         {
             Combo,
-
             Harass,
-
-            Clear,
-
+            LaneClear,
             LastHit,
-
             Flee,
-
             None
         }
-
-        #endregion
-
-        #region Public Properties
 
         public static bool Attack { get; set; }
 
@@ -102,7 +83,7 @@
                            : (config.Item("OW_Harass_Key").IsActive()
                                   ? Mode.Harass
                                   : (config.Item("OW_Clear_Key").IsActive()
-                                         ? Mode.Clear
+                                         ? Mode.LaneClear
                                          : (config.Item("OW_LastHit_Key").IsActive()
                                                 ? Mode.LastHit
                                                 : (config.Item("OW_Flee_Key").IsActive() ? Mode.Flee : Mode.None))));
@@ -134,7 +115,7 @@
             get
             {
                 if (!config.Item("OW_Misc_PriorityFarm").IsActive()
-                    && (CurrentMode == Mode.Harass || CurrentMode == Mode.Clear))
+                    && (CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear))
                 {
                     var hero = GetBestHeroTarget;
                     if (hero.IsValidTarget())
@@ -142,7 +123,7 @@
                         return hero;
                     }
                 }
-                if (CurrentMode == Mode.Harass || CurrentMode == Mode.Clear || CurrentMode == Mode.LastHit)
+                if (CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear || CurrentMode == Mode.LastHit)
                 {
                     foreach (var obj in
                         ObjectManager.Get<Obj_AI_Minion>()
@@ -173,7 +154,7 @@
                 {
                     return ForcedTarget;
                 }
-                if (CurrentMode == Mode.Clear)
+                if (CurrentMode == Mode.LaneClear)
                 {
                     foreach (var obj in ObjectManager.Get<Obj_AI_Turret>().Where(i => InAutoAttackRange(i)))
                     {
@@ -196,7 +177,7 @@
                         return hero;
                     }
                 }
-                if (CurrentMode == Mode.Clear || CurrentMode == Mode.Harass)
+                if (CurrentMode == Mode.LaneClear || CurrentMode == Mode.Harass)
                 {
                     var mob =
                         ObjectManager.Get<Obj_AI_Minion>()
@@ -210,7 +191,7 @@
                         return mob;
                     }
                 }
-                if (CurrentMode != Mode.Clear || ShouldWait)
+                if (CurrentMode != Mode.LaneClear || ShouldWait)
                 {
                     return null;
                 }
@@ -245,10 +226,6 @@
 
         public static bool Move { get; set; }
 
-        #endregion
-
-        #region Properties
-
         private static bool CanMove
         {
             get
@@ -275,7 +252,7 @@
                 {
                     return false;
                 }
-                if ((CurrentMode == Mode.Combo || CurrentMode == Mode.Harass || CurrentMode == Mode.Clear)
+                if ((CurrentMode == Mode.Combo || CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear)
                     && !config.Item("OW_" + CurrentMode + "_Attack").IsActive())
                 {
                     return false;
@@ -292,7 +269,7 @@
                 {
                     return false;
                 }
-                if ((CurrentMode == Mode.Combo || CurrentMode == Mode.Harass || CurrentMode == Mode.Clear)
+                if ((CurrentMode == Mode.Combo || CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear)
                     && !config.Item("OW_" + CurrentMode + "_Move").IsActive())
                 {
                     return false;
@@ -314,8 +291,6 @@
                             <= Player.GetAutoAttackDamage(i, true));
             }
         }
-
-        #endregion
 
         #region Public Methods and Operators
 
