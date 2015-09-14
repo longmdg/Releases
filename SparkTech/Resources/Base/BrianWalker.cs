@@ -241,16 +241,7 @@
         {
             get
             {
-                if (!Attack || config.Item("OW_Misc_AllAttackDisabled").IsActive())
-                {
-                    return false;
-                }
-                if ((CurrentMode == Mode.Combo || CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear)
-                    && !config.Item("OW_" + CurrentMode + "_Attack").IsActive())
-                {
-                    return false;
-                }
-                return CurrentMode != Mode.LastHit || config.Item("OW_LastHit_Attack").IsActive();
+                return ((CurrentMode != Mode.Combo && CurrentMode != Mode.Harass && CurrentMode != Mode.LaneClear) || config.Item("OW_" + CurrentMode + "_Attack").IsActive()) && (CurrentMode != Mode.LastHit || config.Item("OW_LastHit_Attack").IsActive()) && (Attack && !config.Item("OW_Misc_AllAttackDisabled").IsActive());
             }
         }
 
@@ -258,16 +249,7 @@
         {
             get
             {
-                if (!Move || config.Item("OW_Misc_AllMovementDisabled").IsActive())
-                {
-                    return false;
-                }
-                if ((CurrentMode == Mode.Combo || CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear)
-                    && !config.Item("OW_" + CurrentMode + "_Move").IsActive())
-                {
-                    return false;
-                }
-                return CurrentMode != Mode.LastHit || config.Item("OW_LastHit_Move").IsActive();
+                return ((CurrentMode != Mode.Combo && CurrentMode != Mode.Harass && CurrentMode != Mode.LaneClear) || config.Item("OW_" + CurrentMode + "_Move").IsActive()) && (Move && !config.Item("OW_Misc_AllMovementDisabled").IsActive()) && (CurrentMode != Mode.LastHit || config.Item("OW_LastHit_Move").IsActive());
             }
         }
 
@@ -275,13 +257,7 @@
         {
             get
             {
-                return
-                    ObjectManager.Get<Obj_AI_Minion>()
-                        .Any(
-                            i =>
-                            InAutoAttackRange(i) && i.Team != GameObjectTeam.Neutral
-                            && HealthPrediction.GetHealthPrediction(i, (int)(Player.AttackDelay * 1000 * 2), 0)
-                            <= Player.GetAutoAttackDamage(i, true));
+                return ObjectManager.Get<Obj_AI_Minion>().Any(i => InAutoAttackRange(i) && i.Team != GameObjectTeam.Neutral && HealthPrediction.GetHealthPrediction(i, (int)(Player.AttackDelay * 1000 * 2), 0) <= Player.GetAutoAttackDamage(i, true));
             }
         }
 
@@ -377,19 +353,25 @@
             MovePrediction.SetTargetted(Player.BasicAttack.SpellCastTime, Player.BasicAttack.MissileSpeed);
             Attack = true;
             Move = true;
-            Game.OnUpdate += args =>
+            Game.OnUpdate += a =>
                 {
-                    if (Player.IsDead || CurrentMode == Mode.None || MenuGUI.IsChatOpen || Player.IsRecalling()
-                        || Player.IsCastingInterruptableSpell(true))
+                    if (!Player.IsDead && CurrentMode != Mode.None && !MenuGUI.IsChatOpen && !Player.IsRecalling()
+                        && !Player.IsCastingInterruptableSpell(true))
                     {
-                        return;
+                        Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget);
                     }
-                    Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget);
                 };
             Drawing.OnDraw += OnDraw;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
             GameObject.OnCreate += OnCreateMissileClient;
-            Spellbook.OnStopCast += OnStopCast;
+            Spellbook.OnStopCast += (sender, args) =>
+                {
+                    if (!sender.Owner.IsMe || !args.DestroyMissile || !args.StopAnimation)
+                    {
+                        return;
+                    }
+                    ResetAutoAttack();
+                };
         }
 
         public static void MoveTo(Vector3 pos)
@@ -576,15 +558,6 @@
             {
                 ResetAutoAttack();
             }
-        }
-
-        private static void OnStopCast(Spellbook sender, SpellbookStopCastEventArgs args)
-        {
-            if (!sender.Owner.IsMe || !args.DestroyMissile || !args.StopAnimation)
-            {
-                return;
-            }
-            ResetAutoAttack();
         }
 
         private static void ResetAutoAttack()
