@@ -13,12 +13,11 @@
 namespace SparkTech.Resources.Base
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.CodeAnalysis; // .NET 4.6 pls
     using System.Linq;
     using LeagueSharp;
     using LeagueSharp.Common;
     using SharpDX;
- // using Color = System.Drawing.Color;
 
     [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")]
     [SuppressMessage("ReSharper", "UseNullPropagation")]
@@ -33,7 +32,7 @@ namespace SparkTech.Resources.Base
         private static Obj_AI_Minion prevMinion;
         private static readonly Spell MovePrediction = new Spell(SpellSlot.Unknown, GetAutoAttackRange());
         private static readonly Random Random = new Random(DateTime.Now.Millisecond);
-        private static float[] maxhealth;
+        // private static float[] maxhealth;
 
         public delegate void AfterAttackEvenH(AttackableUnit target);
         public delegate void BeforeAttackEvenH(BeforeAttackEventArgs args);
@@ -58,21 +57,9 @@ namespace SparkTech.Resources.Base
 
         public static bool Attack { get; set; }
 
-        public static bool CanAttack
-        {
-            get
-            {
-                return Utils.GameTimeTickCount + Game.Ping / 2 + 25 >= lastAttack + Player.AttackDelay * 1000;
-            }
-        }
+        public static bool CanAttack { get { return Utils.GameTimeTickCount + Game.Ping / 2 + 25 >= lastAttack + Player.AttackDelay * 1000; } }
 
-        public static Mode CurrentMode
-        {
-            get
-            {
-                return config.Item("ST_Combo_Key").IsActive() ? Mode.Combo : (config.Item("ST_Clear_Key").IsActive() ? Mode.LaneClear : (config.Item("ST_Harass_Key").IsActive() ? Mode.Harass : (config.Item("ST_LastHit_Key").IsActive() ? Mode.LastHit : (config.Item("ST_Flee_Key").IsActive() ? Mode.Flee : Mode.None))));
-            }
-        }
+        public static Mode CurrentMode { get { return config.Item("ST_Combo_Key").IsActive() ? Mode.Combo : (config.Item("ST_Clear_Key").IsActive() ? Mode.LaneClear : (config.Item("ST_Harass_Key").IsActive() ? Mode.Harass : (config.Item("ST_LastHit_Key").IsActive() ? Mode.LastHit : (config.Item("ST_Flee_Key").IsActive() ? Mode.Flee : Mode.None)))); } }
 
         public static Obj_AI_Hero GetBestHeroTarget
         {
@@ -159,85 +146,50 @@ namespace SparkTech.Resources.Base
                 {
                     return null;
                 }
-                /*
+                
+                // TODO: Improve Lane Clear logic.
+
                 if (InAutoAttackRange(prevMinion))
                 {
-                    var hpPred = HealthPrediction.LaneClearHealthPrediction(
-                        prevMinion,
-                        (int)(Player.AttackDelay * 1000 * 2),
-                        0);
-                    if (hpPred >= 2 * Player.GetAutoAttackDamage(prevMinion, true)
-                        || Math.Abs(hpPred - prevMinion.Health) < float.Epsilon)
+                    var hpPred = HealthPrediction.LaneClearHealthPrediction(prevMinion, (int)(Player.AttackDelay * 1000 * 2), 0);
+                    if (hpPred >= 2 * Player.GetAutoAttackDamage(prevMinion, true) || Math.Abs(hpPred - prevMinion.Health) < float.Epsilon)
                     {
                         return prevMinion;
                     }
                 }
-                var minion = (from obj in
-                                  ObjectManager.Get<Obj_AI_Minion>()
-                                  .Where(i => InAutoAttackRange(i) && i.CharData.BaseSkinName != "gangplankbarrel")
-                              let hpPred =
-                                  HealthPrediction.GetHealthPrediction(obj, (int)(Player.AttackDelay * 1000 * 2), 0)
-                              where
-                                  hpPred >= 2 * Player.GetAutoAttackDamage(obj, true)
-                                  || Math.Abs(hpPred - obj.Health) < float.Epsilon
-                              select obj).MaxOrDefault(i => i.Health);
+                var minion = (from obj in ObjectManager.Get<Obj_AI_Minion>().Where(i => InAutoAttackRange(i) && i.CharData.BaseSkinName != "gangplankbarrel") let hpPred = HealthPrediction.GetHealthPrediction(obj, (int)(Player.AttackDelay * 1000 * 2), 0) where hpPred >= 2 * Player.GetAutoAttackDamage(obj, true) || Math.Abs(hpPred - obj.Health) < float.Epsilon select obj).MaxOrDefault(i => i.Health);
                 if (minion != null)
                 {
                     prevMinion = minion;
                 }
                 return minion;
-                */
+                
+
+                /*
+
                 maxhealth = new float[] { 0 };
-                foreach (Obj_AI_Minion minion in from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget(GetAutoAttackRange(Player, minion)) let predHealth = HealthPrediction.LaneClearHealthPrediction(minion, (int)((Player.AttackDelay * 1000) * 2f), 0) where (predHealth >= 2 * Player.GetAutoAttackDamage(minion, true) || Math.Abs(predHealth - minion.Health) < float.Epsilon) && (minion.Health >= maxhealth[0] || Math.Abs(maxhealth[0] - float.MaxValue) < float.Epsilon) select minion)
+                foreach (var minion in from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget(GetAutoAttackRange(Player, minion)) let predHealth = HealthPrediction.LaneClearHealthPrediction(minion, (int)((Player.AttackDelay * 1000) * 2f), 0) where (predHealth >= 2 * Player.GetAutoAttackDamage(minion, true) || Math.Abs(predHealth - minion.Health) < float.Epsilon) && (minion.Health >= maxhealth[0] || Math.Abs(maxhealth[0] - float.MaxValue) < float.Epsilon) select minion)
                 {
                     prevMinion = minion;
                     maxhealth[0] = minion.MaxHealth;
                 }
                 return prevMinion;
+
+                */
             }
         }
 
         public static bool Move { get; set; }
 
-        private static bool CanMove
-        {
-            get
-            {
-                return missileLaunched || Utils.GameTimeTickCount + Game.Ping / 2 >= lastAttack + Player.AttackCastDelay * 1000 + GetCurrentWindupTime;
-            }
-        }
+        private static bool CanMove { get { return missileLaunched || Utils.GameTimeTickCount + Game.Ping / 2 >= lastAttack + Player.AttackCastDelay * 1000 + GetCurrentWindupTime; } }
 
-        private static int GetCurrentWindupTime
-        {
-            get
-            {
-                return config.Item("ST_Misc_ExtraWindUp").GetValue<Slider>().Value;
-            }
-        }
+        private static int GetCurrentWindupTime { get { return config.Item("ST_Misc_ExtraWindUp").GetValue<Slider>().Value; } }
 
-        private static bool IsAllowedToAttack
-        {
-            get
-            {
-                return ((CurrentMode != Mode.Combo && CurrentMode != Mode.Harass && CurrentMode != Mode.LaneClear) || config.Item("ST_" + CurrentMode + "_Attack").IsActive()) && (CurrentMode != Mode.LastHit || config.Item("ST_LastHit_Attack").IsActive()) && (Attack && !config.Item("ST_Misc_AllAttackDisabled").IsActive());
-            }
-        }
+        private static bool IsAllowedToAttack { get { return ((CurrentMode != Mode.Combo && CurrentMode != Mode.Harass && CurrentMode != Mode.LaneClear) || config.Item("ST_" + CurrentMode + "_Attack").IsActive()) && (CurrentMode != Mode.LastHit || config.Item("ST_LastHit_Attack").IsActive()) && (Attack && !config.Item("ST_Misc_AllAttackDisabled").IsActive()); } }
 
-        private static bool IsAllowedToMove
-        {
-            get
-            {
-                return ((CurrentMode != Mode.Combo && CurrentMode != Mode.Harass && CurrentMode != Mode.LaneClear) || config.Item("ST_" + CurrentMode + "_Move").IsActive()) && (Move && !config.Item("ST_Misc_AllMovementDisabled").IsActive()) && (CurrentMode != Mode.LastHit || config.Item("ST_LastHit_Move").IsActive());
-            }
-        }
+        private static bool IsAllowedToMove { get { return ((CurrentMode != Mode.Combo && CurrentMode != Mode.Harass && CurrentMode != Mode.LaneClear) || config.Item("ST_" + CurrentMode + "_Move").IsActive()) && (Move && !config.Item("ST_Misc_AllMovementDisabled").IsActive()) && (CurrentMode != Mode.LastHit || config.Item("ST_LastHit_Move").IsActive()); } }
 
-        private static bool ShouldWait
-        {
-            get
-            {
-                return ObjectManager.Get<Obj_AI_Minion>().Any(i => InAutoAttackRange(i) && i.Team != GameObjectTeam.Neutral && HealthPrediction.GetHealthPrediction(i, (int)(Player.AttackDelay * 1000 * 2), 0) <= Player.GetAutoAttackDamage(i, true));
-            }
-        }
+        private static bool ShouldWait { get { return ObjectManager.Get<Obj_AI_Minion>().Any(i => InAutoAttackRange(i) && i.Team != GameObjectTeam.Neutral && HealthPrediction.GetHealthPrediction(i, (int)(Player.AttackDelay * 1000 * 2), 0) <= Player.GetAutoAttackDamage(i, true)); } }
 
         public static float GetAutoAttackRange(AttackableUnit target = null)
         {
@@ -266,7 +218,7 @@ namespace SparkTech.Resources.Base
                 mHarass.AddItem(new MenuItem("ST_Harass_Key", "Key").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
                 mHarass.AddItem(new MenuItem("ST_Harass_Move", "Movement").SetValue(true));
                 mHarass.AddItem(new MenuItem("ST_Harass_Attack", "Attack").SetValue(true));
-                mHarass.AddItem(new MenuItem("ST_Harass_LastHit", "Last Hit Minion").SetValue(true));
+                mHarass.AddItem(new MenuItem("ST_Harass_LastHit", "Last Hit Minions").SetValue(true));
                 modeMenu.AddSubMenu(mHarass);
 
                 var mLaneClear = new Menu("Lane Clear", "ST_Clear");
@@ -288,15 +240,14 @@ namespace SparkTech.Resources.Base
                 stMenu.AddSubMenu(modeMenu);
             }
             var mMisc = new Menu("Miscallenous", "ST_Misc");
-            {
-                mMisc.AddItem(new MenuItem("ST_Misc_HoldZone", "Hold Zone").SetValue(new Slider(0, 0, 250)));
-                mMisc.AddItem(new MenuItem("ST_Misc_MoveDelay", "Movement Delay").SetValue(new Slider(30, 0, 250)));
-                mMisc.AddItem(new MenuItem("ST_Misc_ExtraWindUp", "Extra WindUp Time").SetValue(new Slider(80, 0, 200)));
-                mMisc.AddItem(new MenuItem("ST_Misc_PriorityFarm", "Priorize LastHit Over Harass").SetValue(true));
-                mMisc.AddItem(new MenuItem("ST_Misc_AllMovementDisabled", "Disable All Movement").SetValue(false));
-                mMisc.AddItem(new MenuItem("ST_Misc_AllAttackDisabled", "Disable All Attack").SetValue(false));
-                stMenu.AddSubMenu(mMisc);
-            }
+            mMisc.AddItem(new MenuItem("ST_Misc_HoldZone", "Hold Zone").SetValue(new Slider(0, 0, 250)));
+            mMisc.AddItem(new MenuItem("ST_Misc_MoveDelay", "Movement Delay").SetValue(new Slider(30, 0, 250)));
+            mMisc.AddItem(new MenuItem("ST_Misc_ExtraWindUp", "Extra WindUp Time").SetValue(new Slider(80, 0, 200)));
+            mMisc.AddItem(new MenuItem("ST_Misc_PriorityFarm", "Priorize LastHit Over Harass").SetValue(true));
+            mMisc.AddItem(new MenuItem("ST_Misc_AllMovementDisabled", "Disable All Movement").SetValue(false));
+            mMisc.AddItem(new MenuItem("ST_Misc_AllAttackDisabled", "Disable All Attack").SetValue(false));
+            stMenu.AddSubMenu(mMisc);
+
 
             /*
 
@@ -320,58 +271,55 @@ namespace SparkTech.Resources.Base
             Move = true;
 
             GameObject.OnCreate += (sender, args) =>
-            {
-                if (!sender.IsValid<MissileClient>())
                 {
-                    return;
-                }
-                var missile = (MissileClient)sender;
-                if (!missile.SpellCaster.IsMe || !missile.SpellCaster.IsRanged || !missile.SData.IsAutoAttack())
-                {
-                    return;
-                }
-                missileLaunched = true;
-                FireAfterAttack((AttackableUnit)missile.Target);
-            };
+                    if (!sender.IsValid<MissileClient>())
+                    {
+                        return;
+                    }
+                    var missile = (MissileClient)sender;
+                    if (!missile.SpellCaster.IsMe || !missile.SpellCaster.IsRanged || !missile.SData.IsAutoAttack())
+                    {
+                        return;
+                    }
+                    missileLaunched = true;
+                    FireAfterAttack((AttackableUnit)missile.Target);
+                };
 
             Spellbook.OnStopCast += (sender, args) =>
-            {
-                if (!sender.Owner.IsMe || !args.DestroyMissile || !args.StopAnimation)
                 {
-                    return;
-                }
-                lastAttack = 0;
-            };
+                    if (sender.Owner.IsMe && args.DestroyMissile && args.StopAnimation)
+                    {
+                        lastAttack = 0;
+                    }
+                };
 
             Obj_AI_Base.OnProcessSpellCast += (sender, args) =>
-            {
-                if (!sender.IsMe)
                 {
-                    return;
-                }
-                if (args.Target.IsValid<AttackableUnit>() && args.SData.IsAutoAttack())
-                {
-                    lastAttack = Utils.GameTimeTickCount - Game.Ping / 2;
-                    missileLaunched = false;
-                    var target = (AttackableUnit)args.Target;
-                    if (!lastTarget.IsValidTarget() || target.NetworkId != lastTarget.NetworkId)
+                    if (!sender.IsMe)
                     {
-                        FireOnTargetSwitch(target);
-                        lastTarget = target;
+                        return;
                     }
-                    if (sender.IsMelee)
+                    if (args.Target.IsValid<AttackableUnit>() && args.SData.IsAutoAttack())
                     {
-                        Utility.DelayAction.Add(
-                            (int)(sender.AttackCastDelay * 1000 + 40),
-                            () => FireAfterAttack(target));
+                        lastAttack = Utils.GameTimeTickCount - Game.Ping / 2;
+                        missileLaunched = false;
+                        var target = (AttackableUnit)args.Target;
+                        if (!lastTarget.IsValidTarget() || target.NetworkId != lastTarget.NetworkId)
+                        {
+                            FireOnTargetSwitch(target);
+                            lastTarget = target;
+                        }
+                        if (sender.IsMelee)
+                        {
+                            Utility.DelayAction.Add((int)(sender.AttackCastDelay * 1000 + 40), () => FireAfterAttack(target));
+                        }
+                        FireOnAttack(target);
                     }
-                    FireOnAttack(target);
-                }
-                if (Orbwalking.IsAutoAttackReset(args.SData.Name))
-                {
-                    lastAttack = 0;
-                }
-            };
+                    if (Orbwalking.IsAutoAttackReset(args.SData.Name))
+                    {
+                        lastAttack = 0;
+                    }
+                };
 
             Game.OnUpdate += args =>
                 {
@@ -409,6 +357,8 @@ namespace SparkTech.Resources.Base
 
                 */
         }
+
+        // TODO: Fix the stuttering?
 
         public static void MoveTo(Vector3 pos)
         {
@@ -461,7 +411,9 @@ namespace SparkTech.Resources.Base
         private static void FireAfterAttack(AttackableUnit target)
         {
             if (AfterAttack != null && target.IsValidTarget())
-            AfterAttack(target);
+            {
+                AfterAttack(target);
+            }
         }
 
         private static void FireBeforeAttack(AttackableUnit target)
@@ -469,7 +421,12 @@ namespace SparkTech.Resources.Base
             if (BeforeAttack != null)
             {
                 if (target.IsValidTarget())
-                BeforeAttack(new BeforeAttackEventArgs { Target = target });
+                {
+                    BeforeAttack(new BeforeAttackEventArgs
+                                     {
+                                         Target = target
+                                     });
+                }
             }
             else
             {
@@ -480,19 +437,25 @@ namespace SparkTech.Resources.Base
         private static void FireOnAttack(AttackableUnit target)
         {
             if (OnAttack != null && target.IsValidTarget())
-            OnAttack(target);
+            {
+                OnAttack(target);
+            }
         }
 
         private static void FireOnNonKillableMinion(AttackableUnit minion)
         {
             if (OnNonKillableMinion != null && minion.IsValidTarget())
-            OnNonKillableMinion(minion);
+            {
+                OnNonKillableMinion(minion);
+            }
         }
 
         private static void FireOnTargetSwitch(AttackableUnit newTarget)
         {
             if (OnTargetChange != null)
-            OnTargetChange(lastTarget, newTarget);
+            {
+                OnTargetChange(lastTarget, newTarget);
+            }
         }
 
         private static float GetAutoAttackRange(Obj_AI_Base source, AttackableUnit target)
