@@ -5,7 +5,7 @@
     using LeagueSharp.Common;
     using System.Diagnostics.CodeAnalysis;
 
-    using SparkTech.Resources.Base;
+    using Resources.Base;
 
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")] // reenable when L# supports .NET 4.6
