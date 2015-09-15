@@ -1,21 +1,29 @@
-﻿namespace SparkTech.Resources.Base
+﻿/*
+
+                                                                      HUGE CREDITS TO BRIAN FOR
+
+                                                                       - Coding that good shit
+                                                              - Letting me use it and tune to my needs
+                                                                We (or at least I do) love you man :)
+                                                       Give him a 5 - star rating here, he totally deserved it:
+                                                            https://www.joduska.me/forum/user/2586-brian/
+
+*/
+
+namespace SparkTech.Resources.Base
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
-
     using LeagueSharp;
     using LeagueSharp.Common;
-
     using SharpDX;
-
     using Color = System.Drawing.Color;
 
     [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")]
     [SuppressMessage("ReSharper", "UseNullPropagation")]
     internal class BrianWalker
     {
-
         private static readonly Obj_AI_Hero Player = ObjectManager.Player;
         public static Obj_AI_Hero ForcedTarget = null;
         private static Menu config;
@@ -62,15 +70,7 @@
         {
             get
             {
-                return config.Item("OW_Combo_Key").IsActive()
-                           ? Mode.Combo
-                           : (config.Item("OW_Clear_Key").IsActive()
-                                  ? Mode.LaneClear
-                                  : (config.Item("OW_Harass_Key").IsActive()
-                                         ? Mode.Harass
-                                         : (config.Item("OW_LastHit_Key").IsActive()
-                                                ? Mode.LastHit
-                                                : (config.Item("OW_Flee_Key").IsActive() ? Mode.Flee : Mode.None))));
+                return config.Item("OW_Combo_Key").IsActive() ? Mode.Combo : (config.Item("OW_Clear_Key").IsActive() ? Mode.LaneClear : (config.Item("OW_Harass_Key").IsActive() ? Mode.Harass : (config.Item("OW_LastHit_Key").IsActive() ? Mode.LastHit : (config.Item("OW_Flee_Key").IsActive() ? Mode.Flee : Mode.None))));
             }
         }
 
@@ -98,8 +98,7 @@
         {
             get
             {
-                if (!config.Item("OW_Misc_PriorityFarm").IsActive()
-                    && (CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear))
+                if (!config.Item("OW_Misc_PriorityFarm").IsActive() && (CurrentMode == Mode.Harass || CurrentMode == Mode.LaneClear))
                 {
                     var hero = GetBestHeroTarget;
                     if (hero.IsValidTarget())
@@ -116,8 +115,8 @@
                                 InAutoAttackRange(i) && i.Team != GameObjectTeam.Neutral
                                 && (MinionManager.IsMinion(i, true) || Helper.IsPet(i))
                                 && i.Health < 2 * Player.TotalAttackDamage)
-                            .OrderByDescending(i => i.CharData.BaseSkinName.Contains("Siege"))
-                            .ThenBy(i => i.CharData.BaseSkinName.Contains("Super"))
+                            .OrderByDescending(i => i.CharData.BaseSkinName.ToLower().Contains("siege"))
+                            .ThenBy(i => i.CharData.BaseSkinName.ToLower().Contains("super"))
                             .ThenBy(i => i.Health)
                             .ThenByDescending(i => i.MaxHealth))
                     {
@@ -163,13 +162,7 @@
                 }
                 if (CurrentMode == Mode.LaneClear || CurrentMode == Mode.Harass)
                 {
-                    var mob =
-                        ObjectManager.Get<Obj_AI_Minion>()
-                            .Where(
-                                i =>
-                                InAutoAttackRange(i) && i.Team == GameObjectTeam.Neutral
-                                && i.CharData.BaseSkinName != "gangplankbarrel")
-                            .MaxOrDefault(i => i.MaxHealth);
+                    var mob = ObjectManager.Get<Obj_AI_Minion>().Where(i => InAutoAttackRange(i) && i.Team == GameObjectTeam.Neutral && i.CharData.BaseSkinName != "gangplankbarrel").MaxOrDefault(i => i.MaxHealth);
                     if (mob != null)
                     {
                         return mob;
@@ -271,7 +264,7 @@
             return target.IsValidTarget(GetAutoAttackRange(target) + extraRange, true, from);
         }
 
-        public static void Init(Menu mainMenu)
+        internal static void Init(Menu mainMenu)
         {
             config = mainMenu;
             var owMenu = new Menu("Orbwalker", "OW");
@@ -353,6 +346,7 @@
             MovePrediction.SetTargetted(Player.BasicAttack.SpellCastTime, Player.BasicAttack.MissileSpeed);
             Attack = true;
             Move = true;
+
             Game.OnUpdate += a =>
                 {
                     if (!Player.IsDead && CurrentMode != Mode.None && !MenuGUI.IsChatOpen && !Player.IsRecalling()
@@ -361,16 +355,91 @@
                         Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget);
                     }
                 };
-            Drawing.OnDraw += OnDraw;
-            Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
-            GameObject.OnCreate += OnCreateMissileClient;
+
+            Drawing.OnDraw += a =>
+                {
+                    if (Player.IsDead)
+                    {
+                        return;
+                    }
+                    if (config.Item("OW_Draw_AARange").IsActive())
+                    {
+                        Render.Circle.DrawCircle(
+                            Player.Position,
+                            GetAutoAttackRange(),
+                            config.Item("OW_Draw_AARange").GetValue<Circle>().Color);
+                    }
+                    if (config.Item("OW_Draw_AARangeEnemy").IsActive())
+                    {
+                        foreach (var obj in HeroManager.Enemies.Where(i => i.IsValidTarget(1000)))
+                        {
+                            Render.Circle.DrawCircle(
+                                obj.Position,
+                                GetAutoAttackRange(obj, Player),
+                                config.Item("OW_Draw_AARangeEnemy").GetValue<Circle>().Color);
+                        }
+                    }
+                    if (config.Item("OW_Draw_HoldZone").IsActive())
+                    {
+                        Render.Circle.DrawCircle(
+                            Player.Position,
+                            config.Item("OW_Misc_HoldZone").GetValue<Slider>().Value,
+                            config.Item("OW_Draw_HoldZone").GetValue<Circle>().Color);
+                    }
+                };
+
+            Obj_AI_Base.OnProcessSpellCast += (sender, args) =>
+                {
+                    if (!sender.IsMe)
+                    {
+                        return;
+                    }
+                    if (args.Target.IsValid<AttackableUnit>() && args.SData.IsAutoAttack())
+                    {
+                        lastAttack = Utils.GameTimeTickCount - Game.Ping / 2;
+                        missileLaunched = false;
+                        var target = (AttackableUnit)args.Target;
+                        if (!lastTarget.IsValidTarget() || target.NetworkId != lastTarget.NetworkId)
+                        {
+                            FireOnTargetSwitch(target);
+                            lastTarget = target;
+                        }
+                        if (sender.IsMelee)
+                        {
+                            Utility.DelayAction.Add(
+                                (int)(sender.AttackCastDelay * 1000 + 40),
+                                () => FireAfterAttack(target));
+                        }
+                        FireOnAttack(target);
+                    }
+                    if (Orbwalking.IsAutoAttackReset(args.SData.Name))
+                    {
+                        lastAttack = 0;
+                    }
+                };
+
+            GameObject.OnCreate += (sender, args) =>
+                {
+                    if (!sender.IsValid<MissileClient>())
+                    {
+                        return;
+                    }
+                    var missile = (MissileClient)sender;
+                    if (!missile.SpellCaster.IsMe || !missile.SpellCaster.IsRanged || !missile.SData.IsAutoAttack())
+                    {
+                        return;
+                    }
+                    missileLaunched = true;
+                    FireAfterAttack((AttackableUnit)missile.Target);
+                };
+
             Spellbook.OnStopCast += (sender, args) =>
                 {
                     if (!sender.Owner.IsMe || !args.DestroyMissile || !args.StopAnimation)
                     {
                         return;
                     }
-                    ResetAutoAttack();
+                    lastAttack = 0;
                 };
         }
 
@@ -386,9 +455,7 @@
             {
                 return;
             }
-            Player.IssueOrder(
-                GameObjectOrder.MoveTo,
-                Player.ServerPosition.Extend(pos, (Random.NextFloat(0.6f, 1) + 0.2f) * 400));
+            Player.IssueOrder(GameObjectOrder.MoveTo, Player.ServerPosition.Extend(pos, (Random.NextFloat(0.6f, 1) + 0.2f) * 400));
         }
 
         public static void Orbwalk(AttackableUnit target)
@@ -407,10 +474,7 @@
                     {
                         lastAttack = Utils.GameTimeTickCount + Game.Ping + 400 - (int)(Player.AttackCastDelay * 1000);
                     }
-                    if (!Player.IssueOrder(GameObjectOrder.AttackUnit, target))
-                    {
-                        //ResetAutoAttack();
-                    }
+                    if (!Player.IssueOrder(GameObjectOrder.AttackUnit, target)) { }
                     lastTarget = target;
                     return;
                 }
@@ -485,93 +549,10 @@
             return source.AttackRange + source.BoundingRadius + (target.IsValidTarget() ? target.BoundingRadius : 0);
         }
 
-        private static void OnCreateMissileClient(GameObject sender, EventArgs args)
-        {
-            if (!sender.IsValid<MissileClient>())
-            {
-                return;
-            }
-            var missile = (MissileClient)sender;
-            if (!missile.SpellCaster.IsMe || !missile.SpellCaster.IsRanged || !missile.SData.IsAutoAttack())
-            {
-                return;
-            }
-            missileLaunched = true;
-            FireAfterAttack((AttackableUnit)missile.Target);
-        }
-
-        private static void OnDraw(EventArgs args)
-        {
-            if (Player.IsDead)
-            {
-                return;
-            }
-            if (config.Item("OW_Draw_AARange").IsActive())
-            {
-                Render.Circle.DrawCircle(
-                    Player.Position,
-                    GetAutoAttackRange(),
-                    config.Item("OW_Draw_AARange").GetValue<Circle>().Color);
-            }
-            if (config.Item("OW_Draw_AARangeEnemy").IsActive())
-            {
-                foreach (var obj in HeroManager.Enemies.Where(i => i.IsValidTarget(1000)))
-                {
-                    Render.Circle.DrawCircle(
-                        obj.Position,
-                        GetAutoAttackRange(obj, Player),
-                        config.Item("OW_Draw_AARangeEnemy").GetValue<Circle>().Color);
-                }
-            }
-            if (config.Item("OW_Draw_HoldZone").IsActive())
-            {
-                Render.Circle.DrawCircle(
-                    Player.Position,
-                    config.Item("OW_Misc_HoldZone").GetValue<Slider>().Value,
-                    config.Item("OW_Draw_HoldZone").GetValue<Circle>().Color);
-            }
-        }
-
-        private static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (!sender.IsMe)
-            {
-                return;
-            }
-            if (args.Target.IsValid<AttackableUnit>() && args.SData.IsAutoAttack())
-            {
-                lastAttack = Utils.GameTimeTickCount - Game.Ping / 2;
-                missileLaunched = false;
-                var target = (AttackableUnit)args.Target;
-                if (!lastTarget.IsValidTarget() || target.NetworkId != lastTarget.NetworkId)
-                {
-                    FireOnTargetSwitch(target);
-                    lastTarget = target;
-                }
-                if (sender.IsMelee)
-                {
-                    Utility.DelayAction.Add((int)(sender.AttackCastDelay * 1000 + 40), () => FireAfterAttack(target));
-                }
-                FireOnAttack(target);
-            }
-            if (Orbwalking.IsAutoAttackReset(args.SData.Name))
-            {
-                ResetAutoAttack();
-            }
-        }
-
-        private static void ResetAutoAttack()
-        {
-            lastAttack = 0;
-        }
-
         public class BeforeAttackEventArgs
         {
-
             public AttackableUnit Target;
-
             private bool process = true;
-
             public bool Process
             {
                 get
