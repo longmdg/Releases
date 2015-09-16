@@ -1,5 +1,9 @@
-﻿// Taken from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+﻿#region Credits
+
+// Taken from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
 // Which was c+p'd too, in fact ¯\_(ツ)_/¯
+
+#endregion
 
 namespace SparkTech
 {
@@ -9,10 +13,8 @@ namespace SparkTech
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Diagnostics.CodeAnalysis;
-
- // using static Comms;
-
-    [SuppressMessage("ReSharper", "UseStringInterpolation")] // Remove when .NET 4.6 arrives
+    
+    [SuppressMessage("ReSharper", "UseStringInterpolation")] // TODO Remove this line when .NET 4.6 / new loader BIK
     [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
     public static class Updater
     {

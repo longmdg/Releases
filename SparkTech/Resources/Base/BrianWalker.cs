@@ -17,7 +17,7 @@
 namespace SparkTech.Resources.Base
 {
     using System;
-    using System.Diagnostics.CodeAnalysis; // .NET 4.6 pls
+    using System.Diagnostics.CodeAnalysis; // TODO .NET 4.6 pls
     using System.Linq;
     using LeagueSharp;
     using LeagueSharp.Common;
@@ -50,15 +50,7 @@ namespace SparkTech.Resources.Base
         public static Obj_AI_Hero ForcedTarget = null;
         public static float GetAutoAttackRange(AttackableUnit target = null) { return GetAutoAttackRange(Player, target); }
         public static bool InAutoAttackRange(AttackableUnit target, float extraRange = 0, Vector3 from = new Vector3()) { return target.IsValidTarget(GetAutoAttackRange(target) + extraRange, true, from); }
-        public enum Mode
-        {
-            Combo,
-            Harass,
-            LaneClear,
-            LastHit,
-            Flee,
-            None
-        }
+        public enum Mode { Combo, Harass, LaneClear, LastHit, Flee, None }
         public static Obj_AI_Hero GetBestHeroTarget
         {
             get
@@ -258,10 +250,9 @@ namespace SparkTech.Resources.Base
                     missileLaunched = false;
                     if (Player.Distance(target, true) > Math.Pow(GetAutoAttackRange(target) - 65, 2) && !Player.IsMelee)
                     lastAttack = Utils.GameTimeTickCount + Game.Ping + 400 - (int)(Player.AttackCastDelay * 1000);
-                    // TODO: ???
                     if (!Player.IssueOrder(GameObjectOrder.AttackUnit, target))
                     {
-                        Comms.Print("debug", true);
+                        Comms.Print("debug", true); // TODO
                     }
                     lastTarget = target;
                     return;
@@ -279,7 +270,7 @@ namespace SparkTech.Resources.Base
             MoveTo(Game.CursorPos);
         }
 
-#endregion
+        #endregion
 
         #region Event - related
 
