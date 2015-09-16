@@ -92,36 +92,28 @@ namespace SparkTech.Resources.Base
                     {
                         var time = (int)(Player.AttackCastDelay * 1000) - 100 + Game.Ping / 2 + (int)(Player.Distance(obj) / Orbwalking.GetMyProjectileSpeed() * 1000);
                         var hpPred = HealthPrediction.GetHealthPrediction(obj, time, 0);
-                        if (hpPred < 1)
-                            FireOnNonKillableMinion(obj);
-                        if (hpPred > 0 && hpPred <= Player.GetAutoAttackDamage(obj, true))
-                            return obj;
+                        if (hpPred < 1) FireOnNonKillableMinion(obj);
+                        if (hpPred > 0 && hpPred <= Player.GetAutoAttackDamage(obj, true)) return obj;
                     }
                 if (InAutoAttackRange(ForcedTarget))
                     return ForcedTarget;
                 if (CurrentMode == Mode.LaneClear)
                 {
-                    foreach (var obj in ObjectManager.Get<Obj_AI_Turret>().Where(obj => InAutoAttackRange(obj) && obj.IsValidTarget()))
-                        return obj;
-                    foreach (var obj in ObjectManager.Get<Obj_BarracksDampener>().Where(obj => InAutoAttackRange(obj) && obj.IsValidTarget()))
-                        return obj;
-                    foreach (var obj in ObjectManager.Get<Obj_HQ>().Where(obj => InAutoAttackRange(obj) && obj.IsValidTarget()))
-                        return obj;
+                    foreach (var obj in ObjectManager.Get<Obj_AI_Turret>().Where(obj => InAutoAttackRange(obj) && obj.IsValidTarget())) return obj;
+                    foreach (var obj in ObjectManager.Get<Obj_BarracksDampener>().Where(obj => InAutoAttackRange(obj) && obj.IsValidTarget())) return obj;
+                    foreach (var obj in ObjectManager.Get<Obj_HQ>().Where(obj => InAutoAttackRange(obj) && obj.IsValidTarget())) return obj;
                 }
                 if (CurrentMode != Mode.LastHit)
                 {
                     var hero = GetBestHeroTarget;
-                    if (hero.IsValidTarget())
-                        return hero;
+                    if (hero.IsValidTarget()) return hero;
                 }
                 if (CurrentMode == Mode.LaneClear || CurrentMode == Mode.Harass)
                 {
                     var mob = ObjectManager.Get<Obj_AI_Minion>().Where(i => InAutoAttackRange(i) && i.Team == GameObjectTeam.Neutral && i.CharData.BaseSkinName != "gangplankbarrel").MaxOrDefault(i => i.MaxHealth);
-                    if (mob != null)
-                        return mob;
+                    if (mob != null) return mob;
                 }
-                if (CurrentMode != Mode.LaneClear || ShouldWait)
-                    return null;
+                if (CurrentMode != Mode.LaneClear || ShouldWait) return null;
 
                 // TODO: Improve Lane Clear logic (2/2)
 
@@ -201,7 +193,14 @@ namespace SparkTech.Resources.Base
             Obj_AI_Base.OnProcessSpellCast += (sender, args) => { if (!sender.IsMe) return; if (args.Target.IsValid<AttackableUnit>() && args.SData.IsAutoAttack()) { lastAttack = Utils.GameTimeTickCount - Game.Ping / 2; missileLaunched = false; var target = (AttackableUnit)args.Target; if (!lastTarget.IsValidTarget() || target.NetworkId != lastTarget.NetworkId) { FireOnTargetSwitch(target); lastTarget = target; } if (sender.IsMelee) Utility.DelayAction.Add((int)(sender.AttackCastDelay * 1000 + 40), () => FireAfterAttack(target)); FireOnAttack(target); } if (Orbwalking.IsAutoAttackReset(args.SData.Name)) lastAttack = 0; };
             
             // TODO: Rethink those checks.
-            Game.OnUpdate += args => { if (!Player.IsDead && CurrentMode != Mode.None && !MenuGUI.IsChatOpen && !Player.IsRecalling() && !Player.IsCastingInterruptableSpell(true)) Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget); };
+            Game.OnUpdate += args =>
+                {
+                    if (Player.IsDead || CurrentMode == Mode.None || MenuGUI.IsChatOpen || Player.IsRecalling() || Player.IsCastingInterruptableSpell(true))
+                    {
+                        return;
+                    }
+                    Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget);
+                };
 
             // TODO: Move that 'scope'.
 
@@ -232,7 +231,7 @@ namespace SparkTech.Resources.Base
             */
         }
 
-        #region MoveTo, Orbwalk
+        #region Orbwalk <=> MoveTo
 
         // TODO: Fix the stuttering?
         public static void MoveTo(Vector3 pos)

@@ -60,7 +60,7 @@
   <ItemGroup>
     <Compile Include="Resources\Base\LXOrbwalker.cs" />
     <Compile Include="Cheats.cs" />
-    <Compile Include="Leveler.cs" />
+    <Compile Include="SpellExt.cs" />
     <Compile Include="HTMLColor.cs" />
     <Compile Include="Comms.cs" />
     <Compile Include="Helper.cs" />
@@ -79,7 +79,7 @@
     <Compile Include="Settings.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Resources\Base\BrianWalker.cs" />
-    <Compile Include="STUpdater.cs" />
+    <Compile Include="Updater.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

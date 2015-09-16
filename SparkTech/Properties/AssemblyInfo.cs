@@ -1,15 +1,15 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("SparkTech")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SparkTech")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyTitle("LeagueSharp.Spaghetti")]
+[assembly: AssemblyDescription(null)]
+[assembly: AssemblyConfiguration(null)]
+[assembly: AssemblyCompany("SparkTech")]
+[assembly: AssemblyProduct("LeagueSharp.Spaghetti")]
+[assembly: AssemblyCopyright(null)]
+[assembly: AssemblyTrademark(null)]
+[assembly: AssemblyCulture(null)]
 [assembly: ComVisible(false)]
 [assembly: Guid("a5692347-1db5-41b0-bb16-89601393fd45")]
-[assembly: AssemblyVersion("0.9.1.2")] // displays in loader
-[assembly: AssemblyFileVersion("0.9.1.2")] //for update - should be both the same
+[assembly: AssemblyVersion("0.9.1.3")]
+[assembly: AssemblyFileVersion("0.9.1.3")]

@@ -1,4 +1,6 @@
-﻿namespace SparkTech.Resources.Base
+﻿/*
+
+namespace SparkTech.Resources.Base
 {
     using System;
     using System.Collections.Generic;
@@ -375,26 +377,26 @@
             }
             if (CurrentMode == Mode.Harass || CurrentMode == Mode.Lasthit || CurrentMode == Mode.LaneClear || CurrentMode == Mode.LaneFreeze)
             {
-                /*
-                if (MyHero.ChampionName == "Azir")
-                {
-                    foreach (var minion in
-                        from minion in
-                            ObjectManager.Get<Obj_AI_Minion>()
-                            .Where(minion => minion.IsValidTarget() && InSoldierAttackRange(minion))
-                        let t =
-                            (int)(MyHero.AttackCastDelay * 1000) - 100 + Game.Ping / 2
-                            + 1000 * (int)MyHero.Distance(minion) / (int)MyProjectileSpeed()
-                        let predHealth = HealthPrediction.GetHealthPrediction(minion, t, FarmDelay(-125))
-                        where
-                            minion.Team != GameObjectTeam.Neutral && predHealth > 0
-                            && predHealth <= GetAzirAASandWarriorDamage(minion)
-                        select minion)
-                    {
-                        return minion;
-                    }
-                }
-                */
+                
+                //if (MyHero.ChampionName == "Azir")
+                //{
+                //    foreach (var minion in
+                //        from minion in
+                //            ObjectManager.Get<Obj_AI_Minion>()
+                //            .Where(minion => minion.IsValidTarget() && InSoldierAttackRange(minion))
+                //        let t =
+                //            (int)(MyHero.AttackCastDelay * 1000) - 100 + Game.Ping / 2
+                //            + 1000 * (int)MyHero.Distance(minion) / (int)MyProjectileSpeed()
+                //        let predHealth = HealthPrediction.GetHealthPrediction(minion, t, FarmDelay(-125))
+                //        where
+                //            minion.Team != GameObjectTeam.Neutral && predHealth > 0
+                //            && predHealth <= GetAzirAASandWarriorDamage(minion)
+                //        select minion)
+                //    {
+                //        return minion;
+                //    }
+                //}
+                
 
                 foreach (Obj_AI_Minion minion in from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget() && InAutoAttackRange(minion) let t = (int)(MyHero.AttackCastDelay * 1000) - 100 + Game.Ping / 2 + 1000 * (int)MyHero.Distance(minion) / (int)MyProjectileSpeed() let predHealth = HealthPrediction.GetHealthPrediction(minion, t, FarmDelay()) where minion.Team != GameObjectTeam.Neutral && predHealth > 0 && predHealth <= MyHero.GetAutoAttackDamage(minion, true) select minion)
                 return minion;
@@ -418,26 +420,24 @@
             float[] maxhealth;
             if (CurrentMode == Mode.LaneClear || CurrentMode == Mode.Harass || CurrentMode == Mode.LaneFreeze)
             {
-                /*
-                if (MyHero.ChampionName == "Azir")
-                {
-                    maxhealth = new float[] { 0 };
-                    var maxhealth1 = maxhealth;
-                    foreach (
-                        var minion in
-                            ObjectManager.Get<Obj_AI_Minion>()
-                                .Where(minion => InSoldierAttackRange(minion) && minion.IsValidTarget() && minion.Team == GameObjectTeam.Neutral)
-                                .Where(minion => minion.MaxHealth >= maxhealth1[0] || Math.Abs(maxhealth1[0] - float.MaxValue) < float.Epsilon))
-                    {
-                        tempTarget = minion;
-                        maxhealth[0] = minion.MaxHealth;
-                    }
-                    if (tempTarget != null)
-                    {
-                        return tempTarget;
-                    }
-                }
-                */
+                //if (MyHero.ChampionName == "Azir")
+                //{
+                //    maxhealth = new float[] { 0 };
+                //    var maxhealth1 = maxhealth;
+                //    foreach (
+                //        var minion in
+                //            ObjectManager.Get<Obj_AI_Minion>()
+                //                .Where(minion => InSoldierAttackRange(minion) && minion.IsValidTarget() && minion.Team == GameObjectTeam.Neutral)
+                //                .Where(minion => minion.MaxHealth >= maxhealth1[0] || Math.Abs(maxhealth1[0] - float.MaxValue) < float.Epsilon))
+                //    {
+                //        tempTarget = minion;
+                //        maxhealth[0] = minion.MaxHealth;
+                //    }
+                //    if (tempTarget != null)
+                //    {
+                //        return tempTarget;
+                //    }
+                //}
 
                 maxhealth = new float[] { 0 };
                 var maxhealth2 = maxhealth;
@@ -455,22 +455,22 @@
                 return null;
             }
 
-            /*
-            if (MyHero.ChampionName == "Azir")
-            {
-                maxhealth = new float[] { 0 };
-                float[] maxhealth1 = maxhealth;
-                foreach (Obj_AI_Minion minion in from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget() && InSoldierAttackRange(minion) let predHealth = HealthPrediction.LaneClearHealthPrediction(minion, (int)((MyHero.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay(-125)) where (predHealth >= GetAzirAASandWarriorDamage(minion) + MyHero.GetAutoAttackDamage(minion, true) || Math.Abs(predHealth - minion.Health) < float.Epsilon) && (minion.Health >= maxhealth1[0] || Math.Abs(maxhealth1[0] - float.MaxValue) < float.Epsilon) select minion)
-                {
-                    tempTarget = minion;
-                    maxhealth[0] = minion.MaxHealth;
-                }
-                if (tempTarget != null)
-                {
-                    return tempTarget;
-                }
-            }
-            */
+            
+            //if (MyHero.ChampionName == "Azir")
+            //{
+            //    maxhealth = new float[] { 0 };
+            //    float[] maxhealth1 = maxhealth;
+            //    foreach (Obj_AI_Minion minion in from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget() && InSoldierAttackRange(minion) let predHealth = HealthPrediction.LaneClearHealthPrediction(minion, (int)((MyHero.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay(-125)) where (predHealth >= GetAzirAASandWarriorDamage(minion) + MyHero.GetAutoAttackDamage(minion, true) || Math.Abs(predHealth - minion.Health) < float.Epsilon) && (minion.Health >= maxhealth1[0] || Math.Abs(maxhealth1[0] - float.MaxValue) < float.Epsilon) select minion)
+            //    {
+            //        tempTarget = minion;
+            //        maxhealth[0] = minion.MaxHealth;
+            //    }
+            //   if (tempTarget != null)
+            //    {
+            //        return tempTarget;
+            //    }
+            //}
+            
 
             maxhealth = new float[] { 0 };
             foreach (Obj_AI_Minion minion in from minion in ObjectManager.Get<Obj_AI_Minion>() where minion.IsValidTarget(GetAutoAttackRange(MyHero, minion)) let predHealth = HealthPrediction.LaneClearHealthPrediction(minion, (int)((MyHero.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay()) where (predHealth >= 2 * MyHero.GetAutoAttackDamage(minion, true) || Math.Abs(predHealth - minion.Health) < float.Epsilon) && (minion.Health >= maxhealth[0] || Math.Abs(maxhealth[0] - float.MaxValue) < float.Epsilon) select minion)
@@ -524,15 +524,17 @@
             return (MyHero.CombatType == GameObjectCombatType.Melee) ? float.MaxValue : MyHero.BasicAttack.MissileSpeed;
         }
 
-        private static int FarmDelay(/*int offset = 0*/)
+        private static int FarmDelay(
+        //int offset = 0
+        )
         {
-            /*
-            var ret = offset;
-            if (MyHero.ChampionName == "Azir")
-            {
-                ret += 125;
-            }
-            */
+            
+            //var ret = offset;
+            //if (MyHero.ChampionName == "Azir")
+            //{
+            //    ret += 125;
+            //}
+            //
             return Menu.Item("lxOrbwalker_Misc_Farmdelay").GetValue<Slider>().Value;// + ret;
         }
 
@@ -540,35 +542,35 @@
         {
             Obj_AI_Hero killableEnemy = null;
             var hitsToKill = double.MaxValue;
-            /*
-            if (MyHero.ChampionName == "Azir")
-            {
-                foreach (var enemy in AllEnemys.Where(hero => hero.IsValidTarget() && InSoldierAttackRange(hero)))
-                {
-                    var killHits = CountKillhitsAzirSoldier(enemy);
-                    if (killableEnemy != null
-                        && (!(killHits < hitsToKill) || enemy.HasBuffOfType(BuffType.Invulnerability)))
-                    {
-                        continue;
-                    }
-                    killableEnemy = enemy;
-                    hitsToKill = killHits;
-                }
-                if (hitsToKill <= 4)
-                {
-                    return killableEnemy;
-                }
-                Obj_AI_Hero[] mostdmgenemy = { null };
-                foreach (var enemy in AllEnemys.Where(hero => hero.IsValidTarget() && InSoldierAttackRange(hero)).Where(enemy => mostdmgenemy[0] == null || GetAzirAASandWarriorDamage(enemy) > GetAzirAASandWarriorDamage(mostdmgenemy[0])))
-                {
-                    mostdmgenemy[0] = enemy;
-                }
-                if (mostdmgenemy[0] != null)
-                {
-                    return mostdmgenemy[0];
-                }
-            }
-            */
+            
+            //if (MyHero.ChampionName == "Azir")
+            //{
+            //    foreach (var enemy in AllEnemys.Where(hero => hero.IsValidTarget() && InSoldierAttackRange(hero)))
+            //    {
+            //        var killHits = CountKillhitsAzirSoldier(enemy);
+            //        if (killableEnemy != null
+            //            && (!(killHits < hitsToKill) || enemy.HasBuffOfType(BuffType.Invulnerability)))
+            //        {
+            //            continue;
+            //        }
+            //        killableEnemy = enemy;
+            //        hitsToKill = killHits;
+            //    }
+            //    if (hitsToKill <= 4)
+            //    {
+            //        return killableEnemy;
+            //    }
+            //    Obj_AI_Hero[] mostdmgenemy = { null };
+            //    foreach (var enemy in AllEnemys.Where(hero => hero.IsValidTarget() && InSoldierAttackRange(hero)).Where(enemy => mostdmgenemy[0] == null || GetAzirAASandWarriorDamage(enemy) > GetAzirAASandWarriorDamage(mostdmgenemy[0])))
+            //    {
+            //        mostdmgenemy[0] = enemy;
+            //    }
+            //    if (mostdmgenemy[0] != null)
+            //    {
+            //        return mostdmgenemy[0];
+            //    }
+            //}
+            
             foreach (var enemy in AllEnemys.Where(hero => hero.IsValidTarget() && InAutoAttackRange(hero)))
             {
                 var killHits = CountKillhits(enemy);
@@ -740,3 +742,5 @@
         }
     }
 }
+
+*/
