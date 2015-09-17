@@ -6,53 +6,37 @@
 
     public class Load
     {
-        private static bool subscribed;
+        private const string ClassName = "SparkTech - Load.cs - ";
+        private static readonly bool Subscribed;
+
         static Load()
         {
-            Comms.Print("Static constructor of the SparkTech Load.cs called", true);
-
-            if (Game.Mode == GameMode.Running)
+            Comms.Print("Static constructor of the - " + ClassName + " called", true);
+            try
             {
-                Comms.Print("SparkTech - Load.cs - Fired the first library init option", true);
-
-                try
+                if (Game.Mode == GameMode.Running)
                 {
+                    Comms.Print(ClassName + "Fired the first library init option", true);
                     Summoner(new EventArgs());
                 }
-                catch (Exception ex)
+                else
                 {
-                    Comms.Print("SparkTech - Load.cs - Error: Couldn't sign an event!", true);
-                    Comms.Print("Error: " + ex);
-                }
-            }
-
-            else if (Game.Mode != GameMode.Running)
-            {
-                Comms.Print("SparkTech - Load.cs - Fired the second library init option", true);
-
-                try
-                {
-                    subscribed = true;
+                    Comms.Print(ClassName + "Fired the second library init option", true);
+                    Subscribed = true;
                     CustomEvents.Game.OnGameLoad += Summoner;
                 }
-                catch (Exception ex)
-                {
-                    subscribed = false;
-                    Comms.Print("SparkTech - Load.cs - Error: Couldn't sign an event!", true);
-                    Comms.Print("Error: " + ex);
-                }
             }
-            else
+            catch (Exception ex)
             {
-                Comms.Print("SparkTech - Load.cs - Error: No boot options matching!", true);
+                Comms.Print(ClassName + "Error: Couldn't sign an event!", true);
+                Comms.Print("Error: " + ex, true);
             }
         }
 
         private static void Summoner(EventArgs args)
         {
             STMenu.Create();
-
-            if (subscribed)
+            if (Subscribed)
             {
                 CustomEvents.Game.OnGameLoad -= Summoner;
             }

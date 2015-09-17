@@ -6,16 +6,19 @@
 
     public static class Helper
     {
-        public static int RandomNumber(int min, int max)
+        // ReSharper disable once InconsistentNaming
+        public static bool IsFullHD = Drawing.Height == 1920 && Drawing.Width == 1080;
+
+        public static int RandomNumber(int from, int to)
         {
-            Random random = new Random();
-            return random.Next(min, max);
+            Random r = new Random();
+            return r.Next(from, to);
         }
 
         // tyvm again Brian
         public static bool IsPet(Obj_AI_Minion obj)
         {
-            var pets = new[]
+            string[] pets =
                            {
                                "annietibbers", "elisespiderling", "heimertyellow", "heimertblue", "leblanc",
                                "malzaharvoidling", "shacobox", "shaco", "yorickspectralghoul", "yorickdecayedghoul",

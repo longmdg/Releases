@@ -33,13 +33,12 @@
             BrianWalker.Init(orbmenu);
             LibraryMenu.AddSubMenu(orbmenu);
 
-            if (Drawing.Height == 1920 && Drawing.Width == 1080)
+            if (Helper.IsFullHD())
             {
                 new Extensions();
             }
-
-
-            if (LibraryMenu.Item("hack").GetValue<bool>())
+            
+            if (Settings.LoadZoomHack)
             {
                 new Cheats();
             }

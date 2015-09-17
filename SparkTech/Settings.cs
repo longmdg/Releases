@@ -9,18 +9,19 @@
 
     public static class Settings
     {
-        internal static bool Debug = true;
+        // F5Settings
+        internal static bool LoadZoomHack { get { return STMenu.LibraryMenu.Item("hack").GetValue<bool>(); } }
 
-        public static bool SkipNoUpdate = false;
-        public static bool UpdateCheck = true;
-        public static int UpdateCheckDelay = 250;
+
+
+        // Update
+        internal static bool SkipNoUpdate = false;
+        internal static bool UpdateCheck = true;
+        internal static int UpdateCheckDelay = 250;
 
         private static float spaghettiLimiter;
 
-        internal static bool LoadZoomHack
-        {
-            get { return STMenu.LibraryMenu.Item("hack").GetValue<bool>(); }
-        }
+        
 
         internal static void OnSettingsChange(EventArgs args)
         {
