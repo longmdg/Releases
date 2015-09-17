@@ -21,8 +21,6 @@
 
         internal static void Create()
         {
-            Settings.MenuLoaded = true;
-
             LibraryMenu = new Menu("[ST] Core", "SparkTech", true);
 
             Menu F5Settings = new Menu("F5Settings", "F5Settings");

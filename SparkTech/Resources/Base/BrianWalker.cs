@@ -27,13 +27,10 @@ namespace SparkTech.Resources.Base
     [SuppressMessage("ReSharper", "UseNullPropagation")]
     internal class BrianWalker
     {
-        // TODO: Improve Lane Clear logic (1/2)
-        private static bool ShouldWait { get { return ObjectManager.Get<Obj_AI_Minion>().Any(i => InAutoAttackRange(i) && i.Team != GameObjectTeam.Neutral && HealthPrediction.GetHealthPrediction(i, (int)(Player.AttackDelay * 1000 * 2), 0) <= Player.GetAutoAttackDamage(i, true)); } }
         private static bool CanMove { get { return missileLaunched || Utils.GameTimeTickCount + Game.Ping / 2 >= lastAttack + Player.AttackCastDelay * 1000 + GetCurrentWindupTime; } }
         private static int GetCurrentWindupTime { get { return config.Item("ST_Misc_ExtraWindUp").GetValue<Slider>().Value; } }
         private static bool IsAllowedToAttack { get { return ((CurrentMode != Mode.Combo && CurrentMode != Mode.Harass && CurrentMode != Mode.LaneClear) || config.Item("ST_" + CurrentMode + "_Attack").IsActive()) && (CurrentMode != Mode.LastHit || config.Item("ST_LastHit_Attack").IsActive()) && (Attack && !config.Item("ST_Misc_AllAttackDisabled").IsActive()); } }
         private static bool IsAllowedToMove { get { return ((CurrentMode != Mode.Combo && CurrentMode != Mode.Harass && CurrentMode != Mode.LaneClear) || config.Item("ST_" + CurrentMode + "_Move").IsActive()) && (Move && !config.Item("ST_Misc_AllMovementDisabled").IsActive()) && (CurrentMode != Mode.LastHit || config.Item("ST_LastHit_Move").IsActive()); } }
-        private static float GetAutoAttackRange(Obj_AI_Base source, AttackableUnit target) { return source.AttackRange + source.BoundingRadius + (target.IsValidTarget() ? target.BoundingRadius : 0); }
         private static readonly Obj_AI_Hero Player = ObjectManager.Player;
         private static Menu config;
         private static bool disableNextAttack, missileLaunched;
@@ -48,9 +45,12 @@ namespace SparkTech.Resources.Base
         public static bool CanAttack { get { return Utils.GameTimeTickCount + Game.Ping / 2 + 25 >= lastAttack + Player.AttackDelay * 1000; } }
         public static Mode CurrentMode { get { return config.Item("ST_Combo_Key").IsActive() ? Mode.Combo : (config.Item("ST_Clear_Key").IsActive() ? Mode.LaneClear : (config.Item("ST_Harass_Key").IsActive() ? Mode.Harass : (config.Item("ST_LastHit_Key").IsActive() ? Mode.LastHit : (config.Item("ST_Flee_Key").IsActive() ? Mode.Flee : Mode.None)))); } }
         public static Obj_AI_Hero ForcedTarget = null;
-        public static float GetAutoAttackRange(AttackableUnit target = null) { return GetAutoAttackRange(Player, target); }
-        public static bool InAutoAttackRange(AttackableUnit target, float extraRange = 0, Vector3 from = new Vector3()) { return target.IsValidTarget(GetAutoAttackRange(target) + extraRange, true, from); }
-        public enum Mode { Combo, Harass, LaneClear, LastHit, Flee, None }
+
+        public enum Mode
+        {
+            Combo, Harass, LaneClear, LastHit, Flee, None
+        }
+
         public static Obj_AI_Hero GetBestHeroTarget
         {
             get
@@ -69,6 +69,30 @@ namespace SparkTech.Resources.Base
             }
         }
 
+        private static float GetAutoAttackRange(Obj_AI_Base source, AttackableUnit target)
+        {
+            return source.AttackRange + source.BoundingRadius + (target.IsValidTarget() ? target.BoundingRadius : 0);
+        }
+
+        // TODO: Improve Lane Clear logic (1/2)
+        private static bool ShouldWait
+        {
+            get
+            {
+                return ObjectManager.Get<Obj_AI_Minion>().Any(i => InAutoAttackRange(i) && i.Team != GameObjectTeam.Neutral && HealthPrediction.GetHealthPrediction(i, (int)(Player.AttackDelay * 1000 * 2), 0) <= Player.GetAutoAttackDamage(i, true));
+            }
+        }
+
+        public static float GetAutoAttackRange(AttackableUnit target = null)
+        {
+            return GetAutoAttackRange(Player, target);
+        }
+
+        public static bool InAutoAttackRange(AttackableUnit target, float extraRange = 0, Vector3 from = new Vector3())
+        {
+            return target.IsValidTarget(GetAutoAttackRange(target) + extraRange, true, from);
+        }
+
         public static AttackableUnit GetPossibleTarget
         {
             get
@@ -85,7 +109,8 @@ namespace SparkTech.Resources.Base
                         var time = (int)(Player.AttackCastDelay * 1000) - 100 + Game.Ping / 2 + (int)(Player.Distance(obj) / Orbwalking.GetMyProjectileSpeed() * 1000);
                         var hpPred = HealthPrediction.GetHealthPrediction(obj, time, 0);
                         if (hpPred < 1) FireOnNonKillableMinion(obj);
-                        if (hpPred > 0 && hpPred <= Player.GetAutoAttackDamage(obj, true)) return obj;
+                        if (hpPred > 0 && hpPred <= Player.GetAutoAttackDamage(obj, true))
+                            return obj;
                     }
                 if (InAutoAttackRange(ForcedTarget))
                     return ForcedTarget;
@@ -98,14 +123,17 @@ namespace SparkTech.Resources.Base
                 if (CurrentMode != Mode.LastHit)
                 {
                     var hero = GetBestHeroTarget;
-                    if (hero.IsValidTarget()) return hero;
+                    if (hero.IsValidTarget())
+                        return hero;
                 }
                 if (CurrentMode == Mode.LaneClear || CurrentMode == Mode.Harass)
                 {
                     var mob = ObjectManager.Get<Obj_AI_Minion>().Where(i => InAutoAttackRange(i) && i.Team == GameObjectTeam.Neutral && i.CharData.BaseSkinName != "gangplankbarrel").MaxOrDefault(i => i.MaxHealth);
-                    if (mob != null) return mob;
+                    if (mob != null)
+                        return mob;
                 }
-                if (CurrentMode != Mode.LaneClear || ShouldWait) return null;
+                if (CurrentMode != Mode.LaneClear || ShouldWait)
+                    return null;
 
                 // TODO: Improve Lane Clear logic (2/2)
 
@@ -121,6 +149,8 @@ namespace SparkTech.Resources.Base
                 return minion;
             }
         }
+
+        #region Init
 
         internal static void Init(Menu mainMenu)
         {
@@ -180,9 +210,44 @@ namespace SparkTech.Resources.Base
             Attack = true;
             Move = true;
 
-            GameObject.OnCreate += (sender, args) => { if (!sender.IsValid<MissileClient>())return; var missile = (MissileClient) sender;if (!missile.SpellCaster.IsMe || !missile.SpellCaster.IsRanged || !missile.SData.IsAutoAttack()) return; missileLaunched = true; FireAfterAttack((AttackableUnit)missile.Target); };
-            Spellbook.OnStopCast += (sender, args) => { if (sender.Owner.IsMe && args.DestroyMissile && args.StopAnimation) lastAttack = 0; };
-            Obj_AI_Base.OnProcessSpellCast += (sender, args) => { if (!sender.IsMe) return; if (args.Target.IsValid<AttackableUnit>() && args.SData.IsAutoAttack()) { lastAttack = Utils.GameTimeTickCount - Game.Ping / 2; missileLaunched = false; var target = (AttackableUnit)args.Target; if (!lastTarget.IsValidTarget() || target.NetworkId != lastTarget.NetworkId) { FireOnTargetSwitch(target); lastTarget = target; } if (sender.IsMelee) Utility.DelayAction.Add((int)(sender.AttackCastDelay * 1000 + 40), () => FireAfterAttack(target)); FireOnAttack(target); } if (Orbwalking.IsAutoAttackReset(args.SData.Name)) lastAttack = 0; };
+            GameObject.OnCreate += (sender, args) =>
+                {
+                    if (!sender.IsValid<MissileClient>())
+                        return;
+                    var missile = (MissileClient)sender;
+                    if (!missile.SpellCaster.IsMe || !missile.SpellCaster.IsRanged || !missile.SData.IsAutoAttack())
+                        return;
+                    missileLaunched = true;
+                    FireAfterAttack((AttackableUnit)missile.Target);
+                };
+
+            Spellbook.OnStopCast += (sender, args) =>
+                {
+                    if (sender.Owner.IsMe && args.DestroyMissile && args.StopAnimation)
+                        lastAttack = 0;
+                };
+
+            Obj_AI_Base.OnProcessSpellCast += (sender, args) =>
+                {
+                    if (!sender.IsMe)
+                        return;
+                    if (args.Target.IsValid<AttackableUnit>() && args.SData.IsAutoAttack())
+                    {
+                        lastAttack = Utils.GameTimeTickCount - Game.Ping / 2;
+                        missileLaunched = false;
+                        var target = (AttackableUnit)args.Target;
+                        if (!lastTarget.IsValidTarget() || target.NetworkId != lastTarget.NetworkId)
+                        {
+                            FireOnTargetSwitch(target);
+                            lastTarget = target;
+                        }
+                        if (sender.IsMelee)
+                            Utility.DelayAction.Add((int)(sender.AttackCastDelay * 1000 + 40), () => FireAfterAttack(target));
+                        FireOnAttack(target);
+                    }
+                    if (Orbwalking.IsAutoAttackReset(args.SData.Name))
+                        lastAttack = 0;
+                };
             
             // TODO: Rethink those checks.
             Game.OnUpdate += args =>
@@ -193,6 +258,8 @@ namespace SparkTech.Resources.Base
                     }
                     Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget);
                 };
+
+        #endregion
 
             // TODO: Move that 'scope'.
 
@@ -232,9 +299,7 @@ namespace SparkTech.Resources.Base
             return;
             lastMove = Utils.GameTimeTickCount;
             if (Player.Distance(pos, true) < Math.Pow(Player.BoundingRadius + config.Item("ST_Misc_HoldZone").GetValue<Slider>().Value, 2))
-            {
                 return;
-            }
             Player.IssueOrder(GameObjectOrder.MoveTo, Player.ServerPosition.Extend(pos, (Random.NextFloat(0.6f, 1) + 0.2f) * 400));
         }
 
@@ -259,7 +324,7 @@ namespace SparkTech.Resources.Base
                 }
             }
             if (!CanMove || !IsAllowedToMove)
-            return;
+                return;
             if (config.Item("ST_Combo_MeleeMagnet").IsActive() && CurrentMode == Mode.Combo && Player.IsMelee && Player.AttackRange < 200 && InAutoAttackRange(target) && target.IsValid<Obj_AI_Hero>() && ((Obj_AI_Hero) target).Distance(Game.CursorPos) < 300)
             {
                 MovePrediction.Delay = Player.BasicAttack.SpellCastTime;
@@ -343,7 +408,7 @@ namespace SparkTech.Resources.Base
             }
         }
 
-        #endregion BeforeAttackEventArgs
+        #endregion
 
     }
 }

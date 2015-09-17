@@ -80,15 +80,17 @@ namespace SparkTech
                      {
                          if (senderIsLibrary)
                          {
+                             Comms.Print("senderIsLibrary", true);
                              Comms.Print("Checking for a library update FAILED! Exception:", true);
                              Comms.Print(e.ToString(), true);
                          }
                          else
                          {
+                             Comms.Print("!librarySender", true);
                              Comms.Print("Checking for an update FAILED! Exception:", true);
                              Comms.Print(e.ToString(), true);
                          }
-                         Comms.Print("Failed to check for an update.");
+                         Comms.Print(string.Format("{0} - Checking for an update FAILED!", gitName));
                      }
                  }).Start();
              } 

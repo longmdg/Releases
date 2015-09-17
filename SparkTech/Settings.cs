@@ -9,9 +9,6 @@
 
     public static class Settings
     {
-        #region MenuBools
-
-        public static bool MenuLoaded;
         internal static bool Debug = true;
 
         public static bool SkipNoUpdate = false;
@@ -20,17 +17,10 @@
 
         private static float spaghettiLimiter;
 
-
         internal static bool LoadZoomHack
         {
             get { return STMenu.LibraryMenu.Item("hack").GetValue<bool>(); }
         }
-
-        #endregion MenuBools
-
-        
-
-
 
         internal static void OnSettingsChange(EventArgs args)
         {
@@ -38,13 +28,7 @@
             {
                 return;
             }
-
             spaghettiLimiter = Environment.TickCount;
-
-            /*
-            
-            
-                    */
         }
 
 
