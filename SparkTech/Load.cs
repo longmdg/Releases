@@ -7,7 +7,6 @@
     public class Load
     {
         private static bool subscribed;
-
         static Load()
         {
             Comms.Print("Static constructor of the SparkTech Load.cs called", true);
@@ -51,15 +50,12 @@
 
         private static void Summoner(EventArgs args)
         {
-            Settings.Fire();
+            STMenu.Create();
 
-            if (!subscribed)
+            if (subscribed)
             {
-                return;
+                CustomEvents.Game.OnGameLoad -= Summoner;
             }
-
-            CustomEvents.Game.OnGameLoad -= Summoner;
-            subscribed = false;
         }
     }
 }

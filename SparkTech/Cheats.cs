@@ -41,7 +41,7 @@
 
             CMenu.AddItem((new MenuItem("st_cheats_separator_4", "It disables the display of your skill ranges")));
 
-            Utility.DelayAction.Add(100, () => Settings.LibraryMenu.AddSubMenu(CMenu));
+            Utility.DelayAction.Add(100, () => STMenu.LibraryMenu.AddSubMenu(CMenu));
         }
     }
 }
