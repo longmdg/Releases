@@ -60,8 +60,8 @@
   <ItemGroup>
     <Compile Include="Resources\Base\LXOrbwalker.cs" />
     <Compile Include="Cheats.cs" />
+    <Compile Include="STMenu.cs" />
     <Compile Include="SpellExt.cs" />
-    <Compile Include="HTMLColor.cs" />
     <Compile Include="Comms.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Load.cs" />

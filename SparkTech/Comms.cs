@@ -6,15 +6,18 @@
 
     public static class Comms
     {
-        public static void Print(string message, bool forceconsole = false) // to be expanded.
+        // TODO expand, add menu items, checks, notifications and colors.
+        public static void Print(string message, bool forceConsole = false) 
         {
-            if (forceconsole)
+            if (forceConsole)
             {
                 Console.WriteLine(message);
-                return;
             }
-
-            Game.PrintChat(message);
+            else
+            {
+                Game.PrintChat(message);
+            }
+            
         }
     }
 }
