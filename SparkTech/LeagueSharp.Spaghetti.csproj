@@ -58,7 +58,6 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Resources\Base\LXOrbwalker.cs" />
     <Compile Include="Cheats.cs" />
     <Compile Include="STMenu.cs" />
     <Compile Include="SpellExt.cs" />
