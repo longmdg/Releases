@@ -6,14 +6,7 @@
 
     public static class Helper
     {
-        // ReSharper disable once InconsistentNaming
-        public static bool IsFullHD = Drawing.Height == 1920 && Drawing.Width == 1080;
-
-        public static int RandomNumber(int from, int to)
-        {
-            Random r = new Random();
-            return r.Next(from, to);
-        }
+        private static int tempNumber;
 
         // tyvm again Brian
         public static bool IsPet(Obj_AI_Minion obj)
@@ -24,13 +17,33 @@
                                "malzaharvoidling", "shacobox", "shaco", "yorickspectralghoul", "yorickdecayedghoul",
                                "yorickravenousghoul", "zyrathornplant", "zyragraspingplant"
                            };
+
             return pets.Contains(obj.CharData.BaseSkinName.ToLower());
         }
+
+        // ReSharper disable once InconsistentNaming
+        public static readonly bool IsFullHD = Drawing.Height == 1920 && Drawing.Width == 1080;
+
+        public static int NextNumber
+        {
+            get
+            {
+                tempNumber++;
+                return tempNumber;
+            }
+        }
+
+        public static int RandomNumber(int from, int to)
+        {
+            Random r = new Random();
+            return r.Next(from, to);
+        }
+
     }
 
     #region Colors!
 
-    public static class ColorHelper
+    public static class HelperC
     {
         public const string AliceBlue = "#F0F8FF";
         public const string AntiqueWhite = "#FAEBD7";
@@ -174,6 +187,6 @@
         public const string YellowGreen = "#9ACD32";
     }
 
-    #endregion Colors!
+    #endregion
 
 }

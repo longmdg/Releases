@@ -12,7 +12,6 @@
 
     using Resources.Base;
 
-    // ReSharper disable once InconsistentNaming
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
     public static class STMenu
@@ -33,7 +32,7 @@
             BrianWalker.Init(orbmenu);
             LibraryMenu.AddSubMenu(orbmenu);
 
-            if (Helper.IsFullHD())
+            if (Helper.IsFullHD)
             {
                 new Extensions();
             }

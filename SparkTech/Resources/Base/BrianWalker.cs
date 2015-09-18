@@ -131,6 +131,7 @@ namespace SparkTech.Resources.Base
                     var mob = ObjectManager.Get<Obj_AI_Minion>().Where(i => InAutoAttackRange(i) && i.Team == GameObjectTeam.Neutral && i.CharData.BaseSkinName != "gangplankbarrel").MaxOrDefault(i => i.MaxHealth);
                     if (mob != null)
                         return mob;
+                    
                 }
                 if (CurrentMode != Mode.LaneClear || ShouldWait)
                     return null;
@@ -332,7 +333,7 @@ namespace SparkTech.Resources.Base
                 MoveTo(MovePrediction.GetPrediction((Obj_AI_Hero) target).UnitPosition);
             }
             else
-            MoveTo(Game.CursorPos);
+                MoveTo(Game.CursorPos);
         }
 
         #endregion
@@ -391,9 +392,7 @@ namespace SparkTech.Resources.Base
         public class BeforeAttackEventArgs
         {
             public AttackableUnit Target;
-
             private bool process = true;
-
             public bool Process
             {
                 get
