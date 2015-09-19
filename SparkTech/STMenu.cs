@@ -99,7 +99,7 @@
                 LibraryMenu.AddItem(new MenuItem("onupdatedelay", "Delay in checking for menu changes")).SetValue(new Slider(300, 0, 1000));
 
                 LibraryMenu.AddToMainMenu();
-                Updater.Check(null, true);
+                Updater.Check("SparkTech");
                 // Game.OnUpdate += Settings.OnSettingsChange;
             }
             catch (Exception e)

@@ -37,7 +37,9 @@
         private static void Summoner(EventArgs args)
         {
             if (Subbed)
+            {
                 CustomEvents.Game.OnGameLoad -= Summoner;
+            }
             // ReSharper disable once UnusedVariable
             var menu = new STMenu();
         }
