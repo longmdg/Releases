@@ -11,6 +11,10 @@
 
         public Extensions()
         {
+            if (!Helper.IsFullHD)
+            {
+                return;
+            }
             Hud = new Render.Sprite(Properties.Resources.TaylorSwift, new Vector2(1, 1));
             Hud.Add();
         }

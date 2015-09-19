@@ -4,13 +4,13 @@
 
     internal class Program
     {
-        private const string AssemblyName = "Testing";
+        private const string Assembly = "Testing";
 
         private static void Main()
         {
             // ReSharper disable once ObjectCreationAsStatement
             new Load();
-            Updater.Check(AssemblyName);
+            Updater.Check(Assembly);
         }
     }
 }

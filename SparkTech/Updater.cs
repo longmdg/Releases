@@ -1,7 +1,11 @@
 ﻿#region Credits
 
-// Taken from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
-// Which was c+p'd too, in fact ¯\_(ツ)_/¯
+/*
+
+                                          Taken from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+                                                                 Which was c+p'd too, in fact ¯\_(ツ)_/¯
+
+*/
 
 #endregion
 
@@ -12,10 +16,10 @@ namespace SparkTech
     using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Threading;
-    using System.Diagnostics.CodeAnalysis;
-    
-    [SuppressMessage("ReSharper", "UseStringInterpolation")] // TODO Remove this line when .NET 4.6 / new loader BIK
-    [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
+
+    using System.Diagnostics.CodeAnalysis; // TODO: Remove when .NET 4.6 / new loader arrives
+    [SuppressMessage("ReSharper", "UseStringInterpolation")]
+
     public static class Updater
     {
         public static void Check(string gitName, bool senderIsLibrary = false)
@@ -31,6 +35,7 @@ namespace SparkTech
                              AssemblyName assemblyName = Assembly.GetExecutingAssembly().GetName();
                              Comms.Print("Library Name:", true);
                              Comms.Print(assemblyName.ToString(), true);
+                             // ReSharper disable once AccessToDisposedClosure
                              string data = await client.DownloadStringTaskAsync("https://raw.github.com/Wiciaki/Releases/master/SparkTech/Properties/AssemblyInfo.cs");
                              var version = Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value.Replace("\"", ""));
                              if (version == assemblyName.Version)
@@ -55,6 +60,7 @@ namespace SparkTech
                              var assemblyName = Assembly.GetExecutingAssembly().GetName();
                              Comms.Print("Assembly Name:", true);
                              Comms.Print(assemblyName.ToString(), true);
+                             // ReSharper disable once AccessToDisposedClosure
                              var data = await client.DownloadStringTaskAsync(string.Format("https://raw.github.com/Wiciaki/Releases/master/{0}/Properties/AssemblyInfo.cs", gitName));
                              var version = Version.Parse(new Regex("AssemblyFileVersion\\((\"(.+?)\")\\)").Match(data).Groups[1].Value.Replace("\"", ""));
                              if (version == assemblyName.Version)
@@ -66,8 +72,7 @@ namespace SparkTech
                              }
                              else if (version != assemblyName.Version)
                              {
-                                 Comms.Print(string.Format("{0} - a new version is available! ", gitName));
-                                 Comms.Print(string.Format("{0} => {1}", assemblyName.Version, version));
+                                 Comms.Print(string.Format("{0} - a new version is available: {1} => {2}", gitName, assemblyName.Version, version));
                              }
                              else
                              {
@@ -80,15 +85,11 @@ namespace SparkTech
                      {
                          if (senderIsLibrary)
                          {
-                             Comms.Print("senderIsLibrary", true);
-                             Comms.Print("Checking for a library update FAILED! Exception:", true);
-                             Comms.Print(e.ToString(), true);
+                             Comms.Print("Checking for a library update FAILED! Exception: " + e, true);
                          }
                          else
                          {
-                             Comms.Print("!librarySender", true);
-                             Comms.Print("Checking for an update FAILED! Exception:", true);
-                             Comms.Print(e.ToString(), true);
+                             Comms.Print("Checking for an update FAILED! Exception: " + e, true);
                          }
                          Comms.Print(string.Format("{0} - Checking for an update FAILED!", gitName));
                      }

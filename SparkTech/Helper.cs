@@ -6,32 +6,25 @@
 
     public static class Helper
     {
-        private static int tempNumber;
+        
 
         // tyvm again Brian
         public static bool IsPet(Obj_AI_Minion obj)
         {
-            string[] pets =
+            return Pets.Contains(obj.CharData.BaseSkinName.ToLower());
+        }
+
+        private static readonly string[] Pets =
                            {
                                "annietibbers", "elisespiderling", "heimertyellow", "heimertblue", "leblanc",
                                "malzaharvoidling", "shacobox", "shaco", "yorickspectralghoul", "yorickdecayedghoul",
                                "yorickravenousghoul", "zyrathornplant", "zyragraspingplant"
                            };
 
-            return pets.Contains(obj.CharData.BaseSkinName.ToLower());
-        }
-
         // ReSharper disable once InconsistentNaming
         public static readonly bool IsFullHD = Drawing.Height == 1920 && Drawing.Width == 1080;
 
-        public static int NextNumber
-        {
-            get
-            {
-                tempNumber++;
-                return tempNumber;
-            }
-        }
+        
 
         public static int RandomNumber(int from, int to)
         {

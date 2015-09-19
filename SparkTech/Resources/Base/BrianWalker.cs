@@ -211,54 +211,10 @@ namespace SparkTech.Resources.Base
             Attack = true;
             Move = true;
 
-            GameObject.OnCreate += (sender, args) =>
-                {
-                    if (!sender.IsValid<MissileClient>())
-                        return;
-                    var missile = (MissileClient)sender;
-                    if (!missile.SpellCaster.IsMe || !missile.SpellCaster.IsRanged || !missile.SData.IsAutoAttack())
-                        return;
-                    missileLaunched = true;
-                    FireAfterAttack((AttackableUnit)missile.Target);
-                };
-
-            Spellbook.OnStopCast += (sender, args) =>
-                {
-                    if (sender.Owner.IsMe && args.DestroyMissile && args.StopAnimation)
-                        lastAttack = 0;
-                };
-
-            Obj_AI_Base.OnProcessSpellCast += (sender, args) =>
-                {
-                    if (!sender.IsMe)
-                        return;
-                    if (args.Target.IsValid<AttackableUnit>() && args.SData.IsAutoAttack())
-                    {
-                        lastAttack = Utils.GameTimeTickCount - Game.Ping / 2;
-                        missileLaunched = false;
-                        var target = (AttackableUnit)args.Target;
-                        if (!lastTarget.IsValidTarget() || target.NetworkId != lastTarget.NetworkId)
-                        {
-                            FireOnTargetSwitch(target);
-                            lastTarget = target;
-                        }
-                        if (sender.IsMelee)
-                            Utility.DelayAction.Add((int)(sender.AttackCastDelay * 1000 + 40), () => FireAfterAttack(target));
-                        FireOnAttack(target);
-                    }
-                    if (Orbwalking.IsAutoAttackReset(args.SData.Name))
-                        lastAttack = 0;
-                };
-            
-            // TODO: Rethink those checks.
-            Game.OnUpdate += args =>
-                {
-                    if (Player.IsDead || CurrentMode == Mode.None || MenuGUI.IsChatOpen || Player.IsRecalling() || Player.IsCastingInterruptableSpell(true))
-                    {
-                        return;
-                    }
-                    Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget);
-                };
+            GameObject.OnCreate += BrianWalker.GameObject_OnCreate;
+            Spellbook.OnStopCast += BrianWalker.Spellbook_OnStopCast;
+            Obj_AI_Base.OnProcessSpellCast += BrianWalker.Obj_AI_Base_OnProcessSpellCast;
+            Game.OnUpdate += BrianWalker.Game_OnUpdate;
 
         #endregion
 
@@ -289,6 +245,55 @@ namespace SparkTech.Resources.Base
                 };
                 
             */
+        }
+
+        internal static void GameObject_OnCreate(GameObject sender, EventArgs args)
+        {
+            if (!sender.IsValid<MissileClient>())
+                return;
+            var missile = (MissileClient)sender;
+            if (!missile.SpellCaster.IsMe || !missile.SpellCaster.IsRanged || !missile.SData.IsAutoAttack())
+                return;
+            missileLaunched = true;
+            FireAfterAttack((AttackableUnit)missile.Target);
+        }
+
+        internal static void Spellbook_OnStopCast(Spellbook sender, SpellbookStopCastEventArgs args)
+        {
+            if (sender.Owner.IsMe && args.DestroyMissile && args.StopAnimation)
+                lastAttack = 0;
+        }
+
+        internal static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (!sender.IsMe)
+                return;
+            if (args.Target.IsValid<AttackableUnit>() && args.SData.IsAutoAttack())
+            {
+                lastAttack = Utils.GameTimeTickCount - Game.Ping / 2;
+                missileLaunched = false;
+                var target = (AttackableUnit)args.Target;
+                if (!lastTarget.IsValidTarget() || target.NetworkId != lastTarget.NetworkId)
+                {
+                    FireOnTargetSwitch(target);
+                    lastTarget = target;
+                }
+                if (sender.IsMelee) Utility.DelayAction.Add((int)(sender.AttackCastDelay * 1000 + 40), () => FireAfterAttack(target));
+                    FireOnAttack(target);
+            }
+            if (Orbwalking.IsAutoAttackReset(args.SData.Name))
+                lastAttack = 0;
+        }
+
+        // TODO: Rethink those checks.
+        internal static void Game_OnUpdate(EventArgs args)
+        {
+            if (Player.IsDead || CurrentMode == Mode.None || MenuGUI.IsChatOpen || Player.IsRecalling()|| Player.IsCastingInterruptableSpell(true))
+            {
+                return;
+            }
+            Orbwalk(CurrentMode == Mode.Flee ? null : GetPossibleTarget);
+
         }
 
         #region Orbwalk <=> MoveTo
