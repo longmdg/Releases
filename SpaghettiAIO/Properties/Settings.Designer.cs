@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Spaghetti.Properties {
+namespace SparkTech.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
