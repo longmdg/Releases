@@ -1,15 +1,15 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("LeagueSharp.Spaghetti")]
-[assembly: AssemblyDescription(null)]
+[assembly: AssemblyTitle("SpaghettiAIO")]
+[assembly: AssemblyDescription("Nice meme")]
 [assembly: AssemblyConfiguration(null)]
 [assembly: AssemblyCompany("SparkTech")]
-[assembly: AssemblyProduct("LeagueSharp.Spaghetti")]
+[assembly: AssemblyProduct("SpaghettiAIO")]
 [assembly: AssemblyCopyright(null)]
 [assembly: AssemblyTrademark(null)]
 [assembly: AssemblyCulture(null)]
 [assembly: ComVisible(false)]
-[assembly: Guid("a5692347-1db5-41b0-bb16-89601393fd45")]
-[assembly: AssemblyVersion("0.9.1.3")]
-[assembly: AssemblyFileVersion("0.9.1.3")]
+[assembly: Guid("3f6d154c-f8cb-490f-8e40-d72331a5a120")]
+[assembly: AssemblyVersion("0.9.1.4")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
