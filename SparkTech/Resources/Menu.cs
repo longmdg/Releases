@@ -5,11 +5,12 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using LeagueSharp;
-    using LeagueSharp.Common;
 
-    internal static class Helper
+    public class Menu
     {
-        
+        static Menu()
+        {
+            
+        }
     }
 }
