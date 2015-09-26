@@ -1,9 +1,5 @@
-﻿#region Credits
-
-// Taken from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+﻿// Taken from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
 // Which was c+p'd too, in fact ¯\_(ツ)_/¯
-
-#endregion
 
 namespace SparkTech.Resources
 {
