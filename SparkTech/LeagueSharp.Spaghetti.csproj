@@ -64,7 +64,6 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Events.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SparkTech.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

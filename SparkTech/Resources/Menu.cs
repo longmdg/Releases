@@ -6,9 +6,12 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class Menu
+    using LeagueSharp;
+    using LeagueSharp.Common;
+
+    internal static class Menu
     {
-        static Menu()
+        internal static void Create()
         {
             
         }

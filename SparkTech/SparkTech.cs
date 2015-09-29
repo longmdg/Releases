@@ -7,9 +7,12 @@
     using LeagueSharp.Common;
 
     [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")]
-    [SuppressMessage("ReSharper", "LocalizableElement")]
+    [SuppressMessage("ReSharper", "UseNullPropagation")]
     public sealed class SparkTech
     {
+        public delegate void OnMenuCreated(EventArgs args);
+        public static event OnMenuCreated OnInit;
+
         private static SparkTech inst;
         public static SparkTech Instance
         {
@@ -27,37 +30,45 @@
                 {
                     case GameMode.Running:
                     case GameMode.Paused:
-                        new Resources.Menu();
+                        Resources.Menu.Create();
                         break;
                     case GameMode.Connecting:
-                        CustomEvents.Game.OnGameLoad += Init;
+                        CustomEvents.Game.OnGameLoad += Inject;
                         break;
                     case GameMode.Finished:
                         Game.PrintChat("[ST] " + ObjectManager.Player.ChampionName + " - too late in the game to inject!");
                         break;
                     case GameMode.Exiting:
-                        Console.WriteLine("SparkTech - Injection requirements not met - Incorrect GameMode!");
+                        Console.WriteLine(@"SparkTech - Injection requirements not met - Incorrect GameMode!");
                         break;
                     default:
-                        Console.WriteLine("SparkTech - Injection requirements not met - Unknown GameMode");
+                        Console.WriteLine(@"SparkTech - Injection requirements not met - Unknown GameMode");
                         break;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("SparkTech - An unknown error occured during the injection:\n{0}", ex);
+                Console.WriteLine(@"SparkTech - An unknown error occured during the injection:"  + Environment.NewLine + ex);
             }
         }
 
-        private static void Init(EventArgs args)
+        internal static void FireOnInit()
         {
-            new Resources.Menu();
-            GC.Collect();  // TODO: Drink devs' tears after they realise how awful this line is :^)
+            if (OnInit != null)
+            {
+                OnInit(new EventArgs());
+            }
+        }
+        
+        private static void Inject(EventArgs args)
+        {
+            Resources.Menu.Create();
+            GC.Collect();
         }
 
         ~SparkTech()
         {
-            CustomEvents.Game.OnGameLoad -= Init;
+            CustomEvents.Game.OnGameLoad -= Inject;
         }
     }
 }
