@@ -7,49 +7,50 @@
     using LeagueSharp.Common;
 
     [SuppressMessage("ReSharper", "ConvertPropertyToExpressionBody")]
+    [SuppressMessage("ReSharper", "ConvertConditionalTernaryToNullCoalescing")]
     [SuppressMessage("ReSharper", "UseNullPropagation")]
-    public sealed class SparkTech
+    public static class SparkTech
     {
+        public static bool Present = true;
+
         public delegate void OnMenuCreated(EventArgs args);
+
         public static event OnMenuCreated OnInit;
 
-        private static SparkTech inst;
-        public static SparkTech Instance
+        public delegate void OnTaskFinished(EventArgs args);
+
+        public static event OnTaskFinished OnFinalize;
+
+        private static bool fired;
+
+        static SparkTech()
         {
-            get
+            switch (Game.Mode)
             {
-                return inst ?? (inst = new SparkTech());
+                case GameMode.Running:
+                case GameMode.Paused:
+                    Resources.Menu.Create();
+                    break;
+                case GameMode.Connecting:
+                    Resources.LoadingScreen.Init();
+                    CustomEvents.Game.OnGameLoad += Init;
+                    break;
+                case GameMode.Finished:
+                    Game.PrintChat("[ST] " + ObjectManager.Player.ChampionName + " - too late in the game to inject!");
+                    break;
+                case GameMode.Exiting:
+                    Console.WriteLine(@"SparkTech - Injection requirements not met - Incorrect GameMode!");
+                    break;
+                default:
+                    Console.WriteLine(@"SparkTech - Injection requirements not met - Unknown GameMode");
+                    break;
             }
         }
 
-        private SparkTech()
+        private static void Init(EventArgs args)
         {
-            try
-            {
-                switch (Game.Mode)
-                {
-                    case GameMode.Running:
-                    case GameMode.Paused:
-                        Resources.Menu.Create();
-                        break;
-                    case GameMode.Connecting:
-                        CustomEvents.Game.OnGameLoad += Inject;
-                        break;
-                    case GameMode.Finished:
-                        Game.PrintChat("[ST] " + ObjectManager.Player.ChampionName + " - too late in the game to inject!");
-                        break;
-                    case GameMode.Exiting:
-                        Console.WriteLine(@"SparkTech - Injection requirements not met - Incorrect GameMode!");
-                        break;
-                    default:
-                        Console.WriteLine(@"SparkTech - Injection requirements not met - Unknown GameMode");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(@"SparkTech - An unknown error occured during the injection:"  + Environment.NewLine + ex);
-            }
+            CustomEvents.Game.OnGameLoad -= Init;
+            Resources.Menu.Create();
         }
 
         internal static void FireOnInit()
@@ -59,16 +60,25 @@
                 OnInit(new EventArgs());
             }
         }
-        
-        private static void Inject(EventArgs args)
-        {
-            Resources.Menu.Create();
-            GC.Collect();
-        }
 
-        ~SparkTech()
+        public static void FireOnFinalized()
         {
-            CustomEvents.Game.OnGameLoad -= Inject;
+            if (fired)
+            {
+                return;
+            }
+
+            fired = true;
+
+            Utility.DelayAction.Add(
+                250,
+                () =>
+                    {
+                        if (OnFinalize != null)
+                        {
+                            OnFinalize(new EventArgs());
+                        }
+                    });
         }
     }
 }

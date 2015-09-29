@@ -7,13 +7,23 @@
     using System.Threading.Tasks;
 
     using LeagueSharp;
-    using LeagueSharp.Common;
 
-    internal static class Menu
+    public class Menu
     {
-        internal static void Create()
+        static Menu()
         {
             
+        }
+
+        internal static void Create()
+        {
+            SparkTech.OnFinalize += OnFinalize;
+        }
+
+        private static void OnFinalize(EventArgs args)
+        {
+            Game.PrintChat("Finalized!");
+            Updater.Check("SparkTech");
         }
     }
 }
