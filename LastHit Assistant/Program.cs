@@ -43,10 +43,12 @@ namespace LastHit_Assistant
 
         private static void Main()
         {
-            if (Game.Mode == GameMode.Running)
+            if (Game.Mode == GameMode.Running || Game.Mode == GameMode.Paused)
+            {
                 OnLoad(new EventArgs());
-            else
-                CustomEvents.Game.OnGameLoad += OnLoad;
+                return;
+            }
+            CustomEvents.Game.OnGameLoad += OnLoad;
         }
 
         private static readonly Menu Config = new Menu("[ST] LastHit Assistant", "ST_LHA", true);
