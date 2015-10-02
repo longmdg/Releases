@@ -31,7 +31,7 @@ namespace SparkTech.Resources
                 }
                 catch (Exception ex)
                 {
-                    Comms.Log("Checking for an update failed", "Updater.cs", ex);
+                    Comms.Print("Checking for an update failed\n" + ex, true);
                 }
             else
                 Comms.Print(string.Format("{0} - Updating is off!", gitName), true);

@@ -25,7 +25,7 @@
                         Resources.Menu.Instance();
                         break;
                     case GameMode.Finished:
-                        Game.PrintChat("[ST] " + ObjectManager.Player.ChampionName + " - too late in the game to inject!");
+                        Console.WriteLine(@"Too late in the game to inject!");
                         break;
                     case GameMode.Exiting:
                         Console.WriteLine(@"[ST] - Injection requirements not met - Incorrect GameMode!");
@@ -37,7 +37,7 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine(@"[ST] - Hey, I'm Spark and I'm done coding this shit :(\n" + ex);
+                Console.WriteLine(@"[ST] - Hey, I'm Spark and I'm done coding this shit :(" + Environment.NewLine + ex);
             }
         }
 
