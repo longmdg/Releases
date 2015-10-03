@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -11,9 +7,31 @@ namespace SparkTech.Resources
 {
     internal static class Connecting
     {
-        internal static void Instance()
+        static Connecting()
         {
-            
+            Game.OnStart += OnGameStart;
+            Features();
+        }
+
+        internal static void Instance() { }
+
+        private static void OnGameStart(EventArgs args)
+        {
+            Boot.FireOnInit();
+            Game.OnStart -= OnGameStart;
+        }
+
+        private static void Features()
+        {
+            Utility.DelayAction.Add(125, () =>
+                {
+                    if (Game.Mode != GameMode.Connecting)
+                    {
+                        return;
+                    }
+
+                    Console.WriteLine(@"loading screen xdd");
+                });
         }
     }
 }

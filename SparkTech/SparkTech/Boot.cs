@@ -49,6 +49,6 @@
             }
         }
 
-        public static void Instance() { }
+        public static void Initialize() { }
     }
 }
