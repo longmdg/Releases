@@ -2,6 +2,6 @@
 {
     public static class Settings
     {
-        public static bool SkipNoUpdate, UpdateCheck;
+        public static bool SkipNoUpdate, UpdateCheck = true;
     }
 }

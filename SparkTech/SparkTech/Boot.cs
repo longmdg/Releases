@@ -4,6 +4,7 @@
     using System.Diagnostics.CodeAnalysis;
 
     using LeagueSharp;
+    using LeagueSharp.Common;
 
     [SuppressMessage("ReSharper", "UseNullPropagation")]
     public static class Boot
@@ -13,32 +14,28 @@
 
         static Boot()
         {
-            try
-            {
-                switch (Game.Mode)
-                {
-                    case GameMode.Connecting:
-                        Resources.Connecting.Instance();
-                        break;
-                    case GameMode.Running:
-                    case GameMode.Paused:
-                        Resources.Menu.Instance();
-                        break;
-                    case GameMode.Finished:
-                        Console.WriteLine(@"Too late in the game to inject!");
-                        break;
-                    case GameMode.Exiting:
-                        Console.WriteLine(@"[ST] - Injection requirements not met - Incorrect GameMode!");
-                        break;
-                    default:
-                        Console.WriteLine(@"[ST] - Injection failed - Unknown GameMode");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(@"[ST] - Hey, I'm Spark and I'm done coding this shit :(" + Environment.NewLine + ex);
-            }
+            Utility.DelayAction.Add(250, () =>
+                    {
+                        switch (Game.Mode)
+                        {
+                            case GameMode.Connecting:
+                                Resources.Connecting.Instance();
+                                break;
+                            case GameMode.Running:
+                            case GameMode.Paused:
+                                Resources.Menu.Instance();
+                                break;
+                            case GameMode.Finished:
+                                Console.WriteLine(@"Too late in the game to inject!");
+                                break;
+                            case GameMode.Exiting:
+                                Console.WriteLine(@"[ST] - Injection requirements not met - Incorrect GameMode!");
+                                break;
+                            default:
+                                Console.WriteLine(@"[ST] - Injection failed - Unknown GameMode");
+                                break;
+                        }
+                    });
         }
 
         internal static void FireOnInit()

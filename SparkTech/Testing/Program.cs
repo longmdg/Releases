@@ -13,9 +13,11 @@
 
             Boot.Initialize();
 
-            Boot.OnInit += eventArgs => Comms.Print("Testing - OnInit Fired!");
-
-            Updater.Check("Testing");
+            Boot.OnInit += eventArgs =>
+                {
+                    Comms.Print("Testing - OnInit Fired!");
+                    Updater.Check("Testing");
+                };
 
             Console.WriteLine("Testing inited!");
         }
