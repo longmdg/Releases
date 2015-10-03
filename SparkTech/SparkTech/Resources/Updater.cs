@@ -23,11 +23,16 @@ namespace SparkTech.Resources
                 true);
         }
 
-        public static async void Check(string gitName)
+        public static async void Check(string gitName, AssemblyName assemblyName = null)
         {
             try
             {
-                var assemblyName = Assembly.GetExecutingAssembly().GetName();
+                if (assemblyName == null)
+                {
+                    assemblyName = Assembly.GetExecutingAssembly().GetName();
+                }
+
+                Console.WriteLine(@"Assembly name: " + assemblyName.Name);
 
                 if (!Settings.UpdateCheck)
                 {
