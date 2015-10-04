@@ -4,12 +4,20 @@
     using System.Diagnostics.CodeAnalysis;
 
     using LeagueSharp;
+    using LeagueSharp.Common;
 
     [SuppressMessage("ReSharper", "UseNullPropagation")]
+
     public static class Boot
     {
-        public delegate void OnInitH(EventArgs args);
-        public static event OnInitH OnInit;
+        static Boot()
+        {
+            SwitchGameMode();
+        }
+
+        public delegate void OnInitDelegate(EventArgs args);
+
+        public static event OnInitDelegate OnInit;
 
         internal static void FireOnInit()
         {
@@ -19,15 +27,10 @@
             }
         }
 
-        private static bool inited;
+        public static void Initialize() { }
 
-        public static void Initialize()
+        private static void SwitchGameMode()
         {
-            if (inited)
-                return;
-            
-            inited = true;
-
             switch (Game.Mode)
             {
                 case GameMode.Connecting:
@@ -35,16 +38,17 @@
                     break;
                 case GameMode.Running:
                 case GameMode.Paused:
-                    Resources.Menu.Instance();
+                    Resources.MenuST.Instance();
                     break;
                 case GameMode.Finished:
                     Console.WriteLine(@"Too late in the game to inject!");
                     break;
                 case GameMode.Exiting:
-                    Console.WriteLine(@"[ST] - Injection requirements not met - Incorrect GameMode!");
+                    Console.WriteLine(@"ST - Injection requirements not met - Incorrect GameMode!");
                     break;
                 default:
-                    Console.WriteLine(@"[ST] - Injection failed - Unknown GameMode");
+                    Console.WriteLine(@"ST - An unknown injection failure occured, retrying...");
+                    Utility.DelayAction.Add(125, SwitchGameMode);
                     break;
             }
         }

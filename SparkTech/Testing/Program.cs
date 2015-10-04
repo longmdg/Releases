@@ -1,7 +1,6 @@
 ﻿namespace Testing
 {
     using System;
-    using System.Reflection;
 
     using SparkTech;
     using SparkTech.Resources;
@@ -10,16 +9,12 @@
     {
         private static void Main()
         {
-            Console.WriteLine("Initing Testing...");
-
             Boot.Initialize();
-
-            var assemblyName = Assembly.GetExecutingAssembly().GetName();
 
             Boot.OnInit += eventArgs =>
                 {
                     Comms.Print("Testing - OnInit Fired!");
-                    Updater.Check("Testing", assemblyName);
+                    Updater.Check("Testing");
                 };
 
             Console.WriteLine("Testing inited!");

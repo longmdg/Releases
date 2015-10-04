@@ -1,4 +1,4 @@
-﻿// Taken from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
+﻿// Taken (yet modified a lot) from https://github.com/Hellsing/LeagueSharp/blob/master/Avoid/UpdateChecker.cs
 // Which was c+p'd too, in fact ¯\_(ツ)_/¯
 
 namespace SparkTech.Resources
@@ -16,59 +16,37 @@ namespace SparkTech.Resources
     {
         static Updater()
         {
-            Comms.Print(
-                Settings.UpdateCheck
-                ? "[ST] - Updating seems to be turned on!"
-                : "[ST] - Updating is off!",
-                true);
+            Comms.Print(Settings.UpdateCheck ? "[ST] - Updating is ON!" : "[ST] - Updating is OFF!", true);
         }
 
-        public static async void Check(string gitName, AssemblyName assemblyName = null)
+        public static async void Check(string gitName)
         {
             try
             {
-                if (assemblyName == null)
-                {
-                    assemblyName = Assembly.GetExecutingAssembly().GetName();
-                }
+                var assemblyName = Assembly.GetCallingAssembly().GetName();
 
-                Console.WriteLine(@"Assembly name: " + assemblyName.Name);
+                Comms.Print("Assembly name: " + assemblyName.Name, true);
 
                 if (!Settings.UpdateCheck)
                 {
-                    Comms.Print(string.Format("Assembly Name (Updating is off!):\n{0}", assemblyName), true);
+                    return;
                 }
-                else
+
+                using (var client = new WebClient())
                 {
-                    using (WebClient client = new WebClient())
+
+                    var data = await client.DownloadStringTaskAsync(string.Format("https://raw.github.com/Wiciaki/Releases/master/SparkTech/{0}/Properties/AssemblyInfo.cs", gitName));
+                    var version = Version.Parse(new Regex("AssemblyVersion\\((\"(.+?)\")\\)").Match(data).Groups[2].Value);
+                    if (version == assemblyName.Version)
                     {
-                        Comms.Print(string.Format("Assembly Name:\n{0}", assemblyName), true);
-                        string data = await client.DownloadStringTaskAsync(string.Format("https://raw.github.com/Wiciaki/Releases/master/SparkTech/{0}/Properties/AssemblyInfo.cs", gitName));
-                        Version version = Version.Parse(new Regex("AssemblyVersion\\((\"(.+?)\")\\)").Match(data).Groups[2].Value);
-                        if (version == assemblyName.Version)
+                        if (!Settings.SkipNoUpdate)
                         {
-                            if (!Settings.SkipNoUpdate)
-                            {
-                                Comms.Print(
-                                gitName == "SparkTech"
-                                    ? "Your spaghetti sauce is the hottest!"
-                                    : string.Format("You are using the latest version of \"{0}\"", gitName));
-                            }
+                            Comms.Print(gitName == "SparkTech" ? "Your spaghetti sauce is the hottest!" : string.Format("You are using the latest version of \"{0}\"", gitName));
                         }
-                        else
-                        {
-                            Comms.Print(
-                                gitName == "SparkTech"
-                                    ? string.Format(
-                                        "A new spaghetti sauce is available: {0} => {1}",
-                                        assemblyName.Version,
-                                        version)
-                                    : string.Format(
-                                        "\"{2}\" - a new version is available: {0} => {1}",
-                                        assemblyName.Version,
-                                        version,
-                                        gitName));
-                        }
+                    }
+                    else
+                    {
+                        Comms.Print(gitName == "SparkTech" ? string.Format("A new spaghetti sauce is available: {0} => {1}", assemblyName.Version, version) : string.Format("\"{2}\" - a new version is available: {0} => {1}", assemblyName.Version, version, gitName));
                     }
                 }
             }

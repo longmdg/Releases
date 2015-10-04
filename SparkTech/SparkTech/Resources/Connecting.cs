@@ -9,28 +9,28 @@ namespace SparkTech.Resources
     {
         static Connecting()
         {
-            Game.OnStart += OnGameStart;
+            Game.OnStart += OnStart;
             Features();
         }
 
         internal static void Instance() { }
 
-        private static void OnGameStart(EventArgs args)
+        private static void OnStart(EventArgs args)
         {
-            Boot.FireOnInit();
-            Game.OnStart -= OnGameStart;
+            Game.OnStart -= OnStart;
+            MenuST.Instance();
         }
 
         private static void Features()
         {
-            Utility.DelayAction.Add(125, () =>
+            Utility.DelayAction.Add(250, () =>
                 {
                     if (Game.Mode != GameMode.Connecting)
                     {
                         return;
                     }
 
-                    Console.WriteLine(@"loading screen xdd");
+                    Comms.Print("You are on the loading screen!", true);
                 });
         }
     }

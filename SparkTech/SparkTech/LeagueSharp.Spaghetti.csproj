@@ -61,7 +61,7 @@
     </Compile>
     <Compile Include="Resources\Comms.cs" />
     <Compile Include="Resources\Connecting.cs" />
-    <Compile Include="Resources\Menu.cs" />
+    <Compile Include="Resources\MenuST.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Resources\Updater.cs" />
   </ItemGroup>

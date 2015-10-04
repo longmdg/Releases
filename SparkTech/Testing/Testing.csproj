@@ -37,7 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LeagueSharp.Spaghetti">
-      <HintPath>..\..\..\..\..\..\..\LeagueSharp\System\LeagueSharp.Spaghetti.dll</HintPath>
+      <HintPath>C:\LeagueSharp\System\LeagueSharp.Spaghetti.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
