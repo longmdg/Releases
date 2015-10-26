@@ -1,15 +1,15 @@
-﻿using System.Resources;
-using System.Reflection;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SparkTech")]
+[assembly: AssemblyTitle("Spaghetti_Katarina")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("SparkTech")]
-[assembly: AssemblyProduct("LeagueSharp.Spaghetti")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Spaghetti_Katarina")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("fb80a32f-de04-417b-a36e-08aef42771e9")]
+[assembly: Guid("257ccfbb-36e7-4d32-8c7c-f67c027bda59")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,7 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.9.2.5")]
+[assembly: AssemblyVersion("0.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: NeutralResourcesLanguage("en")]
-
