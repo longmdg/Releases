@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+
+<!-- Thanks for contributing! -->
+  
+<Translations>
+ 
+  <!-- Menu items -->
+<CORE>Core</CORE>
+  
+  <!-- Spoken announcements -->
+<GAMESTART>Warning! Your game has just began!</GAMESTART>
+
+  <!-- Miscallenous -->
+<SPEAK_NOW>Speak now...</SPEAK_NOW> 
+
+</Translations>
