@@ -27,6 +27,11 @@
         public static readonly List<string> Names;
 
         /// <summary>
+        /// The amount of all the values in an enumeration
+        /// </summary>
+        public static readonly int Count;
+
+        /// <summary>
         /// Contains the descriptions of the enum members
         /// </summary>
         private static readonly Dictionary<TEnum, string> Descriptions;
@@ -42,6 +47,8 @@
         /// <summary>
         /// Initializes static members of the <see cref="EnumCache{TEnum}"/> class
         /// </summary>
+        /// <exception cref="InvalidOperationException">TEnum is not an enum</exception>
+        /// <exception cref="InvalidEnumArgumentException">The count is wrong</exception>
         static EnumCache()
         {
             if (!typeof(TEnum).IsEnum)
@@ -52,6 +59,13 @@
             Values = ((TEnum[])Enum.GetValues(typeof(TEnum))).OrderByDescending(item => item).ToList();
 
             Names = Enum.GetNames(typeof(TEnum)).ToList();
+
+            if (Values.Count != Names.Count)
+            {
+                throw new InvalidEnumArgumentException($@"Invalid count in enum ""{typeof(TEnum).Name}""");
+            }
+
+            Count = Values.Count;
 
             Descriptions = Values.ToDictionary(@enum => @enum, @enum =>
                 (typeof(TEnum).GetMember(@enum.ToString(CultureInfo.InvariantCulture)).Single()

@@ -8,8 +8,8 @@
     using LeagueSharp.SDK.Core.UI.IMenu;
     using LeagueSharp.SDK.Core.UI.IMenu.Values;
     using LeagueSharp.SDK.Core.Utils;
-
-    using SparkTech.Base;
+    
+    using SparkTech.Cache;
     using SparkTech.Enumerations;
     using SparkTech.EventData;
     using SparkTech.Executors;
@@ -44,7 +44,7 @@
         /// <summary>
         /// The player
         /// </summary>
-        public static readonly Obj_AI_Hero Player;
+        public static Obj_AI_Hero Player => ObjectCache.Player;
 
         /// <summary>
         /// The champion name
@@ -120,8 +120,6 @@
 
                 Assembly = Assembly.GetExecutingAssembly();
 
-                Player = ObjectManager.Player;
-
                 ChampionName = Player.ChampionName;
 
                 Menu = new Menu("st_core", Empty, true).Attach();
@@ -139,22 +137,6 @@
                 var commsMenu = Menu.Add(new Menu("st_comms", ""));
                 {
 
-                }
-
-                var lang = Menu.Add(new MenuList<Language>("st_language", ""));
-
-                lang.ValueChanged += delegate
-                        {
-                            DelayAction.Add(1, delegate
-                                    {
-                                        ActiveLanguage = lang.SelectedValue;
-                                        LanguageData.Rename(Menu);
-                                    });
-                        };
-
-                if (FirstRun)
-                {
-                    lang.SelectedValue = LanguageData.LoaderLanguage();
                 }
             }
             catch (Exception ex)

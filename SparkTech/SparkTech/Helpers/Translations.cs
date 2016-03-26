@@ -15,13 +15,17 @@
     using SparkTech.Executors;
     using SparkTech.Properties;
 
-    using static System.String;
-
     /// <summary>
     /// Manages the translation data
     /// </summary>
     internal class Translations : IMenuPiece
     {
+        /// <summary>
+        /// Points to a replacement
+        /// </summary>
+        /// <returns></returns>
+        internal delegate string TextPointer();
+
         /// <summary>
         /// Contains the cached <see cref="CultureInfo"/> instances for every <see cref="Language"/>
         /// </summary>
@@ -48,19 +52,24 @@
         /// <param name="name"></param>
         /// <param name="language"></param>
         /// <returns></returns>
-        internal static string GetTranslation(string name, Language? language = null) => language.HasValue ? Resources.ResourceManager.GetString(name, LanguageInfos[language.Value]) : Resources.ResourceManager.GetString(name);
+        internal static string GetTranslation(string name, Language? language)
+        {
+            return language.HasValue
+                       ? Resources.ResourceManager.GetString(name, LanguageInfos[language.Value])
+                       : Resources.ResourceManager.GetString(name);
+        }
 
         /// <summary>
-        /// Contains the pointers to current value of a key
+        /// Contains the pointers to current values of the keys
         /// </summary>
-        private static readonly Dictionary<string, Func<string>> Replacements = new Dictionary<string, Func<string>>();
+        private static readonly Dictionary<string, TextPointer> Replacements = new Dictionary<string, TextPointer>();
 
         /// <summary>
         /// Registers a new replacement
         /// </summary>
         /// <param name="key">The key to be seeked for</param>
         /// <param name="replacement">The string to replace the key when matched</param>
-        internal static void RegisterReplacement(string key, Func<string> replacement) => Replacements.Add(key, replacement);
+        internal static void RegisterReplacement(string key, TextPointer replacement) => Replacements.Add(key, replacement);
 
         /// <summary>
         /// The regular expression that will match all the substrings surrounded by braces
@@ -86,12 +95,24 @@
             {
                 var translation = GetTranslation(name, language);
 
-                component.DisplayName =
-                    (from Match match in BracesAroundTextRegex.Matches(translation) select match.Groups[0].Value)
-                        .Aggregate(
-                            translation,
-                            (current, match) =>
-                            current.Replace(match, Replacements[BraceFinderRegex.Replace(match, Empty)]()));
+                component.DisplayName = (from Match match in BracesAroundTextRegex.Matches(translation)
+                                         select match.Groups).SelectMany(
+                                             groups =>
+                                             {
+                                                 var count = groups.Count;
+                                                 var list = new List<string>(count);
+
+                                                 for (int i = 0; i < count; i++)
+                                                 {
+                                                     list.Add(groups[i].Value);
+                                                 }
+
+                                                 return list;
+                                             })
+                    .Aggregate(
+                        translation,
+                        (current, match) =>
+                        current.Replace(match, Replacements[BraceFinderRegex.Replace(match, string.Empty)]()));
             }
             catch (KeyNotFoundException ex)
             {
@@ -121,9 +142,9 @@
         {
             get
             {
-                var menu = new Menu("st_core_translations", Empty);
+                var menu = new Menu("st_core_translations", string.Empty);
                 {
-                    var language = menu.Add(new MenuList<Language>("st_core_translations_selected", Empty));
+                    var language = menu.Add(new MenuList<Language>("st_core_translations_selected", string.Empty, EnumCache<Language>.Values));
 
                     if (Core.FirstRun)
                     {

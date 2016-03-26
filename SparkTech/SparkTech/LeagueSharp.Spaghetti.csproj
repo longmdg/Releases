@@ -62,6 +62,7 @@
     <Compile Include="Base\SparkSpell.cs" />
     <Compile Include="Cache\ObjectCache.cs" />
     <Compile Include="Core.cs" />
+    <Compile Include="Enumerations\MinionType.cs" />
     <Compile Include="Enumerations\MissileCheckType.cs" />
     <Compile Include="Enumerations\ObjectTeam.cs" />
     <Compile Include="Enumerations\Orbwalker.cs" />

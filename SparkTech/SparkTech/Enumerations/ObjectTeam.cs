@@ -1,17 +1,36 @@
 ﻿namespace SparkTech.Enumerations
 {
+    using System;
+
+    /// <summary>
+    /// Represents a set of object team flags
+    /// </summary>
+    [Flags]
     public enum ObjectTeam
     {
-        Any,
+        /// <summary>
+        /// The none flag
+        /// </summary>
+        None = 0,
 
-        Enemy,
+        /// <summary>
+        /// The enemy flag
+        /// </summary>
+        Enemy = 1 << 1,
 
-        Ally,
+        /// <summary>
+        /// The ally flag
+        /// </summary>
+        Ally = 1 << 2,
 
-        Neutral,
+        /// <summary>
+        /// The neutral flag
+        /// </summary>
+        Neutral = 1 << 3,
 
-        NotAlly,
-
-        NotAllyForEnemy
+        /// <summary>
+        /// The unknown flag
+        /// </summary>
+        Unknown = 1 << 4
     }
 }
