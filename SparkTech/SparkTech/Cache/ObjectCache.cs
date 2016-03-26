@@ -36,24 +36,18 @@
         /// <typeparam name="TGameObject">The requested <see cref="GameObject"/> type</typeparam>
         /// <param name="team">The specified object team</param>
         /// <param name="range">The range to take objects from</param>
+        /// <param name="from">The point to start atking minions from</param>
         /// <param name="moreChecks">Determines whether to obtain invisible or non-targetable units as well</param>
         /// <returns></returns>
         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
-        public static List<TGameObject> Get<TGameObject>(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy | ObjectTeam.Neutral, float range = float.MaxValue, bool moreChecks = true) where TGameObject : GameObject
+        public static List<TGameObject> Get<TGameObject>(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy | ObjectTeam.Neutral, Func<TGameObject, float> range = null, Vector3? from = null, bool moreChecks = true) where TGameObject : GameObject
         {
-            Predicate<TGameObject> inrange = o => true;
             FieldInfo field;
             var name = typeof(TGameObject).Name + "List";
 
-            if (!float.IsPositiveInfinity(range *= range))
-            {
-                var from = Player.ServerPosition;
-                inrange = o => Vector3.DistanceSquared((o as Obj_AI_Base)?.ServerPosition ?? o.Position, from) <= range;
-            }
-
             if (FieldData.TryGetValue(name, out field))
             {
-                return Selector((List<TGameObject>)field.GetValue(null), team, moreChecks, o => o != null && o.IsValid && inrange(o));
+                return Selector((List<TGameObject>)field.GetValue(null), team, moreChecks, o => o != null && o.IsValid, range, from);
             }
 
             field = GetField(name);
@@ -66,7 +60,7 @@
                 FieldData.Add(name, field);
             }
 
-            return Selector(container, team, moreChecks, inrange);
+            return Selector(container, team, moreChecks, null, range, from);
         }
 
         /// <summary>
@@ -75,8 +69,9 @@
         /// <param name="type">The minion type flags</param>
         /// <param name="team">The requested team</param>
         /// <param name="range">The range</param>
+        /// <param name="from">The point to start taking minions from</param>
         /// <returns></returns>
-        public static List<Obj_AI_Minion> GetMinions(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy, MinionType type = MinionType.Minion, float range = float.MaxValue)
+        public static List<Obj_AI_Minion> GetMinions(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy, MinionType type = MinionType.Minion, Func<Obj_AI_Minion, float> range = null, Vector3? from = null)
         {
             var container = new List<Obj_AI_Minion>(Obj_AI_MinionList.Count);
 
@@ -91,30 +86,18 @@
             if (type.HasFlag(MinionType.Other))
                 container.AddRange(OtherMinions);
 
-            Predicate<Obj_AI_Base> match;
-
-            if (!float.IsPositiveInfinity(range *= range))
-            {
-                var from = Player.ServerPosition;
-                match = o => o != null && o.IsValid && Vector3.DistanceSquared(from, o.ServerPosition) <= range;
-            }
-            else
-            {
-                match = o => o != null && o.IsValid;
-            }
-
-            return Selector(container, team, true, match);
+            return Selector(container, team, true, o => o != null && o.IsValid, range, from);
         }
 
         /// <summary>
         /// Gets minions in a similiar way to <see cref="E:MinionManager"/>
         /// </summary>
         /// <param name="from">The from</param>
-        /// <param name="range">The range</param>
+        /// <param name="range">The range function</param>
         /// <param name="team">The team</param>
         /// <param name="type">The minion type</param>
         /// <returns></returns>
-        public static List<Obj_AI_Base> GetMinions(Vector3 from, float range, ObjectTeam team = ObjectTeam.Enemy | ObjectTeam.Ally, MinionType type = MinionType.Minion)
+        public static List<Obj_AI_Base> GetMinions(Vector3 from, Func<Obj_AI_Base, float> range, ObjectTeam team = ObjectTeam.Enemy | ObjectTeam.Ally, MinionType type = MinionType.Minion)
         {
             var container = new List<Obj_AI_Base>(Obj_AI_MinionList.Count);
 
@@ -129,10 +112,7 @@
             if (type.HasFlag(MinionType.Other))
                 container.AddRange(OtherMinions);
 
-            if (from.IsZero)
-                from = Player.ServerPosition;
-
-            return !float.IsPositiveInfinity(range *= range) ? Selector(container, team, true, o => o != null && o.IsValid && Vector3.DistanceSquared(@from, o.ServerPosition) <= range) : Selector(container, team, true, o => o != null && o.IsValid);
+            return Selector(container, team, true, o => o != null && o.IsValid, range, from);
         }
 
         /// <summary>
@@ -154,14 +134,17 @@
         /// Returns a matched list
         /// </summary>
         /// <typeparam name="TGameObject">The requested <see cref="GameObject"/> type</typeparam>
-        /// <param name="container">THe original list</param>
+        /// <param name="container">The original list</param>
         /// <param name="team">The provided team flags</param>
         /// <param name="moreChecks">Determines whether to perform additional checks</param>
         /// <param name="check">The additional predicate</param>
+        /// <param name="range">The range predicate</param>
+        /// <param name="from">The from point</param>
         /// <returns></returns>
-        private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam team, bool moreChecks, Predicate<TGameObject> check) where TGameObject : GameObject
+        private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam team, bool moreChecks, Predicate<TGameObject> check, Func<TGameObject, float> range, Vector3? from) where TGameObject : GameObject
         {
-            var teams = TeamDictionary.Where(pair => team.HasFlag(pair.Key)).Select(pair => pair.Value).ToList();
+            var teams = (from pair in TeamDictionary where team.HasFlag(pair.Key) select pair.Value).ToList();
+            var point = @from.HasValue && !@from.Value.IsZero ? @from.Value : Player.ServerPosition;
 
             container.RemoveAll(o =>
             {
@@ -175,6 +158,19 @@
                 if (!teams.Contains(side))
                 {
                     return true;
+                }
+
+                var unit = o as Obj_AI_Base;
+
+                if (range != null)
+                {
+                    var r = range(o);
+                    r *= r;
+
+                    if (!float.IsPositiveInfinity(r) && Vector3.DistanceSquared(unit?.ServerPosition ?? o.Position, point) > r)
+                    {
+                        return true;
+                    }
                 }
 
                 if (!moreChecks)
@@ -198,8 +194,6 @@
                 {
                     return true;
                 }
-
-                var unit = attackable as Obj_AI_Base;
 
                 return unit != null && unit.HealthPercent <= 10 && unit.HasBuff("kindredrnodeathbuff");
             });
