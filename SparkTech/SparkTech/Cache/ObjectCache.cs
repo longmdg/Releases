@@ -47,7 +47,7 @@
 
             if (FieldData.TryGetValue(name, out field))
             {
-                return Selector((List<TGameObject>)field.GetValue(null), team, moreChecks, o => o != null && o.IsValid, range, from);
+                return Selector((List<TGameObject>)field.GetValue(null), team, moreChecks, Valid<TGameObject>(), range, from);
             }
 
             field = GetField(name);
@@ -86,7 +86,7 @@
             if (type.HasFlag(MinionType.Other))
                 container.AddRange(OtherMinions);
 
-            return Selector(container, team, true, o => o != null && o.IsValid, range, from);
+            return Selector(container, team, true, Valid<Obj_AI_Minion>(), range, from);
         }
 
         /// <summary>
@@ -112,7 +112,7 @@
             if (type.HasFlag(MinionType.Other))
                 container.AddRange(OtherMinions);
 
-            return Selector(container, team, true, o => o != null && o.IsValid, range, from);
+            return Selector(container, team, true, Valid<Obj_AI_Base>(), range, from);
         }
 
         /// <summary>
@@ -185,22 +185,19 @@
 
                 var attackable = o as AttackableUnit;
 
-                if (attackable == null)
-                {
-                    return true;
-                }
-
-                if (attackable.IsInvulnerable || side != AlliedTeam && !attackable.IsTargetable)
-                {
-                    return false;
-                }
-
-                return unit == null || unit.HealthPercent > 10 || !unit.HasBuff("kindredrnodeathbuff");
+                return attackable == null || !attackable.IsInvulnerable && (side == AlliedTeam || attackable.IsTargetable) && (unit == null || unit.HealthPercent > 10 || !unit.HasBuff("kindredrnodeathbuff"));
             });
 
             container.TrimExcess();
             return container;
         }
+
+        /// <summary>
+        /// Returns a pointer that will validate whether the @object is valid
+        /// </summary>
+        /// <typeparam name="TGameObject">The requested <see cref="GameObject"/> type</typeparam>
+        /// <returns></returns>
+        private static Predicate<TGameObject> Valid<TGameObject>() where TGameObject : GameObject => o => o != null && o.IsValid;
 
         /// <summary>
         /// Gets the specified field
@@ -260,6 +257,7 @@
 
             GameObject.OnCreate += (sender, args) => Process(sender, true);
 
+            // I don't find OnDelete reliable when it comes to kepping the lists tidy so I'll use OnUpdate instead
             Game.OnUpdate += delegate
             {
                 var item = GameObjectList.Find(o => o == null || !o.IsValid);
