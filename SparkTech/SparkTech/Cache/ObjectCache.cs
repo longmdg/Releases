@@ -132,18 +132,7 @@
             if (from.IsZero)
                 from = Player.ServerPosition;
 
-            Predicate<Obj_AI_Base> match;
-
-            if (!float.IsPositiveInfinity(range *= range))
-            {
-                match = o => o != null && o.IsValid && Vector3.DistanceSquared(from, o.ServerPosition) <= range;
-            }
-            else
-            {
-                match = o => o != null && o.IsValid;
-            }
-
-            return Selector(container, team, true, match);
+            return !float.IsPositiveInfinity(range *= range) ? Selector(container, team, true, o => o != null && o.IsValid && Vector3.DistanceSquared(@from, o.ServerPosition) <= range) : Selector(container, team, true, o => o != null && o.IsValid);
         }
 
         /// <summary>
