@@ -62,7 +62,7 @@
 
             if (Values.Count != Names.Count)
             {
-                throw new InvalidEnumArgumentException($@"Invalid count in enum ""{typeof(TEnum).Name}""");
+                throw new InvalidEnumArgumentException($"Invalid count in enum \"{typeof(TEnum).Name}\"");
             }
 
             Count = Values.Count;

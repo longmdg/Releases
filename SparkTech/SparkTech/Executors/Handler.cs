@@ -30,7 +30,7 @@
         /// The list of assemblies that need to be inspected in <see cref="E:OnLoad"/>.
         /// <para>This list is only being added to before the <see cref="E:OnLoad"/> function actually executes</para>
         /// </summary>
-        private static readonly List<Assembly> PreBoot = new List<Assembly> { Core.Assembly };
+        private static readonly List<Assembly> PreBoot = new List<Assembly>();
 
         /// <summary>
         /// Contains the instances of the processed assemblies
@@ -50,10 +50,10 @@
         protected Handler(string updatePath) : this()
         {
             Events.OnLoad += delegate
-            {
-                var name = assembly.GetName();
-                new ActionUpdater(updatePath, name.Version, name.Name).CheckPerformed += args => args.Notify();
-            };
+                {
+                    var name = assembly.GetName();
+                    new ActionUpdater(updatePath, name.Version, name.Name).CheckPerformed += args => args.Notify();
+                };
         }
 
         /// <summary>
@@ -79,39 +79,38 @@
         static Handler()
         {
             Events.OnLoad += delegate
-            {
-                lock (PreBoot)
                 {
-                    inside = true;
-                    PreBoot.ForEach(Activate);
-                    PreBoot.Clear();
-                }
+                    new List<Type> { typeof(ObjectCache), typeof(Threading) }.ForEach(type => RuntimeHelpers.RunClassConstructor(type.TypeHandle));
 
-                new List<Type> { typeof(ObjectCache), typeof(Threading) }.ForEach(
-                    type => RuntimeHelpers.RunClassConstructor(type.TypeHandle));
+                    lock (PreBoot)
+                    {
+                        inside = true;
+                        PreBoot.ForEach(Activate);
+                        PreBoot.Clear();
+                        PreBoot.TrimExcess();
+                    }
 
-                Translations.UpdateAll();
+                    Translations.UpdateAll();
 
-                // let me check for my own stuff :sisi3:
-                const string UpdatePath =
-                    "https://raw.githubusercontent.com/Wiciaki/Releases/master/SparkTech/SparkTech/Properties/AssemblyInfo.cs";
+                    // let me check for my own stuff :sisi3:
+                    const string UpdatePath = "https://raw.githubusercontent.com/Wiciaki/Releases/master/SparkTech/SparkTech/Properties/AssemblyInfo.cs";
 
-                var name = Core.Assembly.GetName();
-                new ActionUpdater(UpdatePath, name.Version, name.Name).CheckPerformed += args => args.Notify();
-            };
+                    var name = Core.Assembly.GetName();
+                    new ActionUpdater(UpdatePath, name.Version, name.Name).CheckPerformed += args => args.Notify();
+                };
 
             Game.OnStart += delegate
-            {
-                if (Enabled)
                 {
-                    Enabled = false;
-                }
-            };
+                    if (Enabled)
+                    {
+                        Enabled = false;
+                    }
+                };
 
             Game.OnEnd += delegate
-            {
-
-            };
+                {
+                    
+                };
 
             // broscience :roto2:
             if (ObjectManager.Player == null)
