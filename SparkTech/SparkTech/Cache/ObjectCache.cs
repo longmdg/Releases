@@ -9,7 +9,7 @@
 
     using LeagueSharp;
 
-    // For recognising the minion types
+    /* Used for recognising the minion types */
     using LeagueSharp.SDK;
     using LeagueSharp.SDK.Core.Utils;
 
@@ -37,7 +37,7 @@
         /// <param name="team">The specified object team</param>
         /// <param name="range">The range to take objects from</param>
         /// <param name="from">The point to start atking minions from</param>
-        /// <param name="moreChecks">Determines whether to obtain invisible or non-targetable units as well</param>
+        /// <param name="moreChecks">Determines whether to obtain invisible or non-targetable units as well. This is used mostly for the buildings</param>
         /// <returns></returns>
         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static List<TGameObject> Get<TGameObject>(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy | ObjectTeam.Neutral, Func<TGameObject, float> range = null, Vector3? from = null, bool moreChecks = true) where TGameObject : GameObject
@@ -144,20 +144,20 @@
         private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam team, bool moreChecks, Predicate<TGameObject> check, Func<TGameObject, float> range, Vector3? from) where TGameObject : GameObject
         {
             var teams = (from pair in TeamDictionary where team.HasFlag(pair.Key) select pair.Value).ToList();
-            var point = @from.HasValue && !@from.Value.IsZero ? @from.Value : Player.ServerPosition;
+            var point = from.HasValue && !from.Value.IsZero ? from.Value : Player.ServerPosition;
 
-            container.RemoveAll(o =>
+            container = container.FindAll(o =>
             {
                 if (check != null && !check(o))
                 {
-                    return true;
+                    return false;
                 }
 
                 var side = o.Team;
 
                 if (!teams.Contains(side))
                 {
-                    return true;
+                    return false;
                 }
 
                 var unit = o as Obj_AI_Base;
@@ -169,33 +169,33 @@
 
                     if (!float.IsPositiveInfinity(r) && Vector3.DistanceSquared(unit?.ServerPosition ?? o.Position, point) > r)
                     {
-                        return true;
+                        return false;
                     }
                 }
 
                 if (!moreChecks)
                 {
-                    return false;
+                    return true;
                 }
 
                 if (!o.IsVisible || o.IsDead)
                 {
-                    return true;
+                    return false;
                 }
 
                 var attackable = o as AttackableUnit;
 
                 if (attackable == null)
                 {
-                    return false;
+                    return true;
                 }
 
                 if (attackable.IsInvulnerable || side != AlliedTeam && !attackable.IsTargetable)
                 {
-                    return true;
+                    return false;
                 }
 
-                return unit != null && unit.HealthPercent <= 10 && unit.HasBuff("kindredrnodeathbuff");
+                return unit == null || unit.HealthPercent > 10 || !unit.HasBuff("kindredrnodeathbuff");
             });
 
             container.TrimExcess();
@@ -241,10 +241,10 @@
             Wards = Obj_AI_MinionList.FindAll(minion => minion.GetMinionType().HasFlag(MinionTypes.Ward));
             JungleMinions = Obj_AI_MinionList.FindAll(minion => minion.GetJungleType() != JungleType.Unknown);
             OtherMinions = Obj_AI_MinionList.FindAll(o =>
-                    {
-                        var type = o.GetMinionType();
-                        return !type.HasFlag(MinionTypes.Melee) && !type.HasFlag(MinionTypes.Ranged) && !type.HasFlag(MinionTypes.Ward) && o.GetJungleType() == JungleType.Unknown && !o.IsPet();
-                    });
+            {
+                var type = o.GetMinionType();
+                return !type.HasFlag(MinionTypes.Melee) && !type.HasFlag(MinionTypes.Ranged) && !type.HasFlag(MinionTypes.Ward) && o.GetJungleType() == JungleType.Unknown && !o.IsPet();
+            });
 
             Player = (Obj_AI_Hero)GameObjectList.Single(o => o.IsMe);
 
