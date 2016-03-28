@@ -200,9 +200,9 @@
             {
                 Key = key;
 
-                UnitsEnabled = new UnitType[UnitTypeAmount];
+                UnitsEnabled = new UnitType[EnumCache<UnitType>.Count];
 
-                for (int i = 0; i < UnitTypeAmount; i++)
+                for (int i = 0; i < EnumCache<UnitType>.Count; i++)
                 {
                     UnitsEnabled[i] = i < unitsEnabled.Length ? unitsEnabled[i] : UnitType.None;
                 }
@@ -263,7 +263,7 @@
         /// <summary>
         /// Gets the <see cref="Obj_AI_Hero"/> instance of the <see cref="E:Player"/>
         /// </summary>
-        private static Obj_AI_Hero Player => GameObjects.Player;
+        private static Obj_AI_Hero Player => ObjectCache.Player;
 
         /// <summary>
         /// Gets the <see cref="E:Player"/>'s champion name
@@ -281,16 +281,6 @@
         private static readonly Random Random = new Random(TickCount);
 
         /// <summary>
-        /// The enemy team
-        /// </summary>
-        private static readonly GameObjectTeam EnemyTeam = Player.Team == GameObjectTeam.Order ? GameObjectTeam.Chaos : GameObjectTeam.Order;
-
-        /// <summary>
-        /// The amount of constants in the <see cref="UnitType"/> enumeration
-        /// </summary>
-        private static readonly int UnitTypeAmount = EnumCache<UnitType>.Names.Count;
-
-        /// <summary>
         /// Determines whether the <see cref="E:Player"/> can move
         /// </summary>
         private static bool movementFlag;
@@ -304,6 +294,8 @@
         /// The current ping
         /// </summary>
         private static int ping;
+
+        private static Vector2 myPos;
 
         /// <summary>
         /// The backing field for <see cref="E:OrbwalkingPoint"/>
@@ -499,11 +491,6 @@
         /// </summary>
         public static void ResetTimer(bool resetMoveFlag = false, bool resetAttack = true)
         {
-            if (!Initialized)
-            {
-                return;
-            }
-
             if (resetMoveFlag)
             {
                 movementFlag = true;
@@ -538,8 +525,8 @@
         private static bool HasMovementPermissions(Mode lmode)
         {
             return Movement && lmode != Mode.None && Menu["st_orb_movement"].GetValue<MenuBool>().Value
-                   && !Menu["st_orb_keybind_blockmov"].GetValue<MenuKeyBind>().Active
-                   && Menu[$"st_orb_modes_{lmode.ToString().ToLower()}_movement"].GetValue<MenuBool>().Value;
+                   && Menu[$"st_orb_modes_{lmode.ToString().ToLower()}_movement"].GetValue<MenuBool>().Value
+                   && !Menu["st_orb_keybind_blockmov"].GetValue<MenuKeyBind>().Active;
         }
 
         #endregion
@@ -558,8 +545,7 @@
         {
             get
             {
-                // Don't tell anyone please but I wank to this line sometimes
-                return cmode ?? EnumCache<Mode>.Values.Find(mode => mode == Mode.None || Menu[$"st_orb_modes_{mode.ToString().ToLower()}_key"].GetValue<MenuKeyBind>().Active);
+                return cmode ?? EnumCache<Mode>.Values.Find(mode => Menu[$"st_orb_modes_{mode.ToString().ToLower()}_key"].GetValue<MenuKeyBind>().Active);
             }
             set
             {
@@ -722,7 +708,7 @@ foreach (var info in AttackDictionary.Values.Where(objectInfo => objectInfo.AddT
 }
 }
 
-for (var i = UnitTypeAmount; i > 0; i--)
+for (var i = EnumCache<UnitType>.Count; i > 0; i--)
 {
 var defValue = defValues.Length >= i ? defValues[i] : UnitType.None;
 
@@ -1073,13 +1059,13 @@ premenu.Add(new MenuBool(premenu.Name + "_movement", "Enable movement", true));
                 case UnitType.Champion:
                     return new TargetData(GetHero(lmode));
                 case UnitType.Structure:
-                    return new TargetData(GetStructures(lmode).FirstOrDefault());
+                    return new TargetData(GetStructure(lmode));
                 case UnitType.Object:
                     return new TargetData(GetAttackableObjects(lmode).FirstOrDefault());
                 case UnitType.FreezeMinion:
                 case UnitType.LaneMinion:
                     return new TargetData(GetMinionData(lmode).Select(tuple => tuple.Item1).FirstOrDefault() ?? GetTurretBalanceMinions(lmode).FirstOrDefault());
-                case UnitType.LaneMinionExtra:
+                case UnitType.LaneClearMinion:
 
                     
                 case UnitType.JungleMinion:
@@ -1101,22 +1087,72 @@ premenu.Add(new MenuBool(premenu.Name + "_movement", "Enable movement", true));
         {
             var smode = lmode.ToString().ToLower();
 
-            for (int i = 0; i < UnitTypeAmount; i++)
+            for (int i = 0; i < EnumCache<UnitType>.Count; i++)
             {
                 var data = GetTargetData(Menu[$"st_orb_modes_{smode}_priority_{i}"].GetValue<MenuList<UnitType>>().SelectedValue, lmode);
-
-                if (data.ShouldWait)
-                {
-                    return null;
-                }
 
                 if (data.Target != null)
                 {
                     return data.Target;
                 }
+
+                if (data.ShouldWait)
+                {
+                    return null;
+                }
             }
 
             return null;
+        }
+
+        public static HitData GetHitData(AttackableUnit unit)
+        {
+            var range = Player.AttackRange + Player.BoundingRadius + unit.BoundingRadius;
+
+            var enemyPos = ((unit as Obj_AI_Base)?.ServerPosition ?? unit.Position).ToVector2();
+
+            if (ChampionName == "Caitlyn")
+            {
+                var @base = unit as Obj_AI_Base;
+
+                if (@base != null && @base.HasBuff("caitlynyordletrapinternal"))
+                {
+                    range += 650f;
+                }
+            }
+
+            var byplayer = Vector2.DistanceSquared(enemyPos, myPos) <= range * range;
+
+            if (ChampionName != "Azir")
+            {
+                return byplayer ? HitData.Yes : HitData.No;
+            }
+
+            //TODO: Soldiers
+            return new HitData(byplayer);
+        }
+
+        public static bool InAttackRange(AttackableUnit unit)
+        {
+            var data = GetHitData(unit);
+            var count = data.SoldiersInRange.Count;
+
+            if (data.PlayerInRange)
+            {
+                count++;
+            }
+
+            return count > 0;
+        }
+
+        private static int GetProjectileTime(AttackableUnit unit)
+        {
+            
+        }
+
+        private static float GetAttackDamage(Obj_AI_Base unit)
+        {
+            
         }
 
         /// <summary>
@@ -1367,92 +1403,94 @@ premenu.Add(new MenuBool(premenu.Name + "_movement", "Enable movement", true));
         }
 
         /// <summary>
-        /// Gets the attackable objects for the specified mode
+        /// Gets the best attackable object for the specified mode
         /// </summary>
         /// <param name="mode">The specified mode</param>
         /// <returns></returns>
-        private static IEnumerable<Obj_AI_Minion> GetAttackableObjects(Mode mode)
+        private static TargetData GetAttackableObject(Mode mode)
         {
-            ObjectInfo info;
-
-            var collection = from minion in GameObjects.Get<Obj_AI_Minion>()
-                             where minion.InAutoAttackRange() && !minion.IsMinion()
-                             let charData = minion.CharData
-                             where !BlackListedNames.Contains(charData.Name.ToLower())
-                                 && AttackDictionary.TryGetValue(charData.BaseSkinName.ToLower(), out info)
-                                 && info.Attack(mode)
-                             select minion;
+            var flags = MinionType.Pet;
 
             if (Menu[$"st_orb_modes_{mode.ToString().ToLower()}_targeting_objects_wards"].GetValue<MenuBool>().Value)
             {
-                collection = collection.Concat(GameObjects.EnemyWards.Where(ward => ward.InAutoAttackRange()));
+                flags |= MinionType.Ward;
             }
 
-            return collection.OrderByDescending(attackable => attackable.Health).ThenByDescending(attackable => attackable.DistanceToPlayer());
+            ObjectInfo info;
+
+            return new TargetData(ObjectCache.GetMinions(ObjectTeam.Neutral | ObjectTeam.Enemy, flags, InAttackRange)
+                    .Select(minion => new { Minion = minion, Name = minion.CharData.BaseSkinName.ToLower(), IsWard = minion.GetMinionType().HasFlag(MinionTypes.Ward) })
+                    .Where(arg => arg.IsWard || !BlackListedNames.Contains(arg.Minion.CharData.Name.ToLower()) && AttackDictionary.TryGetValue(arg.Name, out info) && info.Attack(mode))
+                    .OrderBy(arg => arg.IsWard)
+                    .ThenByDescending(arg => arg.Minion.Health)
+                    .ThenByDescending(arg => arg.Minion.DistanceToPlayer())
+                    .FirstOrDefault()?
+                    .Minion);
         }
 
         /// <summary>
-        /// Gets minion data for the specified mode
+        /// Gets the <see cref="TargetData"/> of the best killable minion
         /// </summary>
-        /// <param name="mode"></param>
+        /// <param name="mode">The requested mode</param>
         /// <returns></returns>
-        private static IEnumerable<Tuple<Obj_AI_Minion, float>> GetMinionData(Mode mode)
+        private static TargetData GetKillableMinion(Mode mode)
         {
-            var minionData =
-                from minion in
-                    GameObjects.EnemyMinions.Where(minion => minion.InAutoAttackRange() && minion.IsMinion())
-                    .OrderBy(minion => minion.GetMinionType().HasFlag(MinionTypes.Siege))
-                    .ThenBy(minion => minion.GetMinionType().HasFlag(MinionTypes.Melee))
-                let pred = Health.GetPrediction(minion, (int)minion.GetTimeToHit(), FarmDelay)
-                where pred <= Player.GetAutoAttackDamage(minion)
-                select Tuple.Create(minion, pred);
+            var max = mode == Mode.Freeze ? Menu[$"st_orb_modes_{mode.ToString().ToLower()}_targeting_freeze_maxhealth"].GetValue<MenuSlider>().Value : int.MaxValue;
+            var onlykillable = Menu[$"st_orb_modes_{mode.ToString().ToLower()}_targeting_minions_onlykillable"].GetValue<MenuBool>().Value;
 
-            if (mode == Mode.Freeze)
-            {
-                var max = Menu[$"st_orb_modes_{mode.ToString().ToLower()}_targeting_freeze_maxhealth"].GetValue<MenuSlider>().Value;
+            var data = ObjectCache.GetMinions(ObjectTeam.Enemy, MinionType.Minion, InAttackRange).Select(minion =>
+                        new
+                        {
+                            Minion = minion, Damage = GetAttackDamage(minion),
+                            Prediction = HealthWrapper.GetPrediction(minion, GetProjectileTime(minion), FarmDelay),
+                            Type = minion.GetMinionType()
+                        })
+                    .ToList();
 
-                minionData = minionData.Where(tuple => tuple.Item2 <= max);
-            }
+            var killable = data.FindAll(arg =>
+                    arg.Prediction <= max && (!onlykillable || arg.Prediction > 0f) && arg.Prediction <= GetAttackDamage(arg.Minion))
+                    .OrderByDescending(arg =>
+                        {
+                            var weight = arg.Prediction / HealthWrapper.GetAggroCount(arg.Minion);
 
-            if (Menu[$"st_orb_modes_{mode.ToString().ToLower()}_targeting_minions_onlykillable"].GetValue<MenuBool>().Value)
-            {
-                minionData = minionData.Where(tuple => tuple.Item2 > 0);
-            }
+                            if (HealthWrapper.HasTurretAggro(arg.Minion)) weight /= 2.4f;
+                            if (arg.Type.HasFlag(MinionTypes.Siege)) weight /= 1.8f;
+                            if (arg.Type.HasFlag(MinionTypes.Melee)) weight /= 1.25f;
 
-            return minionData;
+                            return weight;
+                        }).FirstOrDefault()?.Minion;
+
+            return killable != null ? new TargetData(killable) : new TargetData(null,
+                             data.Exists(arg =>
+                                 {
+                                     var time = Math.Max((int)Math.Round(Player.AttackDelay * 1000 * LaneClearWaitTimeMod), 0);
+                                     var simulation = HealthWrapper.GetPrediction(arg.Minion, time, FarmDelay, true);
+                                     var damage = Math.Min(max, arg.Damage);
+
+                                     return simulation < damage;
+                                 }));
         }
 
         /// <summary>
-        /// Gets structures for the specified mode
+        /// Searches for a structure for the specified mode
         /// </summary>
-        /// <param name="mode"></param>
+        /// <param name="mode">The requested mode</param>
         /// <returns></returns>
-        private static IEnumerable<AttackableUnit> GetStructures(Mode mode)
+        private static TargetData GetStructure(Mode mode)
         {
             var smode = mode.ToString().ToLower();
+            var collection = new List<AttackableUnit>(2);
 
-            if (Menu[$"st_orb_modes_{smode}_targeting_structures_nexus"].GetValue<MenuBool>().Value && GameObjects.EnemyNexus.InAutoAttackRange())
-            {
-                yield return GameObjects.EnemyNexus;
-            }
-            
+            if (Menu[$"st_orb_modes_{smode}_targeting_structures_turret"].GetValue<MenuBool>().Value)
+                collection.AddRange(ObjectCache.Get<Obj_AI_Turret>(ObjectTeam.Enemy, InAttackRange));
+
             if (Menu[$"st_orb_modes_{smode}_targeting_structures_inhibitor"].GetValue<MenuBool>().Value)
-            {
-                foreach (var inhibitor in GameObjects.EnemyInhibitors.Where(inhibitor => inhibitor.InAutoAttackRange()))
-                {
-                    yield return inhibitor;
-                }
-            }
+                collection.AddRange(ObjectCache.Get<Obj_BarracksDampener>(ObjectTeam.Enemy, InAttackRange));
 
-            if (!Menu[$"st_orb_modes_{smode}_targeting_structures_turret"].GetValue<MenuBool>().Value)
-            {
-                yield break;
-            }
+            if (Menu[$"st_orb_modes_{smode}_targeting_structures_nexus"].GetValue<MenuBool>().Value)
+                collection.AddRange(ObjectCache.Get<Obj_HQ>(ObjectTeam.Enemy, InAttackRange));
 
-            foreach (var turret in GameObjects.EnemyTurrets.Where(turret => turret.InAutoAttackRange()))
-            {
-                yield return turret;
-            }
+            return new TargetData(collection.Count > 0 ? collection[0] : null);
         }
 
         private static IEnumerable<Obj_AI_Minion> GetTurretBalanceMinions(Mode mode)
@@ -1501,9 +1539,7 @@ premenu.Add(new MenuBool(premenu.Name + "_movement", "Enable movement", true));
 
             foreach (
                 var minion in
-                    reachable.Where(minion => (minion.IsMelee ? melee : ranged)(minion))
-                        .OrderBy(Health.HasTurretAggro)
-                        .ThenBy(Health.HasMinionAggro))
+                    reachable.Where(minion => (minion.IsMelee ? melee : ranged)(minion)).OrderBy(Health.HasTurretAggro).ThenBy(Health.HasMinionAggro))
             {
                 yield return minion;
             }
@@ -1512,19 +1548,20 @@ premenu.Add(new MenuBool(premenu.Name + "_movement", "Enable movement", true));
         private static Obj_AI_Hero GetHero(Mode lmode)
         {
             var header = $"st_orb_modes_{lmode.ToString().ToLower()}_targeting_hero";
+            var ignoreShields = Menu[header + "_ignoreshields"].GetValue<MenuBool>().Value;
 
             // ReSharper disable once InvertIf
-            if (Menu[$"{header}_ignorets"].GetValue<MenuBool>().Value)
+            if (Menu[header + "_ignorets"].GetValue<MenuBool>().Value)
             {
-                var maxIgnored = Menu[$"{header}_attacks"].GetValue<MenuSlider>().Value;
+                var maxIgnored = Menu[header + "_attacks"].GetValue<MenuSlider>().Value;
 
                 var killable =
-                    GameObjects.EnemyHeroes.OrderBy(hero => hero.DistanceToPlayer())
+                    ObjectCache.Get<Obj_AI_Hero>(ObjectTeam.Enemy, InAttackRange)
+                        .OrderByDescending(enemy => enemy.Health / Player.GetAutoAttackDamage(enemy))
                         .FirstOrDefault(
-                            hero =>
-                            hero.InAutoAttackRange() && !hero.IsZombie
-                            && !Invulnerable.Check(hero, DamageType.Physical, true, (float)Player.GetAutoAttackDamage(hero))
-                            && Math.Ceiling(hero.Health / Player.GetAutoAttackDamage(hero)) <= maxIgnored);
+                            enemy =>
+                            !enemy.IsZombie && !Invulnerable.Check(enemy, DamageType.Physical, ignoreShields)
+                            && Math.Ceiling(enemy.Health / Player.GetAutoAttackDamage(enemy)) <= maxIgnored);
 
                 if (killable != null)
                 {
@@ -1535,9 +1572,13 @@ premenu.Add(new MenuBool(premenu.Name + "_movement", "Enable movement", true));
             return Variables.TargetSelector.GetTarget(
                 float.MaxValue,
                 DamageType.Physical,
-                Menu[header + "_ignoreshields"].GetValue<MenuBool>().Value,
-                default(Vector3),
-                GameObjects.EnemyHeroes.Where(enemy => Menu[$"{header}_blacklist_{enemy.NetworkId}"].GetValue<MenuBool>().Value || enemy.IsZombie || !enemy.InAutoAttackRange()));
+                ignoreShields,
+                Player.ServerPosition,
+                ObjectCache.Get<Obj_AI_Hero>(ObjectTeam.Enemy)
+                    .FindAll(
+                        enemy =>
+                        Menu[$"{header}_blacklist_{enemy.NetworkId}"].GetValue<MenuBool>().Value || enemy.IsZombie
+                        || !InAttackRange(enemy)));
         }
 
         #endregion

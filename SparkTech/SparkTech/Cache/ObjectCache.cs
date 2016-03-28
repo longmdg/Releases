@@ -8,8 +8,7 @@
     using System.Security.Permissions;
 
     using LeagueSharp;
-
-    /* Used for recognising the minion types */
+    
     using LeagueSharp.SDK;
     using LeagueSharp.SDK.Core.Utils;
 
@@ -35,32 +34,34 @@
         /// </summary>
         /// <typeparam name="TGameObject">The requested <see cref="GameObject"/> type</typeparam>
         /// <param name="team">The specified object team</param>
-        /// <param name="range">The range to take objects from</param>
-        /// <param name="from">The point to start atking minions from</param>
+        /// <param name="inrange">The function determining whether this instance is in range</param>
+        /// <param name="zombies">Determines whether to obtain zombie units</param>
         /// <param name="moreChecks">Determines whether to obtain invisible or non-targetable units as well. This is used mostly for the buildings</param>
         /// <returns></returns>
         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
-        public static List<TGameObject> Get<TGameObject>(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy | ObjectTeam.Neutral, Func<TGameObject, float> range = null, Vector3? from = null, bool moreChecks = true) where TGameObject : GameObject
+        public static List<TGameObject> Get<TGameObject>(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy | ObjectTeam.Neutral, Predicate<TGameObject> inrange = null, bool zombies = false, bool moreChecks = true) where TGameObject : GameObject
         {
             FieldInfo field;
             var name = typeof(TGameObject).Name + "List";
 
+            // Found it cached
             if (FieldData.TryGetValue(name, out field))
             {
-                return Selector((List<TGameObject>)field.GetValue(null), team, moreChecks, Valid<TGameObject>(), range, from);
+                return Selector((List<TGameObject>)field.GetValue(null), team, moreChecks, true, zombies, inrange);
             }
 
             field = GetField(name);
-            var container = GameObjectList.OfType<GameObject, TGameObject>().FindAll(o => o.IsValid);
+            var container = GameObjectList.OfType<GameObject, TGameObject>(o => o.IsValid);
 
             // ReSharper disable once InvertIf
+            // This type of GameObject is supported however cache is being just initialized
             if (field != null)
             {
                 field.SetValue(null, container);
                 FieldData.Add(name, field);
             }
 
-            return Selector(container, team, moreChecks, null, range, from);
+            return Selector(container, team, moreChecks, false, zombies, inrange);
         }
 
         /// <summary>
@@ -68,10 +69,9 @@
         /// </summary>
         /// <param name="type">The minion type flags</param>
         /// <param name="team">The requested team</param>
-        /// <param name="range">The range</param>
-        /// <param name="from">The point to start taking minions from</param>
+        /// <param name="inrange">The function determining whether this instance is in range</param>
         /// <returns></returns>
-        public static List<Obj_AI_Minion> GetMinions(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy, MinionType type = MinionType.Minion, Func<Obj_AI_Minion, float> range = null, Vector3? from = null)
+        public static List<Obj_AI_Minion> GetMinions(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy, MinionType type = MinionType.Minion, Predicate<Obj_AI_Minion> inrange = null)
         {
             var container = new List<Obj_AI_Minion>(Obj_AI_MinionList.Count);
 
@@ -86,18 +86,18 @@
             if (type.HasFlag(MinionType.Other))
                 container.AddRange(OtherMinions);
 
-            return Selector(container, team, true, Valid<Obj_AI_Minion>(), range, from);
+            return Selector(container, team, true, true, false, inrange);
         }
 
         /// <summary>
         /// Gets minions in a similiar way to <see cref="E:MinionManager"/>
         /// </summary>
         /// <param name="from">The from</param>
-        /// <param name="range">The range function</param>
+        /// <param name="range">The range to take minions from</param>
         /// <param name="team">The team</param>
         /// <param name="type">The minion type</param>
         /// <returns></returns>
-        public static List<Obj_AI_Base> GetMinions(Vector3 from, Func<Obj_AI_Base, float> range, ObjectTeam team = ObjectTeam.Enemy | ObjectTeam.Ally, MinionType type = MinionType.Minion)
+        public static List<Obj_AI_Base> GetMinions(Vector3 from, float range, ObjectTeam team = ObjectTeam.Enemy | ObjectTeam.Ally, MinionType type = MinionType.Minion)
         {
             var container = new List<Obj_AI_Base>(Obj_AI_MinionList.Count);
 
@@ -112,7 +112,12 @@
             if (type.HasFlag(MinionType.Other))
                 container.AddRange(OtherMinions);
 
-            return Selector(container, team, true, Valid<Obj_AI_Base>(), range, from);
+            if (from.IsZero)
+                from = Player.ServerPosition;
+
+            var infinity = float.IsPositiveInfinity(range *= range);
+
+            return Selector(container, team, true, true, false, @base => infinity || Vector3.DistanceSquared(@base.ServerPosition, from) <= range);
         }
 
         /// <summary>
@@ -135,42 +140,28 @@
         /// </summary>
         /// <typeparam name="TGameObject">The requested <see cref="GameObject"/> type</typeparam>
         /// <param name="container">The original list</param>
-        /// <param name="team">The provided team flags</param>
+        /// <param name="flags">The provided team flags</param>
         /// <param name="moreChecks">Determines whether to perform additional checks</param>
         /// <param name="check">The additional predicate</param>
-        /// <param name="range">The range predicate</param>
-        /// <param name="from">The from point</param>
+        /// <param name="inrange">The function to check if the unit is in range</param>
+        /// <param name="zombies">Determines whether to obtain zombie units</param>
         /// <returns></returns>
-        private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam team, bool moreChecks, Predicate<TGameObject> check, Func<TGameObject, float> range, Vector3? from) where TGameObject : GameObject
+        private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam flags, bool moreChecks, bool check, bool zombies, Predicate<TGameObject> inrange) where TGameObject : GameObject
         {
-            var teams = (from pair in TeamDictionary where team.HasFlag(pair.Key) select pair.Value).ToList();
-            var point = from.HasValue && !from.Value.IsZero ? from.Value : Player.ServerPosition;
+            var teams = (from pair in TeamDictionary where flags.HasFlag(pair.Key) select pair.Value).ToList();
 
             container = container.FindAll(o =>
             {
-                if (check != null && !check(o))
+                if (check && (o == null || !o.IsValid))
                 {
                     return false;
                 }
 
-                var side = o.Team;
+                var team = o.Team;
 
-                if (!teams.Contains(side))
+                if (!teams.Contains(team) || inrange != null && !inrange(o))
                 {
                     return false;
-                }
-
-                var unit = o as Obj_AI_Base;
-
-                if (range != null)
-                {
-                    var r = range(o);
-                    r *= r;
-
-                    if (!float.IsPositiveInfinity(r) && Vector3.DistanceSquared(unit?.ServerPosition ?? o.Position, point) > r)
-                    {
-                        return false;
-                    }
                 }
 
                 if (!moreChecks)
@@ -185,19 +176,29 @@
 
                 var attackable = o as AttackableUnit;
 
-                return attackable == null || !attackable.IsInvulnerable && (side == AlliedTeam || attackable.IsTargetable) && (unit == null || unit.HealthPercent > 10 || !unit.HasBuff("kindredrnodeathbuff"));
+                if (attackable == null)
+                {
+                    return true;
+                }
+
+                if (!zombies && attackable.IsZombie)
+                {
+                    return false;
+                }
+
+                if (attackable.IsInvulnerable || (team != AlliedTeam && !attackable.IsTargetable))
+                {
+                    return false;
+                }
+
+                var unit = o as Obj_AI_Base;
+
+                return unit == null || unit.HealthPercent > 10f || !unit.HasBuff("kindredrnodeathbuff");
             });
 
             container.TrimExcess();
             return container;
         }
-
-        /// <summary>
-        /// Returns a pointer that will validate whether the @object is valid
-        /// </summary>
-        /// <typeparam name="TGameObject">The requested <see cref="GameObject"/> type</typeparam>
-        /// <returns></returns>
-        private static Predicate<TGameObject> Valid<TGameObject>() where TGameObject : GameObject => o => o != null && o.IsValid;
 
         /// <summary>
         /// Gets the specified field
@@ -207,7 +208,7 @@
         [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static FieldInfo GetField(string fieldName)
         {
-            return typeof(ObjectCache).GetField(fieldName, BindingFlags.Default | BindingFlags.NonPublic | BindingFlags.Static);
+            return typeof(ObjectCache).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static);
         }
 
         /// <summary>
@@ -260,12 +261,7 @@
             // I don't find OnDelete reliable when it comes to kepping the lists tidy so I'll use OnUpdate instead
             Game.OnUpdate += delegate
             {
-                var item = GameObjectList.Find(o => o == null || !o.IsValid);
-
-                if (item != null)
-                {
-                    Process(item, false);
-                }
+                GameObjectList.RemoveAll(o => o == null || !o.IsValid);
             };
         }
 

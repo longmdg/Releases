@@ -44,8 +44,9 @@
         /// <typeparam name="TOld">The original type</typeparam>
         /// <typeparam name="TNew">The requested type</typeparam>
         /// <param name="source">The original collection</param>
+        /// <param name="additional">The additional check on the new instance</param>
         /// <returns></returns>
-        public static List<TNew> OfType<TOld, TNew>(this IEnumerable<TOld> source) where TNew : class, TOld
+        public static List<TNew> OfType<TOld, TNew>(this IList<TOld> source, Predicate<TNew> additional = null) where TNew : class, TOld
         {
             if (source == null)
             {
@@ -57,10 +58,9 @@
             // ReSharper disable once TooWideLocalVariableScope
             TNew temp;
 
-            // ReSharper disable once LoopCanBeConvertedToQuery
-            foreach (var item in source as IList<TOld> ?? source)
+            foreach (var item in source)
             {
-                if ((temp = item as TNew) != null)
+                if ((temp = item as TNew) != null && additional?.Invoke(temp) != false)
                 {
                     container.Add(temp);
                 }

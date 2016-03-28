@@ -8,36 +8,36 @@ namespace SparkTech.Enumerations
         /// <summary>
         /// The orbwalker is performing a combo
         /// </summary>
-        Combo,
+        Combo = 1,
 
         /// <summary>
         /// The orbwalker is clearing the minions
         /// </summary>
-        LaneClear,
+        LaneClear = 2,
 
         /// <summary>
         /// The orbwalker is harassing
         /// </summary>
-        Harass,
+        Harass = 3,
 
         /// <summary>
         /// The orbwalker finishes minions
         /// </summary>
-        LastHit,
+        LastHit = 4,
 
         /// <summary>
         /// The orbwalker freezes the lane
         /// </summary>
-        Freeze,
+        Freeze = 5,
 
         /// <summary>
         /// The orbwalker flees
         /// </summary>
-        Flee,
+        Flee = 6,
 
         /// <summary>
         /// The orbwalker is slacking
         /// </summary>
-        None
+        None = 0
     }
 }

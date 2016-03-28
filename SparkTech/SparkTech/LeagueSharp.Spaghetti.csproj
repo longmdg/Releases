@@ -75,7 +75,9 @@
     <Compile Include="Enumerations\Mode.cs" />
     <Compile Include="Enumerations\Language.cs" />
     <Compile Include="EventData\SpellFarmSuggestedEventArgs.cs" />
-    <Compile Include="EventData\TargetData.cs" />
+    <Compile Include="SparkWalker\HealthWrapper.cs" />
+    <Compile Include="SparkWalker\HitData.cs" />
+    <Compile Include="SparkWalker\TargetData.cs" />
     <Compile Include="EventData\UnkillableMinionsEventArgs.cs" />
     <Compile Include="EventData\CheckPerformedEventArgs.cs" />
     <Compile Include="SparkWalker\Orbwalker.cs" />

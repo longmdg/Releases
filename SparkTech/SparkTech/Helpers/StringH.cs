@@ -7,10 +7,11 @@
     public static class StringH
     {
         internal static readonly string LogFileEnder = "\r\n\r\n------------------------------------------------------------------------------\r\n";
+       
         /// <summary>
-        /// Gets the real champion name
+        /// Obtains the real champion name
         /// </summary>
-        /// <param name="champ"><see cref="Obj_AI_Hero"/> instance</param>
+        /// <param name="champ">The <see cref="Obj_AI_Hero"/> instance</param>
         /// <returns></returns>
         public static string ChampionName(this Obj_AI_Hero champ)
         {
@@ -18,6 +19,8 @@
 
             switch (name.ToLower())
             {
+                case "aurelionsol":
+                    return "Aurelion Sol";
                 case "chogath":
                     return "Cho'Gath";
                 case "drmundo":
@@ -38,6 +41,16 @@
         private static ushort i;
 
         /// <summary>
+        /// The string-spacing regular expression. This takes the presence of acronyms into account
+        /// </summary>
+        private static readonly Regex StringSpacer = new Regex(@"((?<=\p{Ll})\p{Lu})|((?!\A)\p{Lu}(?>\p{Ll}))", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        /// <summary>
+        /// The string-spacing regular expression.
+        /// </summary>
+        private static readonly Regex StringSpacerNoAcronyms = new Regex(@"(?<!^)([A-Z])", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        /// <summary>
         /// Spaces the input string
         /// </summary>
         /// <param name="input">The string to be spaced</param>
@@ -45,9 +58,9 @@
         /// <returns></returns>
         public static string Space(this string input, bool ignoreAcronyms = true)
         {
-            return ignoreAcronyms
-                       ? Regex.Replace(input, "((?<=\\p{Ll})\\p{Lu})|((?!\\A)\\p{Lu}(?>\\p{Ll}))", " $0")
-                       : Regex.Replace(input, "(?<!^)([A-Z])", " $1");
+            var replacement = " $" + (ignoreAcronyms ? 0 : 1);
+
+            return (ignoreAcronyms ? StringSpacer : StringSpacerNoAcronyms).Replace(input, replacement);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿namespace SparkTech.EventData
+﻿namespace SparkTech.SparkWalker
 {
     using LeagueSharp;
 
