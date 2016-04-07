@@ -1,4 +1,4 @@
-﻿namespace SparkTech.Helpers
+﻿namespace SparkTech.Utils
 {
     using System;
     using System.Speech.Recognition;
@@ -11,25 +11,16 @@
     /// </summary>
     public static class Speech
     {
-        private static readonly DictationGrammar Grammar = new DictationGrammar();
-
         /// <summary>
         /// Says the message aloud using the speech synthesizer
         /// </summary>
         /// <param name="message">Text that will be spoken</param>
         public static void Announce(string message)
         {
-            try
+            using (var synth = new SpeechSynthesizer())
             {
-                using (var synth = new SpeechSynthesizer())
-                {
-                    synth.SetOutputToDefaultAudioDevice();
-                    synth.Speak(message);
-                }
-            }
-            catch (Exception ex)
-            {
-                Settings.Logger.Catch(ex);
+                synth.SetOutputToDefaultAudioDevice();
+                synth.Speak(message);
             }
         }
 
@@ -42,14 +33,14 @@
             get
             {
                 string myMessage = null;
-                var myNotif = new Notification(LanguageData.GetTranslation("speak_now"));
+                var myNotif = new Notification(Translations.GetTranslation("speak_now", null), "");
                 Notifications.Add(myNotif);
 
                 using (var recognizer = new SpeechRecognitionEngine())
                 {
                     try
                     {
-                        recognizer.LoadGrammar(Grammar);
+                        recognizer.LoadGrammar(new DictationGrammar());
                         recognizer.SetInputToDefaultAudioDevice();
                         myMessage = recognizer.Recognize().Text;
                     }

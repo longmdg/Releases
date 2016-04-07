@@ -9,12 +9,13 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Spaghetti_Katarina</RootNamespace>
     <AssemblyName>Spaghetti_Katarina</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PreBuildEvent />
     <PostBuildEvent />
     <OutputPath>bin\Release</OutputPath>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -42,6 +43,9 @@
     <Reference Include="LeagueSharp.Common">
       <HintPath>C:\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
+    <Reference Include="LeagueSharp.SDK">
+      <HintPath>C:\LeagueSharp\System\LeagueSharp.SDK.dll</HintPath>
+    </Reference>
     <Reference Include="LeagueSharp.Spaghetti">
       <HintPath>C:\LeagueSharp\System\LeagueSharp.Spaghetti.dll</HintPath>
     </Reference>
@@ -62,7 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Katarina.cs" />
+    <Compile Include="Azir.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

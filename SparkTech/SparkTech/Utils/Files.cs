@@ -1,10 +1,9 @@
-﻿namespace SparkTech.Helpers
+﻿/*
+namespace SparkTech.Utils
 {
     using System;
     using System.IO;
     using System.Linq;
-
-    using LeagueSharp.Common;
 
     internal static class Files
     {
@@ -35,7 +34,6 @@
                     {
                         File.WriteAllBytes(destinationPath, resource);
                     }
-                    */
 
                     File.WriteAllBytes(Path.Combine(Settings.Files.CachePath, language + ".xml"), resource);
                 }
@@ -58,4 +56,4 @@
 
         }
     }
-}
+}*/

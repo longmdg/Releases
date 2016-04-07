@@ -1,11 +1,11 @@
-﻿namespace SparkTech.Helpers
+﻿namespace SparkTech.Utils
 {
     using System;
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows.Threading;
-    
+
     using SparkTech.Executors;
 
     /// <summary>
@@ -15,7 +15,7 @@
     {
         public Threading()
         {
-            CreateThreads(Settings.InitialThreadAmount);
+            CreateThreads(5);
         }
 
         /// <summary>

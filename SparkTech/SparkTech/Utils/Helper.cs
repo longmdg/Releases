@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace SparkTech.Helpers
+namespace SparkTech.Utils
 {
     using System;
     using System.Collections.Generic;

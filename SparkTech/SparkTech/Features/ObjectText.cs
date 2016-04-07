@@ -11,8 +11,8 @@
     using LeagueSharp.SDK.Core.UI.IMenu;
     using LeagueSharp.SDK.Core.UI.IMenu.Values;
 
+    using SparkTech.Cache;
     using SparkTech.Executors;
-    using SparkTech.Helpers;
 
     /// <summary>
     /// The class offering you to draw text under the champions in an easy way
@@ -37,22 +37,13 @@
         /// <summary>
         /// The <see cref="Menu"/> holding down the values
         /// </summary>
-        public Menu Piece
+        Menu IMenuPiece.Piece
         {
             get
             {
-                return menu ?? (Piece = new Menu("st_core_drawings_text", "Text below units"));
-            }
-            private set
-            {
-                if (menu != null)
-                {
-                    Entries.ForEach(RemoveItem);
-                }
-
-                menu = value;
-                
+                menu = new Menu("st_core_drawings_text", "Text below units");
                 Entries.ForEach(AddItem);
+                return menu;
             }
         }
 
@@ -71,14 +62,7 @@
         /// <param name="item">The <see cref="ObjectText"/>'s component to be removed</param>
         private static void RemoveItem(ObjectTextEntry item)
         {
-            try
-            {
-                menu?.Remove(menu.Components.Values.OfType<MenuBool>().Single(component => component.Name == $"st_core_drawings_text_{item.Id}"));
-            }
-            catch (Exception ex)
-            {
-                ex.Catch();
-            }
+            menu?.Remove(menu.Components.Values.OfType<MenuBool>().Single(component => component.Name == $"st_core_drawings_text_{item.Id}"));
         }
 
         /// <summary>
@@ -88,40 +72,31 @@
         {
             Entries.CollectionChanged += (sender, args) =>
             {
-                try
+                switch (args.Action)
                 {
-                    switch (args.Action)
-                    {
-                        case NotifyCollectionChangedAction.Add:
-                            AddItem((ObjectTextEntry)args.NewItems[0]);
-                            break;
-                        case NotifyCollectionChangedAction.Remove:
-                            RemoveItem((ObjectTextEntry)args.OldItems[0]);
-                            break;
-                        case NotifyCollectionChangedAction.Reset:
-                            // thought you could break my stuff? I have some bad news for you :kappapride:
-                            args.OldItems.Cast<ObjectTextEntry>().ForEach(Entries.Add);
-                            break;
-                        case NotifyCollectionChangedAction.Replace:
-                            AddItem((ObjectTextEntry)args.NewItems[0]);
-                            RemoveItem((ObjectTextEntry)args.OldItems[0]);
-                            break;
-                        case NotifyCollectionChangedAction.Move:
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(args.Action), args.Action, null);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ex.Catch();
+                    case NotifyCollectionChangedAction.Add:
+                        AddItem((ObjectTextEntry)args.NewItems[0]);
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        RemoveItem((ObjectTextEntry)args.OldItems[0]);
+                        break;
+                    case NotifyCollectionChangedAction.Reset:
+                        // thought you could break my stuff? I have some bad news for you :kappa:
+                        args.OldItems.Cast<ObjectTextEntry>().ForEach(Entries.Add);
+                        break;
+                    case NotifyCollectionChangedAction.Replace:
+                        AddItem((ObjectTextEntry)args.NewItems[0]);
+                        RemoveItem((ObjectTextEntry)args.OldItems[0]);
+                        break;
+                    case NotifyCollectionChangedAction.Move:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(args.Action), args.Action, null);
                 }
             };
 
             Drawing.OnDraw += delegate
             {
-                try
-                {
                     if (menu == null || !menu["st_core_drawings_text_enable"].GetValue<MenuBool>().Value)
                     {
                         return;
@@ -131,28 +106,23 @@
                         Entries.Where(
                             item =>
                             menu[$"st_core_drawings_text_{item.Id}"].GetValue<MenuBool>().Value && item.Condition())
-                            .OrderBy(item => item.Id);
+                            .OrderBy(item => item.Id).ToList();
 
-                    foreach (var o in GameObjects.AllGameObjects)
+                    foreach (var o in ObjectCache.GetNative<GameObject>())
                     {
                         var pos = Drawing.WorldToScreen(o.Position);
                         var steps = 0;
 
-                        foreach (var item in entries.Where(item => item.Draw(o)))
+                        foreach (var item in entries.FindAll(item => item.Draw(o)))
                         {
                             var text = item.DrawnText(o);
 
                             if (!string.IsNullOrWhiteSpace(text))
                             {
-                                Drawing.DrawText(pos.X, pos.Y - ++steps * StepSize, item.Color(o), text);
+                                Drawing.DrawText(pos.X - text.Length * 5, pos.Y - steps++ * StepSize, item.Color(o), text);
                             }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    ex.Catch();
-                }
             };
         }
 

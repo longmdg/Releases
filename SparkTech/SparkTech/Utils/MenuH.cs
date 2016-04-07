@@ -1,4 +1,4 @@
-﻿namespace SparkTech.Helpers
+﻿namespace SparkTech.Utils
 {
     using System.Linq;
 
@@ -15,7 +15,7 @@
         /// <param name="text">The custom text to be displayed</param>
         public static void AddSeparator(this Menu menu, string text = null)
         {
-            menu.Add(new MenuSeparator(StringH.SeparatorText, text ?? string.Empty));
+            menu.Add(new MenuSeparator(StringH.SeparatorText, string.IsNullOrWhiteSpace(text) ? " " : text));
         }
 
         /// <summary>

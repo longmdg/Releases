@@ -1,4 +1,5 @@
-﻿namespace SparkTech.Features
+﻿/*
+namespace SparkTech.Features
 {
     using System.Collections.Generic;
 
@@ -16,7 +17,7 @@
     {
         private static readonly List<Zone> Zones = new List<Zone>();
 
-        public static readonly Zone Zone
+        public static readonly Zone Zone;
 
         private static bool enabled;
 
@@ -73,4 +74,4 @@
             }
         }
     }
-}
+}*/

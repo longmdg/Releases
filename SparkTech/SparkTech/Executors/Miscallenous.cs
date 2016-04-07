@@ -3,7 +3,6 @@
     using System;
 
     using SparkTech.EventData;
-    using SparkTech.Helpers;
 
     /// <summary>
     /// Derive from it in order to create a self-injecting miscallenous (utility) class

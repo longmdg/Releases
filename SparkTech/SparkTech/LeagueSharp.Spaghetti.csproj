@@ -58,10 +58,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Base\OrbwalkingManager.cs" />
     <Compile Include="Base\SparkSpell.cs" />
     <Compile Include="Cache\ObjectCache.cs" />
     <Compile Include="Core.cs" />
+    <Compile Include="Enumerations\HumanizerMode.cs" />
     <Compile Include="Enumerations\MinionType.cs" />
     <Compile Include="Enumerations\MissileCheckType.cs" />
     <Compile Include="Enumerations\ObjectTeam.cs" />
@@ -75,13 +75,15 @@
     <Compile Include="Enumerations\Mode.cs" />
     <Compile Include="Enumerations\Language.cs" />
     <Compile Include="EventData\SpellFarmSuggestedEventArgs.cs" />
+    <Compile Include="Executors\Bootstrap.cs" />
     <Compile Include="SparkWalker\HealthWrapper.cs" />
     <Compile Include="SparkWalker\HitData.cs" />
+    <Compile Include="SparkWalker\Windup.cs" />
+    <Compile Include="SparkWalker\Soldiers.cs" />
     <Compile Include="SparkWalker\TargetData.cs" />
     <Compile Include="EventData\UnkillableMinionsEventArgs.cs" />
     <Compile Include="EventData\CheckPerformedEventArgs.cs" />
     <Compile Include="SparkWalker\Orbwalker.cs" />
-    <Compile Include="Base\xSaliceWalker.cs" />
     <Compile Include="EventData\GameUpdateEventArgs.cs" />
     <Compile Include="Executors\Handler.cs" />
     <Compile Include="Executors\HeroBase.cs" />
@@ -91,31 +93,29 @@
     <Compile Include="Features\Connecting.cs" />
     <Compile Include="Features\Humanizer.cs" />
     <Compile Include="Features\ObjectText.cs" />
-    <Compile Include="Features\Draw.cs" />
     <Compile Include="Executors\Hero.cs" />
     <Compile Include="Features\Indicator.cs" />
     <Compile Include="Features\Pranks\FirstApril.cs" />
     <Compile Include="Features\Prank.cs" />
     <Compile Include="Cache\EnumCache.cs" />
-    <Compile Include="Helpers\ExceptionH.cs" />
-    <Compile Include="Helpers\Initializer.cs" />
-    <Compile Include="Helpers\Invulnerable.cs" />
-    <Compile Include="Helpers\MenuH.cs" />
-    <Compile Include="Helpers\StringH.cs" />
-    <Compile Include="Helpers\Threading.cs" />
-    <Compile Include="Helpers\Translations.cs" />
-    <Compile Include="Logger.cs" />
-    <Compile Include="Helpers\Helper.cs" />
-    <Compile Include="Helpers\Files.cs" />
-    <Compile Include="Helpers\ManaManager.cs" />
-    <Compile Include="Helpers\Speech.cs" />
+    <Compile Include="Utils\SafeExecution.cs" />
+    <Compile Include="Utils\ExceptionH.cs" />
+    <Compile Include="Utils\Invulnerable.cs" />
+    <Compile Include="Utils\MenuH.cs" />
+    <Compile Include="Utils\StringH.cs" />
+    <Compile Include="Utils\Threading.cs" />
+    <Compile Include="Utils\Translations.cs" />
+    <Compile Include="Utils\Helper.cs" />
+    <Compile Include="Utils\Files.cs" />
+    <Compile Include="Utils\ManaManager.cs" />
+    <Compile Include="Utils\Speech.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\Comms.cs" />
+    <Compile Include="Utils\Comms.cs" />
     <Compile Include="Web\ActionUpdater.cs" />
     <Compile Include="Web\Updater.cs" />
     <Compile Include="Resources\TODO.cs" />

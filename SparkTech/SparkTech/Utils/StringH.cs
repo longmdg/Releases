@@ -1,4 +1,4 @@
-﻿namespace SparkTech.Helpers
+﻿namespace SparkTech.Utils
 {
     using System.Text.RegularExpressions;
 
@@ -6,8 +6,13 @@
 
     public static class StringH
     {
-        internal static readonly string LogFileEnder = "\r\n\r\n------------------------------------------------------------------------------\r\n";
-       
+        private const string LogFileEnder = "\r\n\r\n------------------------------------------------------------------------------\r\n";
+
+        /// <summary>
+        /// The update path
+        /// </summary>
+        internal const string UpdatePath = "https://raw.githubusercontent.com/Wiciaki/Releases/master/SparkTech/SparkTech/Properties/AssemblyInfo.cs";
+
         /// <summary>
         /// Obtains the real champion name
         /// </summary>

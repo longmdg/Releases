@@ -5,28 +5,14 @@
 
     public static class HealthWrapper
     {
-        public static float GetPrediction(Obj_AI_Base unit, int time, int delay = 0, bool simulated = false, bool @default = false)
+        public static float GetPrediction(Obj_AI_Base unit, int time, int delay = 0, HealthPredictionType type = HealthPredictionType.Default)
         {
-            if (@default)
-            {
-                return Health.GetPrediction(unit, time, delay, simulated ? HealthPredictionType.Simulated : HealthPredictionType.Default);
-            }
-
-            /*
-            
-            
-            */
+            return Health.GetPrediction(unit, time, delay, type);
         }
 
-        public static int GetAggroCount(Obj_AI_Base unit, bool includeTurret = true)
+        public static bool HasTurretAggro(Obj_AI_Minion unit)
         {
-            
+            return Health.HasTurretAggro(unit);
         }
-
-        public static bool HasTurretAggro(Obj_AI_Base unit)
-        {
-            
-        }
-
     }
 }

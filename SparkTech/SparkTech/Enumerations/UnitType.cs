@@ -31,11 +31,6 @@
         LaneClearMinion,
 
         /// <summary>
-        /// The unit is a lane minion
-        /// </summary>
-        FreezeMinion,
-
-        /// <summary>
         /// The unit is a jungle creep
         /// </summary>
         JungleMinion,

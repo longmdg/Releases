@@ -9,7 +9,7 @@
     using LeagueSharp.SDK.Core.UI.IMenu.Abstracts;
 
     using SparkTech.Enumerations;
-    using SparkTech.Helpers;
+    using SparkTech.Utils;
 
     /// <summary>
     /// Provides extension method for both internal and external usage

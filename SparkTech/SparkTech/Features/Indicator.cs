@@ -1,4 +1,5 @@
-﻿namespace SparkTech.Features
+﻿/*
+namespace SparkTech.Features
 {
     using System;
     using System.Collections.Generic;
@@ -64,4 +65,4 @@
             }
         }
     }
-}
+}*/

@@ -30,32 +30,27 @@
         /// <param name="assemblyName">The name of the <see cref="Assembly"/></param>
         public ActionUpdater(string fullRawAssemblyInfoLink, Version localVersion, string assemblyName) : base(fullRawAssemblyInfoLink)
         {
-            // Don't even try to download or invoke anything if the developer couldn't even provide a proper link...
+            // Don't try to download or invoke anything if the developer couldn't even provide a proper link...
             if (!IsLinkValid)
             {
                 return;
             }
 
-            try
-            {
-                new Action(async delegate
-                    {
-                        using (var client = new WebClient())
-                        {
-                            var match = AssemblyVersionRegex.Match(await client.DownloadStringTaskAsync(Link));
 
-                            RaiseEvent(
-                                new CheckPerformedEventArgs(
-                                    match.Success ? new Version(match.Groups[1].Value) : null,
-                                    localVersion,
-                                    assemblyName));
-                        }
-                    }).Invoke();
-            }
-            catch (Exception ex)
-            {
-                ex.Catch();
-            }
+            new Action(
+                async delegate
+                {
+                    using (var client = new WebClient())
+                    {
+                        var match = AssemblyVersionRegex.Match(await client.DownloadStringTaskAsync(Link));
+
+                        RaiseEvent(
+                            new CheckPerformedEventArgs(
+                                match.Success ? new Version(match.Groups[1].Value) : null,
+                                localVersion,
+                                assemblyName));
+                    }
+                }).Invoke();
         }
     }
 }

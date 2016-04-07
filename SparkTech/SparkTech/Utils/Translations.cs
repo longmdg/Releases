@@ -1,11 +1,11 @@
-﻿namespace SparkTech.Helpers
+﻿namespace SparkTech.Utils
 {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
-    
+
     using LeagueSharp.SDK.Core.UI.IMenu;
     using LeagueSharp.SDK.Core.UI.IMenu.Abstracts;
     using LeagueSharp.SDK.Core.UI.IMenu.Values;
@@ -99,10 +99,9 @@
                                          select match.Groups).SelectMany(
                                              groups =>
                                              {
-                                                 var count = groups.Count;
-                                                 var list = new List<string>(count);
+                                                 var list = new List<string>(groups.Count);
 
-                                                 for (int i = 0; i < count; i++)
+                                                 for (int i = 0; i < groups.Count; i++)
                                                  {
                                                      list.Add(groups[i].Value);
                                                  }

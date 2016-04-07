@@ -5,12 +5,14 @@
     using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
+    using System.Security;
+    using System.Security.Permissions;
 
     using LeagueSharp;
     using LeagueSharp.SDK;
 
     using SparkTech.Cache;
-    using SparkTech.Helpers;
+    using SparkTech.Utils;
     using SparkTech.Web;
 
     using static Features.Connecting;
@@ -18,7 +20,7 @@
     /// <summary>
     ///     Responsible for awakening the core library functions and methods
     /// </summary>
-    public abstract class Handler
+    internal static class Handler
     {
         #region Static Fields
 
@@ -32,18 +34,14 @@
         private static readonly List<Assembly> PreBoot = new List<Assembly>();
 
         /// <summary>
+        ///     The permission set that lifts the sandbox restrictions on creating instances
+        /// </summary>
+        private static readonly PermissionSet Unrestricter = new PermissionSet(PermissionState.Unrestricted);
+
+        /// <summary>
         ///     Determines whether the <see cref="E:OnLoad" /> has already executed
         /// </summary>
         private static bool inside;
-
-        #endregion
-
-        #region Fields
-
-        /// <summary>
-        ///     The calling <see cref="Assembly" />
-        /// </summary>
-        private readonly Assembly assembly;
 
         #endregion
 
@@ -56,14 +54,29 @@
         {
             Events.OnLoad += delegate
             {
-                RuntimeHelpers.RunClassConstructor(typeof(ObjectCache).TypeHandle);
-                RuntimeHelpers.RunClassConstructor(typeof(Threading).TypeHandle);
+                new List<Type> { typeof(ObjectCache), typeof(SparkWalker.Orbwalker), typeof(Threading) }.ForEach(
+                    type => RuntimeHelpers.RunClassConstructor(type.TypeHandle));
 
+                Unrestricter.Assert();
+
+                /* Initialize the library components */
                 foreach (var type in Core.Assembly.GetTypes().Where(type => type.IsSubclassOf(typeof(IMenuPiece))))
                 {
-                    Core.Menu.Add(Initializer.CreateInstance<IMenuPiece>(type).Piece);
+                    Core.Menu.Add(
+                        ((IMenuPiece)
+                         Activator.CreateInstance(
+                             type,
+                             BindingFlags.NonPublic | BindingFlags.Instance,
+                             null,
+                             null,
+                             null)).Piece);
                 }
 
+                CodeAccessPermission.RevertAssert();
+
+                Translations.UpdateAll();
+
+                /* Initialize the outer components */
                 lock (PreBoot)
                 {
                     inside = true;
@@ -71,13 +84,6 @@
                     PreBoot.Clear();
                     PreBoot.TrimExcess();
                 }
-
-                Translations.UpdateAll();
-
-                // let me check for my own stuff :sisi3:
-                const string Link = "https://raw.githubusercontent.com/Wiciaki/Releases/master/SparkTech/SparkTech/Properties/AssemblyInfo.cs";
-
-                new ActionUpdater(Link, Core.Assembly).CheckPerformed += args => args.Notify();
             };
 
             Game.OnStart += delegate
@@ -88,42 +94,38 @@
                 }
             };
 
-            Game.OnEnd += delegate { };
-
-            // broscience :roto2:
+            Game.OnEnd += delegate
+            {
+                
+            };
+            
             if (ObjectManager.Player == null)
             {
                 Enabled = true;
             }
-        }
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="Handler" /> class
-        ///     <para>This constructor will additionally check for the updates and notify the result to user</para>
-        ///     <para>This works with raw GitHub links only</para>
-        /// </summary>
-        protected Handler(string updatePath) : this()
-        {
-            Events.OnLoad += delegate
+            new ActionUpdater(StringH.UpdatePath, Core.Assembly).CheckPerformed += args =>
             {
-                new ActionUpdater(updatePath, assembly).CheckPerformed += args => args.Notify();
+                Events.OnLoad += delegate
+                { args.Notify(); };
             };
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Handler" /> class
+        ///     Adds an assembly to the initialization list
         /// </summary>
-        protected Handler()
+        internal static void Register(Assembly caller)
         {
-            assembly = Assembly.GetAssembly(GetType());
-
-            if (inside)
+            lock (PreBoot)
             {
-                Activate(assembly);
-            }
-            else
-            {
-                PreBoot.Add(assembly);
+                if (!inside)
+                {
+                    PreBoot.Add(caller);
+                }
+                else
+                {
+                    Activate(caller);
+                }
             }
         }
 
@@ -142,27 +144,52 @@
             // .IsSubclassOf() check on all execution paths eliminates the need
             var posttypes =
                 assembly.GetTypes()
-                    .OrderBy(type => type.Name)
-                    .ToList()
-                    .FindAll(type => type.IsVisible && type.GetConstructor(Type.EmptyTypes) != null);
+                    .Where(type => type.IsVisible && type.GetConstructor(Type.EmptyTypes) != null)
+                    .ToList();
 
-            // Don't even bother searching for the champion type if we've got one already
-            if (Core.Champion == null)
+            // Initialize all the the Miscallenous types
+            posttypes.FindAll(type => type.IsSubclassOf(typeof(Miscallenous))).ForEach(type => New<Miscallenous>(type));
+
+            // Don't even bother searching for the champion type if we've got one already :roto2:
+            if (Core.Champion != null)
             {
-                var hero = posttypes.Find(type => type.IsSubclassOf(typeof(HeroBase)) && type.Name == Core.ChampionName);
-
-                // We got the champ right here! :D
-                if (hero != null)
-                {
-                    Core.Champion = Initializer.CreateInstance<HeroBase>(hero);
-                }
+                return;
             }
 
-            // Initialize all the the Miscallenous
-            foreach (var type in posttypes.FindAll(type => type.IsSubclassOf(typeof(Miscallenous))))
+            var hero = posttypes.Find(type => type.IsSubclassOf(typeof(HeroBase)) && type.Name == Core.ChampionName);
+
+            // We got the champ right here! :D
+            if (hero != null)
             {
-                Initializer.CreateInstance<Miscallenous>(type);
+                Core.Champion = New<HeroBase>(hero);
             }
+        }
+
+        /// <summary>
+        ///     Create a new instance of the specified type
+        /// </summary>
+        /// <typeparam name="TType">The requested output type</typeparam>
+        /// <param name="type">The type to be instantiated</param>
+        /// <returns></returns>
+        public static TType New<TType>(Type type = null) where TType : class
+        {
+            if (type == null)
+            {
+                type = typeof(TType);
+            }
+
+            if (!type.IsVisible || (!type.IsValueType && (!type.IsClass || type.IsAbstract)))
+            {
+                return null;
+            }
+
+            Unrestricter.Assert();
+
+            var instance = (TType)Activator.CreateInstance(type);
+
+            CodeAccessPermission.RevertAssert();
+
+            return instance;
         }
 
         #endregion

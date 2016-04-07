@@ -13,13 +13,13 @@
         /// <summary>
         /// The minions that the orbwalker needs help with
         /// </summary>
-        public readonly IReadOnlyCollection<Obj_AI_Minion> Minions; 
+        public readonly List<Obj_AI_Minion> Minions; 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpellFarmSuggestedEventArgs"/> class
         /// </summary>
         /// <param name="minions">The list of the minions</param>
-        internal SpellFarmSuggestedEventArgs(IReadOnlyCollection<Obj_AI_Minion> minions)
+        internal SpellFarmSuggestedEventArgs(List<Obj_AI_Minion> minions)
         {
             Minions = minions;
         }

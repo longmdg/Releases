@@ -1,42 +1,24 @@
 ﻿namespace Spaghetti_Katarina
 {
     using System;
-    using System.Linq;
-    using System.Reflection;
-    using System.Security.Permissions;
 
-    using SparkTech.Base;
+    using SparkTech.Executors;
 
-    using LeagueSharp.Common;
-
-    using SparkTech.Web;
-
-    internal static class Program
+    internal class Program : Bootstrap<Program>
     {
-    //    private static Menu menu;
-
-        public static SparkWalker Orbwalker;
-        
-        private static void Main(string[] a)
+        private static void Main(string[] args)
         {
-            if (a == null || a.Any())
+            if (args == null)
             {
                 return;
             }
 
-      //      new SecurityPermission(PermissionState.Unrestricted).Assert();
-
-            CustomEvents.Game.OnGameLoad += delegate
+            foreach (var arg in args)
             {
-                new ActionUpdater(
-                    "https://raw.githubusercontent.com/Wiciaki/Releases/master/SparkTech/Spaghetti_Katarina/Properties/AssemblyInfo.cs",
-                    Assembly.GetAssembly(typeof(Program)))
-                    .OnCheckPerformed += args => args.Notify();
+                Console.WriteLine(arg);
+            }
 
-                //  (menu ?? (menu = new Menu("Asd", "asd123", true))).AddToMainMenu();
-
-                //  orb = new SparkTech.Base.SparkWalker(menu);
-            };
+            Initialize();
         }
     }
 }

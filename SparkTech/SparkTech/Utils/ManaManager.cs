@@ -1,9 +1,9 @@
-﻿namespace SparkTech.Helpers
+﻿namespace SparkTech.Utils
 {
     using System.Linq;
 
     using LeagueSharp;
-    using LeagueSharp.Common;
+    using LeagueSharp.SDK;
 
     public static class ManaManager
     {
@@ -23,8 +23,8 @@
         {
             if (NoMana) return true;
 
-            float myLostManaPercent = Player.ManaPercent - ((Player.Mana - spell.ManaCost) / (Player.MaxMana) * 100);
-            float enemyLostHealthPercent = target.HealthPercent - ((target.Health - spell.GetDamage(target)) / (target.MaxHealth) * 100);
+            float myLostManaPercent = Player.ManaPercent - (Player.Mana - spell.Instance.ManaCost) / Player.MaxMana * 100;
+            float enemyLostHealthPercent = target.HealthPercent - target.Health - spell.GetDamage(target) / target.MaxHealth * 100;
 
             return myLostManaPercent < enemyLostHealthPercent;
         }

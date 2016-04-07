@@ -4,7 +4,7 @@
     using System.Reflection;
 
     using SparkTech.Enumerations;
-    using SparkTech.Helpers;
+    using SparkTech.Utils;
 
     /// <summary>
     /// The instance containing event data regarding any of the updaters
@@ -23,7 +23,7 @@
 
             // ex. "You are using the latest version of [NAME]"
             Comms.Print(
-                LanguageData.GetTranslation(
+                Translations.GetTranslation(
                     ("updater_" + (Success ? GitVersion == LocalVersion ? "updated" : "available" : "error")).Replace(
                         "[NAME]",
                         aName),
@@ -48,7 +48,7 @@
         /// <summary>
         /// The message <see cref="Language"/>
         /// </summary>
-        public Language MessageLanguage = Core.ActiveLanguage;
+        public Language MessageLanguage = Translations.CurrentLanguage;
 
         /// <summary>
         /// The locally saved assembly name
@@ -61,25 +61,17 @@
         private bool notified;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CheckPerformedEventArgs"/> class by a cloud <see cref="Version"/> and an <see cref="Assembly"/>
+        /// Initializes a new instance of the <see cref="CheckPerformedEventArgs"/> class with a cloud <see cref="Version"/> and an <see cref="Assembly"/>
         /// </summary>
         /// <param name="gitVersion">The version of the assembly on the cloud</param>
         /// <param name="callingAssembly">The calling assembly</param>
-        internal CheckPerformedEventArgs(Version gitVersion, Assembly callingAssembly)
+        internal CheckPerformedEventArgs(Version gitVersion, Assembly callingAssembly) : this(gitVersion, callingAssembly.GetName().Version, callingAssembly.GetName().Name)
         {
-            var name = callingAssembly.GetName();
 
-            LocalVersion = name.Version;
-
-            aName = name.Name;
-
-            GitVersion = gitVersion;
-
-            Success = gitVersion != null;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CheckPerformedEventArgs"/> class by a cloud <see cref="Version"/>, a local <see cref="Version"/> and a assembly name
+        /// Initializes a new instance of the <see cref="CheckPerformedEventArgs"/> class with a cloud <see cref="Version"/>, a local <see cref="Version"/> and an assembly name
         /// </summary>
         /// <param name="gitVersion">The <see cref="Version"/> of the assembly on the cloud</param>
         /// <param name="localVersion">The local <see cref="Version"/> of the assembly</param>

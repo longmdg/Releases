@@ -6,7 +6,6 @@
     using LeagueSharp.SDK;
 
     using SparkTech.EventData;
-    using SparkTech.Helpers;
 
     using Orbwalker = SparkTech.Enumerations.Orbwalker;
 

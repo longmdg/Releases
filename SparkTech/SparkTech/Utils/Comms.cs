@@ -1,4 +1,4 @@
-﻿namespace SparkTech.Helpers
+﻿namespace SparkTech.Utils
 {
     using LeagueSharp;
     using LeagueSharp.SDK.Core.UI.IMenu;
@@ -33,6 +33,11 @@
         // TODO expand, add menu items, checks, notifications and colors.
         public static void Print(string text)
         {
+            if (text == null)
+            {
+                return;
+            }
+
             Game.PrintChat(text);
         }
 

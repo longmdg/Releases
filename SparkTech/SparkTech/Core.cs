@@ -122,19 +122,19 @@
 
                 ChampionName = Player.ChampionName;
 
-                Menu = new Menu("st_core", Empty, true).Attach();
+                Menu = new Menu("st_core", "Ayy lmao", true).Attach();
                 {
-                    var frun = Menu.Add(new MenuBool("st_first_run_nt", Empty, true));
+                    var frun = Menu.Add(new MenuBool("st_first_run_nt", "xddd", true));
                     FirstRun = frun.Value;
                     frun.Value = frun.Visible = false;
                 }
 
-                var baseMenu = Menu.Add(new Menu("st_base", ""));
+           //     var baseMenu = Menu.Add(new Menu("st_base", ""));
                 {
 
                 }
 
-                var commsMenu = Menu.Add(new Menu("st_comms", ""));
+             //   var commsMenu = Menu.Add(new Menu("st_comms", ""));
                 {
 
                 }

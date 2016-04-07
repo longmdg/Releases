@@ -20,13 +20,23 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="TargetData"/> class
         /// </summary>
+        /// <param name="shouldWait">Determines whether this instance should wait</param>
+        internal TargetData(bool shouldWait)
+        {
+            Target = null;
+
+            ShouldWait = shouldWait;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TargetData"/> class
+        /// </summary>
         /// <param name="target">The target</param>
-        /// <param name="shouldWait">The should wait value</param>
-        internal TargetData(AttackableUnit target, bool shouldWait = false)
+        internal TargetData(AttackableUnit target)
         {
             Target = target;
 
-            ShouldWait = target == null && shouldWait;
+            ShouldWait = false;
         }
     }
 }

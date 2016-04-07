@@ -1,4 +1,4 @@
-﻿namespace SparkTech.Helpers
+﻿namespace SparkTech.Utils
 {
     using System;
 
@@ -6,10 +6,9 @@
     using LeagueSharp.SDK;
     using LeagueSharp.SDK.Core.UI.IMenu;
     using LeagueSharp.SDK.Core.UI.IMenu.Values;
+    using LeagueSharp.SDK.Core.Utils;
 
     using SparkTech.Executors;
-
-    using static LeagueSharp.SDK.Core.Utils.Logging;
 
     /// <summary>
     /// The helper class for <see cref="Exception"/> and logging
@@ -44,7 +43,7 @@
         /// <summary>
         /// The cached <see cref="E:Write"/> delegate
         /// </summary>
-        private static readonly WriteDelegate WriteT = Write(true), WriteF = Write();
+        private static readonly Logging.WriteDelegate WriteT = Logging.Write(true), WriteF = Logging.Write();
 
         /// <summary>
         /// The current error amount
